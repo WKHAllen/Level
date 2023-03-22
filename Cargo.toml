@@ -1,0 +1,12 @@
+[workspace]
+members = [
+    "frontend",
+    "backend",
+    "commands",
+    "macros",
+    "frontend_macros",
+    "backend_macros",
+    "db",
+    "migration",
+    "migration_macros"
+]
