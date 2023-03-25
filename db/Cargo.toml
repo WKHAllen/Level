@@ -14,3 +14,9 @@ project-root = "0.2.2"
 rand = "0.8.5"
 sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "sqlite", "macros", "chrono"] }
 tokio = { version = "1.25", features = ["full"] }
+
+[build-dependencies]
+anyhow = "1.0"
+project-root = "0.2.2"
+sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "sqlite", "macros", "chrono"] }
+tokio = { version = "1.25", features = ["full"] }

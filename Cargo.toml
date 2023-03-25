@@ -8,6 +8,5 @@ members = [
     "backend_macros",
     "db",
     "migration",
-    "migration_macros",
-    "build"
+    "migration_macros"
 ]
