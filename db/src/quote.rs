@@ -15,7 +15,7 @@ impl Quote {
         let id = new_id();
 
         sqlx::query!("INSERT INTO quotes VALUES (?, ?);", id, quote)
-            .execute(&db.pool)
+            .execute(&**db)
             .await
             .unwrap();
 
@@ -25,7 +25,7 @@ impl Quote {
     /// Retrieve a quote from the database.
     pub async fn get(db: &DB, id: &str) -> Option<Self> {
         sqlx::query_as!(Self, "SELECT * FROM quotes WHERE id = ?;", id)
-            .fetch_optional(&db.pool)
+            .fetch_optional(&**db)
             .await
             .unwrap()
     }
@@ -33,7 +33,7 @@ impl Quote {
     /// List all quotes in the database.
     pub async fn list(db: &DB) -> Vec<Quote> {
         sqlx::query_as!(Self, "SELECT * FROM quotes;")
-            .fetch_all(&db.pool)
+            .fetch_all(&**db)
             .await
             .unwrap()
     }
@@ -47,7 +47,7 @@ impl Quote {
             self.quote,
             self.id
         )
-        .execute(&db.pool)
+        .execute(&**db)
         .await
         .unwrap();
     }
@@ -55,7 +55,7 @@ impl Quote {
     /// Delete the quote from the database, consuming it in memory.
     pub async fn delete(self, db: &DB) {
         sqlx::query!("DELETE FROM quotes WHERE id = ?;", self.id)
-            .execute(&db.pool)
+            .execute(&**db)
             .await
             .unwrap();
     }
