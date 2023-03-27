@@ -44,9 +44,9 @@ jobs:
       - name: Build
         run: cd backend && cargo tauri build --verbose
         env:
-          DATABASE_URL: sqlite:saves/test.db
+          DATABASE_URL: sqlite:temp/test.db
 
       - name: Run tests
         run: cargo test --verbose -- --nocapture
         env:
-          DATABASE_URL: sqlite:saves/test.db
+          DATABASE_URL: sqlite:temp/test.db

@@ -4,13 +4,13 @@ use std::ops::Deref;
 use std::path::Path;
 use tokio::fs;
 
-/// The directory in which save files are stored.
-const SAVES_DIR: &str = "saves";
+/// The directory in which temporary database files are stored.
+const TEMP_DB_DIR: &str = "temp";
 
 /// Gets the path to a database file.
 fn get_db_path(name: &str) -> String {
     let root_path = project_root::get_project_root().unwrap();
-    let db_path = format!("{}/{}/{}.db", root_path.display(), SAVES_DIR, name);
+    let db_path = format!("{}/{}/{}.db", root_path.display(), TEMP_DB_DIR, name);
     db_path
 }
 
