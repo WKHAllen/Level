@@ -4,7 +4,7 @@ CREATE TABLE account_transaction (
   name             TEXT     NOT NULL,
   description      TEXT,
   amount           REAL     NOT NULL,
-  transaction_date DATE     NOT NULL DEFAULT CURRENT_DATE,
+  transaction_date DATETIME NOT NULL,
   category_id      TEXT     NOT NULL,
   subcategory_id   TEXT,
   reconciled       BOOLEAN  NOT NULL DEFAULT FALSE,

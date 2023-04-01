@@ -1,3 +1,4 @@
+use crate::TABLES;
 use anyhow::Result;
 use sqlx::sqlite::SqlitePool;
 use std::ops::Deref;
@@ -54,7 +55,10 @@ impl DB {
             fs::File::create(&db_path).await?;
         }
 
-        Self::open(name).await
+        let this = Self::open(name).await?;
+        this.init_tables().await?;
+
+        Ok(this)
     }
 
     /// Opens a database file, creating it if it doesn't exist.
@@ -64,6 +68,26 @@ impl DB {
         } else {
             Self::create(name).await
         }
+    }
+
+    /// Initialize a database table.
+    async fn init_table(&self, table: &str) -> Result<()> {
+        let sql_path = format!("sql/init/{}.sql", table);
+        let sql_bytes = fs::read(sql_path).await?;
+        let sql_str = String::from_utf8(sql_bytes)?;
+
+        sqlx::query(&sql_str).execute(&**self).await?;
+
+        Ok(())
+    }
+
+    /// Initializes all database tables.
+    async fn init_tables(&self) -> Result<()> {
+        for table in TABLES {
+            self.init_table(table).await?;
+        }
+
+        Ok(())
     }
 
     /// Deletes the existing database file.
