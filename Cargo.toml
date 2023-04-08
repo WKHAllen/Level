@@ -6,7 +6,5 @@ members = [
     "macros",
     "frontend_macros",
     "backend_macros",
-    "db",
-    "migration",
-    "migration_macros"
+    "db"
 ]
