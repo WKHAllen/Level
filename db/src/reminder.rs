@@ -21,7 +21,7 @@ pub struct Reminder {
 impl Reminder {
     /// Creates a new reminder.
     pub async fn create(
-        db: &DB,
+        db: &mut DB,
         account: &Account,
         note: &str,
         timeframe: Timeframe,
@@ -38,32 +38,32 @@ impl Reminder {
             timeframe_name,
             timeframe_offset
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
 
-        Self::get(&db, &id).await.unwrap()
+        Self::get(db, &id).await.unwrap()
     }
 
     /// Gets a reminder from the database.
-    pub async fn get(db: &DB, id: &str) -> Option<Self> {
+    pub async fn get(db: &mut DB, id: &str) -> Option<Self> {
         sqlx::query_as!(Self, "SELECT * FROM reminder WHERE id = ?;", id)
-            .fetch_optional(&**db)
+            .fetch_optional(&mut **db)
             .await
             .unwrap()
     }
 
     /// Lists all reminders in the database.
-    pub async fn list(db: &DB) -> Vec<Self> {
+    pub async fn list(db: &mut DB) -> Vec<Self> {
         sqlx::query_as!(Self, "SELECT * FROM reminder ORDER BY created_at;")
-            .fetch_all(&**db)
+            .fetch_all(&mut **db)
             .await
             .unwrap()
     }
 
     /// Gets the account the reminder is associated with.
-    pub async fn get_account(&self, db: &DB) -> Account {
-        Account::get(&db, &self.account_id).await.unwrap()
+    pub async fn get_account(&self, db: &mut DB) -> Account {
+        Account::get(db, &self.account_id).await.unwrap()
     }
 
     /// Gets the timeframe.
@@ -72,7 +72,7 @@ impl Reminder {
     }
 
     /// Sets the associated account.
-    pub async fn set_account(&mut self, db: &DB, account: &Account) {
+    pub async fn set_account(&mut self, db: &mut DB, account: &Account) {
         self.account_id = account.id.clone();
 
         sqlx::query!(
@@ -80,13 +80,13 @@ impl Reminder {
             self.account_id,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Sets the reminder note.
-    pub async fn set_note(&mut self, db: &DB, note: &str) {
+    pub async fn set_note(&mut self, db: &mut DB, note: &str) {
         self.note = Some(note.to_owned());
 
         sqlx::query!(
@@ -94,13 +94,13 @@ impl Reminder {
             self.note,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Sets the timeframe.
-    pub async fn set_timeframe(&mut self, db: &DB, timeframe: Timeframe) {
+    pub async fn set_timeframe(&mut self, db: &mut DB, timeframe: Timeframe) {
         self.timeframe = timeframe.to_internal_name();
 
         sqlx::query!(
@@ -108,13 +108,13 @@ impl Reminder {
             self.timeframe,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Sets the timeframe offset.
-    pub async fn set_timeframe_offset(&mut self, db: &DB, timeframe_offset: NaiveDateTime) {
+    pub async fn set_timeframe_offset(&mut self, db: &mut DB, timeframe_offset: NaiveDateTime) {
         self.timeframe_offset = timeframe_offset;
 
         sqlx::query!(
@@ -122,15 +122,15 @@ impl Reminder {
             self.timeframe_offset,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Deletes the reminder from the database.
-    pub async fn delete(self, db: &DB) {
+    pub async fn delete(self, db: &mut DB) {
         sqlx::query!("DELETE FROM reminder WHERE id = ?;", self.id)
-            .execute(&**db)
+            .execute(&mut **db)
             .await
             .unwrap();
     }
@@ -145,12 +145,13 @@ mod tests {
     #[tokio::test]
     async fn test_reminder() {
         // Init
-        let db = TestDB::new().await.unwrap();
+        let mut db = TestDB::new().await.unwrap();
 
         // Create
-        let account1 = Account::create(&db, AccountType::BankAccount, "My bank account", "").await;
+        let account1 =
+            Account::create(&mut db, AccountType::BankAccount, "My bank account", "").await;
         let mut reminder1 = Reminder::create(
-            &db,
+            &mut db,
             &account1,
             "My reminder",
             Timeframe::Monthly,
@@ -158,7 +159,7 @@ mod tests {
         )
         .await;
         let reminder2 = Reminder::create(
-            &db,
+            &mut db,
             &account1,
             "My other reminder",
             Timeframe::Weekly,
@@ -167,14 +168,14 @@ mod tests {
         .await;
 
         // Get
-        let reminder3 = Reminder::get(&db, &reminder1.id).await.unwrap();
+        let reminder3 = Reminder::get(&mut db, &reminder1.id).await.unwrap();
         assert_eq!(reminder3, reminder1);
-        let reminder4 = Reminder::get(&db, &reminder2.id).await.unwrap();
+        let reminder4 = Reminder::get(&mut db, &reminder2.id).await.unwrap();
         assert_eq!(reminder4, reminder2);
-        assert!(Reminder::get(&db, "").await.is_none());
+        assert!(Reminder::get(&mut db, "").await.is_none());
 
         // List
-        let reminders = Reminder::list(&db).await;
+        let reminders = Reminder::list(&mut db).await;
         assert_eq!(reminders.len(), 2);
         let reminder5 = reminders.iter().find(|x| x.id == reminder1.id).unwrap();
         assert_eq!(reminder5, &reminder1);
@@ -182,9 +183,9 @@ mod tests {
         assert_eq!(reminder6, &reminder2);
 
         // Get account
-        let account2 = reminder1.get_account(&db).await;
+        let account2 = reminder1.get_account(&mut db).await;
         assert_eq!(account2, account1);
-        let account3 = reminder2.get_account(&db).await;
+        let account3 = reminder2.get_account(&mut db).await;
         assert_eq!(account3, account1);
 
         // Get timeframe
@@ -192,32 +193,33 @@ mod tests {
         assert_eq!(reminder2.get_timeframe(), Timeframe::Weekly);
 
         // Set account
-        let account4 = Account::create(&db, AccountType::CreditCard, "My other account", "").await;
-        reminder1.set_account(&db, &account4).await;
-        let account5 = reminder1.get_account(&db).await;
+        let account4 =
+            Account::create(&mut db, AccountType::CreditCard, "My other account", "").await;
+        reminder1.set_account(&mut db, &account4).await;
+        let account5 = reminder1.get_account(&mut db).await;
         assert_eq!(account5, account4);
         assert_ne!(account5, account1);
-        let account6 = reminder2.get_account(&db).await;
+        let account6 = reminder2.get_account(&mut db).await;
         assert_eq!(account6, account1);
         assert_ne!(account6, account4);
 
         // Set note
-        reminder1.set_note(&db, "New note").await;
-        let reminder7 = Reminder::get(&db, &reminder1.id).await.unwrap();
+        reminder1.set_note(&mut db, "New note").await;
+        let reminder7 = Reminder::get(&mut db, &reminder1.id).await.unwrap();
         assert_eq!(reminder7.note.as_ref().unwrap().as_str(), "New note");
         assert_eq!(reminder7, reminder1);
 
         // Set timeframe
-        reminder1.set_timeframe(&db, Timeframe::Quarterly).await;
-        let reminder8 = Reminder::get(&db, &reminder1.id).await.unwrap();
+        reminder1.set_timeframe(&mut db, Timeframe::Quarterly).await;
+        let reminder8 = Reminder::get(&mut db, &reminder1.id).await.unwrap();
         assert_eq!(reminder8.get_timeframe(), Timeframe::Quarterly);
         assert_eq!(reminder8, reminder1);
 
         // Set timeframe offset
         reminder1
-            .set_timeframe_offset(&db, NaiveDateTime::from_timestamp_millis(1).unwrap())
+            .set_timeframe_offset(&mut db, NaiveDateTime::from_timestamp_millis(1).unwrap())
             .await;
-        let reminder9 = Reminder::get(&db, &reminder1.id).await.unwrap();
+        let reminder9 = Reminder::get(&mut db, &reminder1.id).await.unwrap();
         assert_eq!(
             reminder9.timeframe_offset,
             NaiveDateTime::from_timestamp_millis(1).unwrap()
@@ -226,13 +228,13 @@ mod tests {
 
         // Delete
         let reminder_id1 = reminder1.id.clone();
-        assert!(Reminder::get(&db, &reminder_id1).await.is_some());
-        reminder1.delete(&db).await;
-        assert!(Reminder::get(&db, &reminder_id1).await.is_none());
+        assert!(Reminder::get(&mut db, &reminder_id1).await.is_some());
+        reminder1.delete(&mut db).await;
+        assert!(Reminder::get(&mut db, &reminder_id1).await.is_none());
         let reminder_id2 = reminder2.id.clone();
-        assert!(Reminder::get(&db, &reminder_id2).await.is_some());
-        reminder2.delete(&db).await;
-        assert!(Reminder::get(&db, &reminder_id2).await.is_none());
+        assert!(Reminder::get(&mut db, &reminder_id2).await.is_some());
+        reminder2.delete(&mut db).await;
+        assert!(Reminder::get(&mut db, &reminder_id2).await.is_none());
 
         // Clean up
         db.delete().await.unwrap();

@@ -28,48 +28,48 @@ pub struct Budget {
 impl Budget {
     /// Creates a new budget.
     pub async fn create(
-        db: &DB,
+        db: &mut DB,
         account: &Account,
         note: &str,
         limit: f64,
         timeframe: Timeframe,
         timeframe_offset: NaiveDateTime,
     ) -> Result<Self, BudgetError> {
-        match Self::get(&db, &account).await {
+        match Self::get(db, &account).await {
             Some(_budget) => Err(BudgetError::BudgetAlreadyExists),
             None => {
                 let timeframe_name = timeframe.to_internal_name();
 
-                sqlx::query!("INSERT INTO budget (account_id, note, total_limit, timeframe, timeframe_offset) VALUES (?, ?, ?, ?, ?);", account.id, note, limit, timeframe_name, timeframe_offset).execute(&**db).await.unwrap();
+                sqlx::query!("INSERT INTO budget (account_id, note, total_limit, timeframe, timeframe_offset) VALUES (?, ?, ?, ?, ?);", account.id, note, limit, timeframe_name, timeframe_offset).execute(&mut **db).await.unwrap();
 
-                Ok(Self::get(&db, &account).await.unwrap())
+                Ok(Self::get(db, &account).await.unwrap())
             }
         }
     }
 
     /// Gets the budget for the specified account.
-    pub async fn get(db: &DB, account: &Account) -> Option<Self> {
+    pub async fn get(db: &mut DB, account: &Account) -> Option<Self> {
         sqlx::query_as!(
             Self,
             "SELECT * FROM budget WHERE account_id = ?;",
             account.id
         )
-        .fetch_optional(&**db)
+        .fetch_optional(&mut **db)
         .await
         .unwrap()
     }
 
     /// Lists all budgets in the database.
-    pub async fn list(db: &DB) -> Vec<Self> {
+    pub async fn list(db: &mut DB) -> Vec<Self> {
         sqlx::query_as!(Self, "SELECT * FROM budget ORDER BY created_at;")
-            .fetch_all(&**db)
+            .fetch_all(&mut **db)
             .await
             .unwrap()
     }
 
     /// Gets the account the budget is associated with.
-    pub async fn get_account(&self, db: &DB) -> Account {
-        Account::get(&db, &self.account_id).await.unwrap()
+    pub async fn get_account(&self, db: &mut DB) -> Account {
+        Account::get(db, &self.account_id).await.unwrap()
     }
 
     /// Gets the timeframe.
@@ -78,7 +78,7 @@ impl Budget {
     }
 
     /// Sets the associated account.
-    pub async fn set_account(&mut self, db: &DB, account: &Account) {
+    pub async fn set_account(&mut self, db: &mut DB, account: &Account) {
         let old_account_id = self.account_id.clone();
         self.account_id = account.id.clone();
 
@@ -87,13 +87,13 @@ impl Budget {
             self.account_id,
             old_account_id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Sets the budget note.
-    pub async fn set_note(&mut self, db: &DB, note: &str) {
+    pub async fn set_note(&mut self, db: &mut DB, note: &str) {
         self.note = Some(note.to_owned());
 
         sqlx::query!(
@@ -101,13 +101,13 @@ impl Budget {
             self.note,
             self.account_id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Sets the budget limit.
-    pub async fn set_limit(&mut self, db: &DB, limit: f64) {
+    pub async fn set_limit(&mut self, db: &mut DB, limit: f64) {
         self.total_limit = limit;
 
         sqlx::query!(
@@ -115,13 +115,13 @@ impl Budget {
             self.total_limit,
             self.account_id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Sets the timeframe.
-    pub async fn set_timeframe(&mut self, db: &DB, timeframe: Timeframe) {
+    pub async fn set_timeframe(&mut self, db: &mut DB, timeframe: Timeframe) {
         self.timeframe = timeframe.to_internal_name();
 
         sqlx::query!(
@@ -129,13 +129,13 @@ impl Budget {
             self.timeframe,
             self.account_id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Sets the timeframe offset.
-    pub async fn set_timeframe_offset(&mut self, db: &DB, timeframe_offset: NaiveDateTime) {
+    pub async fn set_timeframe_offset(&mut self, db: &mut DB, timeframe_offset: NaiveDateTime) {
         self.timeframe_offset = timeframe_offset;
 
         sqlx::query!(
@@ -143,15 +143,15 @@ impl Budget {
             self.timeframe_offset,
             self.account_id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Deletes the budget from the database.
-    pub async fn delete(self, db: &DB) {
+    pub async fn delete(self, db: &mut DB) {
         sqlx::query!("DELETE FROM budget WHERE account_id = ?;", self.account_id)
-            .execute(&**db)
+            .execute(&mut **db)
             .await
             .unwrap();
     }
@@ -166,13 +166,14 @@ mod tests {
     #[tokio::test]
     async fn test_budget() {
         // Init
-        let db = TestDB::new().await.unwrap();
+        let mut db = TestDB::new().await.unwrap();
 
         // Create
-        let account1 = Account::create(&db, AccountType::Investment, "My investments", "").await;
-        let account2 = Account::create(&db, AccountType::Property, "My property", "").await;
+        let account1 =
+            Account::create(&mut db, AccountType::Investment, "My investments", "").await;
+        let account2 = Account::create(&mut db, AccountType::Property, "My property", "").await;
         let mut budget1 = Budget::create(
-            &db,
+            &mut db,
             &account1,
             "My budget",
             123.45,
@@ -182,7 +183,7 @@ mod tests {
         .await
         .unwrap();
         Budget::create(
-            &db,
+            &mut db,
             &account1,
             "My invalid budget",
             999.99,
@@ -193,17 +194,17 @@ mod tests {
         .unwrap_err();
 
         // Get
-        let budget2 = Budget::get(&db, &account1).await.unwrap();
+        let budget2 = Budget::get(&mut db, &account1).await.unwrap();
         assert_eq!(budget2, budget1);
-        assert!(Budget::get(&db, &account2).await.is_none());
+        assert!(Budget::get(&mut db, &account2).await.is_none());
 
         // List
-        let budgets = Budget::list(&db).await;
+        let budgets = Budget::list(&mut db).await;
         assert_eq!(budgets.len(), 1);
         assert_eq!(budgets[0], budget1);
 
         // Get account
-        let account3 = budget1.get_account(&db).await;
+        let account3 = budget1.get_account(&mut db).await;
         assert_eq!(account3, account1);
 
         // Get timeframe
@@ -211,39 +212,39 @@ mod tests {
 
         // Set account
         assert_eq!(budget1.account_id, account1.id);
-        assert!(Budget::get(&db, &account1).await.is_some());
-        assert!(Budget::get(&db, &account2).await.is_none());
-        budget1.set_account(&db, &account2).await;
+        assert!(Budget::get(&mut db, &account1).await.is_some());
+        assert!(Budget::get(&mut db, &account2).await.is_none());
+        budget1.set_account(&mut db, &account2).await;
         assert_eq!(budget1.account_id, account2.id);
-        assert!(Budget::get(&db, &account1).await.is_none());
-        assert!(Budget::get(&db, &account2).await.is_some());
-        let account4 = budget1.get_account(&db).await;
+        assert!(Budget::get(&mut db, &account1).await.is_none());
+        assert!(Budget::get(&mut db, &account2).await.is_some());
+        let account4 = budget1.get_account(&mut db).await;
         assert_eq!(account4, account2);
         assert_ne!(account4, account1);
 
         // Set note
-        budget1.set_note(&db, "New note").await;
-        let budget3 = Budget::get(&db, &account2).await.unwrap();
+        budget1.set_note(&mut db, "New note").await;
+        let budget3 = Budget::get(&mut db, &account2).await.unwrap();
         assert_eq!(budget3.note.as_ref().unwrap().as_str(), "New note");
         assert_eq!(budget3, budget1);
 
         // Set limit
-        budget1.set_limit(&db, 234.56).await;
-        let budget4 = Budget::get(&db, &account2).await.unwrap();
+        budget1.set_limit(&mut db, 234.56).await;
+        let budget4 = Budget::get(&mut db, &account2).await.unwrap();
         assert_eq!(budget4.total_limit, 234.56);
         assert_eq!(budget4, budget1);
 
         // Set timeframe
-        budget1.set_timeframe(&db, Timeframe::Quarterly).await;
-        let budget5 = Budget::get(&db, &account2).await.unwrap();
+        budget1.set_timeframe(&mut db, Timeframe::Quarterly).await;
+        let budget5 = Budget::get(&mut db, &account2).await.unwrap();
         assert_eq!(budget5.get_timeframe(), Timeframe::Quarterly);
         assert_eq!(budget5, budget1);
 
         // Set timeframe offset
         budget1
-            .set_timeframe_offset(&db, NaiveDateTime::from_timestamp_millis(1).unwrap())
+            .set_timeframe_offset(&mut db, NaiveDateTime::from_timestamp_millis(1).unwrap())
             .await;
-        let budget6 = Budget::get(&db, &account2).await.unwrap();
+        let budget6 = Budget::get(&mut db, &account2).await.unwrap();
         assert_eq!(
             budget6.timeframe_offset,
             NaiveDateTime::from_timestamp_millis(1).unwrap()
@@ -251,9 +252,9 @@ mod tests {
         assert_eq!(budget6, budget1);
 
         // Delete
-        assert!(Budget::get(&db, &account2).await.is_some());
-        budget1.delete(&db).await;
-        assert!(Budget::get(&db, &account2).await.is_none());
+        assert!(Budget::get(&mut db, &account2).await.is_some());
+        budget1.delete(&mut db).await;
+        assert!(Budget::get(&mut db, &account2).await.is_none());
 
         // Clean up
         db.delete().await.unwrap();

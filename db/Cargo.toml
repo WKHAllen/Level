@@ -10,7 +10,9 @@ doctest = false
 
 [dependencies]
 anyhow = "1.0"
+backend_common = { path = "../backend_common" }
 chrono = "0.4"
+crypto = { path = "../crypto" }
 project-root = "0.2.2"
 rand = "0.8.5"
 serde = { version = "1.0", features = ["derive"] }

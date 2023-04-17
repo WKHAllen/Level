@@ -16,7 +16,7 @@ pub struct Tag {
 
 impl Tag {
     /// Creates a new tag.
-    pub async fn create(db: &DB, name: &str, description: &str) -> Self {
+    pub async fn create(db: &mut DB, name: &str, description: &str) -> Self {
         let id = new_id();
 
         sqlx::query!(
@@ -25,41 +25,41 @@ impl Tag {
             name,
             description
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
 
-        Self::get(&db, &id).await.unwrap()
+        Self::get(db, &id).await.unwrap()
     }
 
     /// Gets a tag from the database.
-    pub async fn get(db: &DB, id: &str) -> Option<Self> {
+    pub async fn get(db: &mut DB, id: &str) -> Option<Self> {
         sqlx::query_as!(Self, "SELECT * FROM tag WHERE id = ?;", id)
-            .fetch_optional(&**db)
+            .fetch_optional(&mut **db)
             .await
             .unwrap()
     }
 
     /// Lists all tags in the database.
-    pub async fn list(db: &DB) -> Vec<Self> {
+    pub async fn list(db: &mut DB) -> Vec<Self> {
         sqlx::query_as!(Self, "SELECT * FROM tag ORDER BY name;")
-            .fetch_all(&**db)
+            .fetch_all(&mut **db)
             .await
             .unwrap()
     }
 
     /// Sets the tag name.
-    pub async fn set_name(&mut self, db: &DB, name: &str) {
+    pub async fn set_name(&mut self, db: &mut DB, name: &str) {
         self.name = name.to_owned();
 
         sqlx::query!("UPDATE tag SET name = ? WHERE id = ?;", self.name, self.id)
-            .execute(&**db)
+            .execute(&mut **db)
             .await
             .unwrap();
     }
 
     /// Sets the tag description.
-    pub async fn set_description(&mut self, db: &DB, description: &str) {
+    pub async fn set_description(&mut self, db: &mut DB, description: &str) {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -67,15 +67,15 @@ impl Tag {
             self.description,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Deletes the tag from the database.
-    pub async fn delete(self, db: &DB) {
+    pub async fn delete(self, db: &mut DB) {
         sqlx::query!("DELETE FROM tag WHERE id = ?;", self.id)
-            .execute(&**db)
+            .execute(&mut **db)
             .await
             .unwrap();
     }
@@ -90,21 +90,21 @@ mod tests {
     #[tokio::test]
     async fn test_tag() {
         // Init
-        let db = TestDB::new().await.unwrap();
+        let mut db = TestDB::new().await.unwrap();
 
         // Create
-        let mut tag1 = Tag::create(&db, "Tag 1", "Tag 1 description").await;
-        let tag2 = Tag::create(&db, "Tag 2", "").await;
+        let mut tag1 = Tag::create(&mut db, "Tag 1", "Tag 1 description").await;
+        let tag2 = Tag::create(&mut db, "Tag 2", "").await;
 
         // Get
-        let tag3 = Tag::get(&db, &tag1.id).await.unwrap();
+        let tag3 = Tag::get(&mut db, &tag1.id).await.unwrap();
         assert_eq!(tag3, tag1);
-        let tag4 = Tag::get(&db, &tag2.id).await.unwrap();
+        let tag4 = Tag::get(&mut db, &tag2.id).await.unwrap();
         assert_eq!(tag4, tag2);
-        assert!(Tag::get(&db, "").await.is_none());
+        assert!(Tag::get(&mut db, "").await.is_none());
 
         // List
-        let tags = Tag::list(&db).await;
+        let tags = Tag::list(&mut db).await;
         assert_eq!(tags.len(), 2);
         let tag5 = tags.iter().find(|x| x.id == tag1.id).unwrap();
         assert_eq!(tag5, &tag1);
@@ -112,29 +112,29 @@ mod tests {
         assert_eq!(tag6, &tag2);
 
         // Set name
-        tag1.set_name(&db, "Not tag 1").await;
+        tag1.set_name(&mut db, "Not tag 1").await;
         assert_eq!(&tag1.name, "Not tag 1");
-        let tag7 = Tag::get(&db, &tag1.id).await.unwrap();
+        let tag7 = Tag::get(&mut db, &tag1.id).await.unwrap();
         assert_eq!(tag7, tag1);
 
         // Set description
-        tag1.set_description(&db, "Not tag 1 description").await;
+        tag1.set_description(&mut db, "Not tag 1 description").await;
         assert_eq!(
             tag1.description.as_ref().unwrap().as_str(),
             "Not tag 1 description"
         );
-        let tag8 = Tag::get(&db, &tag1.id).await.unwrap();
+        let tag8 = Tag::get(&mut db, &tag1.id).await.unwrap();
         assert_eq!(tag8, tag1);
 
         // Delete
         let tag_id1 = tag1.id.clone();
-        assert!(Tag::get(&db, &tag_id1).await.is_some());
-        tag1.delete(&db).await;
-        assert!(Tag::get(&db, &tag_id1).await.is_none());
+        assert!(Tag::get(&mut db, &tag_id1).await.is_some());
+        tag1.delete(&mut db).await;
+        assert!(Tag::get(&mut db, &tag_id1).await.is_none());
         let tag_id2 = tag2.id.clone();
-        assert!(Tag::get(&db, &tag_id2).await.is_some());
-        tag2.delete(&db).await;
-        assert!(Tag::get(&db, &tag_id2).await.is_none());
+        assert!(Tag::get(&mut db, &tag_id2).await.is_some());
+        tag2.delete(&mut db).await;
+        assert!(Tag::get(&mut db, &tag_id2).await.is_none());
 
         // Clean up
         db.delete().await.unwrap();

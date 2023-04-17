@@ -14,46 +14,50 @@ pub struct AccountTransactionTag {
 
 impl AccountTransactionTag {
     /// Create a new account transaction tag.
-    pub async fn create(db: &DB, account_transaction: &AccountTransaction, tag: &Tag) -> Self {
+    pub async fn create(db: &mut DB, account_transaction: &AccountTransaction, tag: &Tag) -> Self {
         sqlx::query!(
             "INSERT INTO account_transaction_tag (account_transaction_id, tag_id) VALUES (?, ?)",
             account_transaction.id,
             tag.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
 
-        Self::get(&db, &account_transaction, &tag).await.unwrap()
+        Self::get(db, &account_transaction, &tag).await.unwrap()
     }
 
     /// Gets an account transaction tag from the database.
-    pub async fn get(db: &DB, account_transaction: &AccountTransaction, tag: &Tag) -> Option<Self> {
+    pub async fn get(
+        db: &mut DB,
+        account_transaction: &AccountTransaction,
+        tag: &Tag,
+    ) -> Option<Self> {
         sqlx::query_as!(Self, "SELECT * FROM account_transaction_tag WHERE account_transaction_id = ? AND tag_id = ?;", account_transaction.id, tag.id)
-            .fetch_optional(&**db)
+            .fetch_optional(&mut **db)
             .await
             .unwrap()
     }
 
     /// Checks if an account transaction/tag link exists.
-    pub async fn exists(db: &DB, account_transaction: &AccountTransaction, tag: &Tag) -> bool {
-        Self::get(&db, &account_transaction, &tag).await.is_some()
+    pub async fn exists(db: &mut DB, account_transaction: &AccountTransaction, tag: &Tag) -> bool {
+        Self::get(db, &account_transaction, &tag).await.is_some()
     }
 
     /// Lists all account transaction tags in the database.
-    pub async fn list(db: &DB) -> Vec<Self> {
+    pub async fn list(db: &mut DB) -> Vec<Self> {
         sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction_tag ORDER BY created_at;"
         )
-        .fetch_all(&**db)
+        .fetch_all(&mut **db)
         .await
         .unwrap()
     }
 
     /// Lists account transaction tags corresponding to a given account transaction.
     pub async fn list_by_transaction(
-        db: &DB,
+        db: &mut DB,
         account_transaction: &AccountTransaction,
     ) -> Vec<Self> {
         sqlx::query_as!(
@@ -61,43 +65,43 @@ impl AccountTransactionTag {
             "SELECT * FROM account_transaction_tag WHERE account_transaction_id = ? ORDER BY created_at;",
             account_transaction.id
         )
-        .fetch_all(&**db)
+        .fetch_all(&mut **db)
         .await
         .unwrap()
     }
 
     /// Lists account transaction tags corresponding to a given tag.
-    pub async fn list_by_tag(db: &DB, tag: &Tag) -> Vec<Self> {
+    pub async fn list_by_tag(db: &mut DB, tag: &Tag) -> Vec<Self> {
         sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction_tag WHERE tag_id = ? ORDER BY created_at;",
             tag.id
         )
-        .fetch_all(&**db)
+        .fetch_all(&mut **db)
         .await
         .unwrap()
     }
 
     /// Gets the associated account transaction.
-    pub async fn get_account_transaction(&self, db: &DB) -> AccountTransaction {
-        AccountTransaction::get(&db, &self.account_transaction_id)
+    pub async fn get_account_transaction(&self, db: &mut DB) -> AccountTransaction {
+        AccountTransaction::get(db, &self.account_transaction_id)
             .await
             .unwrap()
     }
 
     /// Gets the associated tag.
-    pub async fn get_tag(&self, db: &DB) -> Tag {
-        Tag::get(&db, &self.tag_id).await.unwrap()
+    pub async fn get_tag(&self, db: &mut DB) -> Tag {
+        Tag::get(db, &self.tag_id).await.unwrap()
     }
 
     /// Deletes the account transaction tag from the database.
-    pub async fn delete(self, db: &DB) {
+    pub async fn delete(self, db: &mut DB) {
         sqlx::query!(
             "DELETE FROM account_transaction_tag WHERE account_transaction_id = ? AND tag_id = ?;",
             self.account_transaction_id,
             self.tag_id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
@@ -113,13 +117,14 @@ mod tests {
     #[tokio::test]
     async fn test_account_transaction_tag() {
         // Init
-        let db = TestDB::new().await.unwrap();
+        let mut db = TestDB::new().await.unwrap();
 
         // Create
-        let mut account = Account::create(&db, AccountType::BankAccount, "My account", "").await;
-        let category = Category::create(&db, "My category", "").await;
+        let mut account =
+            Account::create(&mut db, AccountType::BankAccount, "My account", "").await;
+        let category = Category::create(&mut db, "My category", "").await;
         let transaction1 = AccountTransaction::create(
-            &db,
+            &mut db,
             &mut account,
             "Transaction 1",
             "",
@@ -131,7 +136,7 @@ mod tests {
         .await
         .unwrap();
         let transaction2 = AccountTransaction::create(
-            &db,
+            &mut db,
             &mut account,
             "Transaction 2",
             "",
@@ -142,29 +147,29 @@ mod tests {
         )
         .await
         .unwrap();
-        let tag1 = Tag::create(&db, "Tag 1", "").await;
-        let tag2 = Tag::create(&db, "Tag 2", "").await;
-        let transaction_tag1 = AccountTransactionTag::create(&db, &transaction1, &tag1).await;
-        let transaction_tag2 = AccountTransactionTag::create(&db, &transaction2, &tag2).await;
+        let tag1 = Tag::create(&mut db, "Tag 1", "").await;
+        let tag2 = Tag::create(&mut db, "Tag 2", "").await;
+        let transaction_tag1 = AccountTransactionTag::create(&mut db, &transaction1, &tag1).await;
+        let transaction_tag2 = AccountTransactionTag::create(&mut db, &transaction2, &tag2).await;
 
         // Get
-        let transaction_tag3 = AccountTransactionTag::get(&db, &transaction1, &tag1)
+        let transaction_tag3 = AccountTransactionTag::get(&mut db, &transaction1, &tag1)
             .await
             .unwrap();
         assert_eq!(transaction_tag3, transaction_tag1);
-        let transaction_tag4 = AccountTransactionTag::get(&db, &transaction2, &tag2)
+        let transaction_tag4 = AccountTransactionTag::get(&mut db, &transaction2, &tag2)
             .await
             .unwrap();
         assert_eq!(transaction_tag4, transaction_tag2);
 
         // Exists
-        assert!(AccountTransactionTag::exists(&db, &transaction1, &tag1).await);
-        assert!(AccountTransactionTag::exists(&db, &transaction2, &tag2).await);
-        assert!(!AccountTransactionTag::exists(&db, &transaction1, &tag2).await);
-        assert!(!AccountTransactionTag::exists(&db, &transaction2, &tag1).await);
+        assert!(AccountTransactionTag::exists(&mut db, &transaction1, &tag1).await);
+        assert!(AccountTransactionTag::exists(&mut db, &transaction2, &tag2).await);
+        assert!(!AccountTransactionTag::exists(&mut db, &transaction1, &tag2).await);
+        assert!(!AccountTransactionTag::exists(&mut db, &transaction2, &tag1).await);
 
         // List
-        let transaction_tags1 = AccountTransactionTag::list(&db).await;
+        let transaction_tags1 = AccountTransactionTag::list(&mut db).await;
         assert_eq!(transaction_tags1.len(), 2);
         let transaction_tag5 = transaction_tags1
             .iter()
@@ -179,41 +184,41 @@ mod tests {
 
         // List by transaction
         let transaction_tags2 =
-            AccountTransactionTag::list_by_transaction(&db, &transaction1).await;
+            AccountTransactionTag::list_by_transaction(&mut db, &transaction1).await;
         assert_eq!(transaction_tags2.len(), 1);
         assert_eq!(transaction_tags2[0], transaction_tag1);
         let transaction_tags3 =
-            AccountTransactionTag::list_by_transaction(&db, &transaction2).await;
+            AccountTransactionTag::list_by_transaction(&mut db, &transaction2).await;
         assert_eq!(transaction_tags3.len(), 1);
         assert_eq!(transaction_tags3[0], transaction_tag2);
 
         // List by tag
-        let transaction_tags4 = AccountTransactionTag::list_by_tag(&db, &tag1).await;
+        let transaction_tags4 = AccountTransactionTag::list_by_tag(&mut db, &tag1).await;
         assert_eq!(transaction_tags4.len(), 1);
         assert_eq!(transaction_tags4[0], transaction_tag1);
-        let transaction_tags5 = AccountTransactionTag::list_by_tag(&db, &tag2).await;
+        let transaction_tags5 = AccountTransactionTag::list_by_tag(&mut db, &tag2).await;
         assert_eq!(transaction_tags5.len(), 1);
         assert_eq!(transaction_tags5[0], transaction_tag2);
 
         // Get account transaction
-        let transaction3 = transaction_tag1.get_account_transaction(&db).await;
+        let transaction3 = transaction_tag1.get_account_transaction(&mut db).await;
         assert_eq!(transaction3, transaction1);
-        let transaction4 = transaction_tag2.get_account_transaction(&db).await;
+        let transaction4 = transaction_tag2.get_account_transaction(&mut db).await;
         assert_eq!(transaction4, transaction2);
 
         // Get tag
-        let tag3 = transaction_tag1.get_tag(&db).await;
+        let tag3 = transaction_tag1.get_tag(&mut db).await;
         assert_eq!(tag3, tag1);
-        let tag4 = transaction_tag2.get_tag(&db).await;
+        let tag4 = transaction_tag2.get_tag(&mut db).await;
         assert_eq!(tag4, tag2);
 
         // Delete
-        assert!(AccountTransactionTag::exists(&db, &transaction1, &tag1).await);
-        transaction_tag1.delete(&db).await;
-        assert!(!AccountTransactionTag::exists(&db, &transaction1, &tag1).await);
-        assert!(AccountTransactionTag::exists(&db, &transaction2, &tag2).await);
-        transaction_tag2.delete(&db).await;
-        assert!(!AccountTransactionTag::exists(&db, &transaction2, &tag2).await);
+        assert!(AccountTransactionTag::exists(&mut db, &transaction1, &tag1).await);
+        transaction_tag1.delete(&mut db).await;
+        assert!(!AccountTransactionTag::exists(&mut db, &transaction1, &tag1).await);
+        assert!(AccountTransactionTag::exists(&mut db, &transaction2, &tag2).await);
+        transaction_tag2.delete(&mut db).await;
+        assert!(!AccountTransactionTag::exists(&mut db, &transaction2, &tag2).await);
 
         // Clean up
         db.delete().await.unwrap();

@@ -22,7 +22,12 @@ pub struct Account {
 
 impl Account {
     /// Creates a new account.
-    pub async fn create(db: &DB, account_type: AccountType, name: &str, description: &str) -> Self {
+    pub async fn create(
+        db: &mut DB,
+        account_type: AccountType,
+        name: &str,
+        description: &str,
+    ) -> Self {
         let id = new_id();
         let account_type_name = account_type.to_internal_name();
 
@@ -33,28 +38,28 @@ impl Account {
             name,
             description
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
 
-        Self::get(&db, &id).await.unwrap()
+        Self::get(db, &id).await.unwrap()
     }
 
     /// Gets an account from the database.
-    pub async fn get(db: &DB, id: &str) -> Option<Self> {
+    pub async fn get(db: &mut DB, id: &str) -> Option<Self> {
         sqlx::query_as!(Self, "SELECT * FROM account WHERE id = ?;", id)
-            .fetch_optional(&**db)
+            .fetch_optional(&mut **db)
             .await
             .unwrap()
     }
 
     /// Lists all accounts in the database.
-    pub async fn list(db: &DB) -> Vec<Self> {
+    pub async fn list(db: &mut DB) -> Vec<Self> {
         sqlx::query_as!(
             Self,
             "SELECT * FROM account ORDER BY edited_at DESC, created_at DESC;"
         )
-        .fetch_all(&**db)
+        .fetch_all(&mut **db)
         .await
         .unwrap()
     }
@@ -65,7 +70,7 @@ impl Account {
     }
 
     /// Marks the account as edited.
-    pub async fn mark_edited(&mut self, db: &DB) {
+    pub async fn mark_edited(&mut self, db: &mut DB) {
         self.edited_at = Some(Utc::now().naive_utc());
 
         sqlx::query!(
@@ -73,13 +78,13 @@ impl Account {
             self.edited_at,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Marks the account as reconciled.
-    pub async fn mark_reconciled(&mut self, db: &DB) {
+    pub async fn mark_reconciled(&mut self, db: &mut DB) {
         self.reconciled_at = Some(Utc::now().naive_utc());
 
         sqlx::query!(
@@ -87,13 +92,13 @@ impl Account {
             self.reconciled_at,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
     }
 
     /// Sets the account type.
-    pub async fn set_account_type(&mut self, db: &DB, account_type: AccountType) {
+    pub async fn set_account_type(&mut self, db: &mut DB, account_type: AccountType) {
         self.account_type = account_type.to_internal_name();
 
         sqlx::query!(
@@ -101,15 +106,15 @@ impl Account {
             self.account_type,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
 
-        self.mark_edited(&db).await;
+        self.mark_edited(db).await;
     }
 
     /// Sets the account name.
-    pub async fn set_name(&mut self, db: &DB, name: &str) {
+    pub async fn set_name(&mut self, db: &mut DB, name: &str) {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -117,15 +122,15 @@ impl Account {
             self.name,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
 
-        self.mark_edited(&db).await;
+        self.mark_edited(db).await;
     }
 
     /// Sets the account description.
-    pub async fn set_description(&mut self, db: &DB, description: &str) {
+    pub async fn set_description(&mut self, db: &mut DB, description: &str) {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -133,17 +138,17 @@ impl Account {
             self.description,
             self.id
         )
-        .execute(&**db)
+        .execute(&mut **db)
         .await
         .unwrap();
 
-        self.mark_edited(&db).await;
+        self.mark_edited(db).await;
     }
 
     /// Deletes the account from the database.
-    pub async fn delete(self, db: &DB) {
+    pub async fn delete(self, db: &mut DB) {
         sqlx::query!("DELETE FROM account WHERE id = ?;", self.id)
-            .execute(&**db)
+            .execute(&mut **db)
             .await
             .unwrap();
     }
@@ -158,18 +163,18 @@ mod tests {
     #[tokio::test]
     async fn test_account() {
         // Init
-        let db = TestDB::new().await.unwrap();
+        let mut db = TestDB::new().await.unwrap();
 
         // Create
         let mut account1 = Account::create(
-            &db,
+            &mut db,
             AccountType::BankAccount,
             "My Bank Account",
             "Description of bank account",
         )
         .await;
         let mut account2 = Account::create(
-            &db,
+            &mut db,
             AccountType::CreditCard,
             "My Credit Card",
             "Description of credit card",
@@ -177,14 +182,14 @@ mod tests {
         .await;
 
         // Get
-        let account3 = Account::get(&db, &account1.id).await.unwrap();
+        let account3 = Account::get(&mut db, &account1.id).await.unwrap();
         assert_eq!(account3, account1);
-        let account4 = Account::get(&db, &account2.id).await.unwrap();
+        let account4 = Account::get(&mut db, &account2.id).await.unwrap();
         assert_eq!(account4, account2);
-        assert!(Account::get(&db, "").await.is_none());
+        assert!(Account::get(&mut db, "").await.is_none());
 
         // List
-        let accounts = Account::list(&db).await;
+        let accounts = Account::list(&mut db).await;
         assert_eq!(accounts.len(), 2);
         let account5 = accounts.iter().find(|x| x.id == account1.id).unwrap();
         assert_eq!(account5, &account1);
@@ -197,50 +202,50 @@ mod tests {
 
         // Mark edited
         assert!(account1.edited_at.is_none());
-        account1.mark_edited(&db).await;
+        account1.mark_edited(&mut db).await;
         assert!(account1.edited_at.is_some());
         assert_ne!(account1, account3);
 
         // Mark reconciled
         assert!(account2.reconciled_at.is_none());
-        account2.mark_reconciled(&db).await;
+        account2.mark_reconciled(&mut db).await;
         assert!(account2.reconciled_at.is_some());
         assert_ne!(account2, account4);
 
         // Set account type
         account1
-            .set_account_type(&db, AccountType::Investment)
+            .set_account_type(&mut db, AccountType::Investment)
             .await;
         assert_eq!(account1.get_account_type(), AccountType::Investment);
-        let account7 = Account::get(&db, &account1.id).await.unwrap();
+        let account7 = Account::get(&mut db, &account1.id).await.unwrap();
         assert_eq!(account7, account1);
 
         // Set account name
-        account1.set_name(&db, "My Investments").await;
+        account1.set_name(&mut db, "My Investments").await;
         assert_eq!(&account1.name, "My Investments");
-        let account8 = Account::get(&db, &account1.id).await.unwrap();
+        let account8 = Account::get(&mut db, &account1.id).await.unwrap();
         assert_eq!(account8, account1);
 
         // Set account description
         account1
-            .set_description(&db, "Investment description")
+            .set_description(&mut db, "Investment description")
             .await;
         assert_eq!(
             account1.description.as_ref().unwrap(),
             "Investment description"
         );
-        let account9 = Account::get(&db, &account1.id).await.unwrap();
+        let account9 = Account::get(&mut db, &account1.id).await.unwrap();
         assert_eq!(account9, account1);
 
         // Delete
         let account_id1 = account1.id.clone();
-        assert!(Account::get(&db, &account_id1).await.is_some());
-        account1.delete(&db).await;
-        assert!(Account::get(&db, &account_id1).await.is_none());
+        assert!(Account::get(&mut db, &account_id1).await.is_some());
+        account1.delete(&mut db).await;
+        assert!(Account::get(&mut db, &account_id1).await.is_none());
         let account_id2 = account2.id.clone();
-        assert!(Account::get(&db, &account_id2).await.is_some());
-        account2.delete(&db).await;
-        assert!(Account::get(&db, &account_id2).await.is_none());
+        assert!(Account::get(&mut db, &account_id2).await.is_some());
+        account2.delete(&mut db).await;
+        assert!(Account::get(&mut db, &account_id2).await.is_none());
 
         // Clean up
         db.delete().await.unwrap();

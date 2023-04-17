@@ -1,20 +1,32 @@
 use anyhow::Result;
 use backend_macros::backend_commands;
 use commands::BackendCommands;
-use db::DB;
+use db::Save;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 /// The backend application state.
 pub struct State {
     /// The backend database.
-    db: DB,
+    save: Arc<Mutex<Save>>,
 }
 
 impl State {
     /// Initialize the backend state and connect to the test database.
     pub async fn new() -> Result<Self> {
-        let db = DB::open("test").await?;
+        let save_name = "test";
+        let save_description = "A test save.";
+        let save_password = "password123";
 
-        Ok(Self { db })
+        let save = if Save::exists(save_name) {
+            Save::open(save_name, save_password).await?
+        } else {
+            Save::create(save_name, save_description, save_password).await?
+        };
+
+        Ok(Self {
+            save: Arc::new(Mutex::new(save)),
+        })
     }
 }
 

@@ -6,5 +6,7 @@ members = [
     "macros",
     "frontend_macros",
     "backend_macros",
-    "db"
+    "db",
+    "crypto",
+    "backend_common"
 ]

@@ -10,6 +10,7 @@ mod db;
 mod id;
 mod reminder;
 mod report_template;
+mod save;
 mod subcategory;
 mod tag;
 mod timeframe;
@@ -20,13 +21,15 @@ pub use crate::account_transaction_tag::*;
 pub use crate::account_type::*;
 pub use crate::budget::*;
 pub use crate::category::*;
-pub use crate::db::*;
-pub use crate::id::*;
+pub use crate::db::DB;
 pub use crate::reminder::*;
 pub use crate::report_template::*;
+pub use crate::save::{Save, SaveMetadata};
 pub use crate::subcategory::*;
 pub use crate::tag::*;
 pub use crate::timeframe::*;
+
+use crate::id::*;
 
 /// The database tables, in order.
 pub(crate) const TABLES: &[&str] = &[
@@ -41,6 +44,21 @@ pub(crate) const TABLES: &[&str] = &[
     "report_template",
 ];
 
+/// Converts a name into an acceptable file name.
+pub(crate) fn convert_file_name(name: &str) -> String {
+    name.chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() {
+                c
+            } else if c == ' ' || c == '_' {
+                '_'
+            } else {
+                '-'
+            }
+        })
+        .collect()
+}
+
 #[cfg(test)]
 pub(crate) use tests::*;
 
@@ -48,7 +66,7 @@ pub(crate) use tests::*;
 mod tests {
     use super::*;
     use anyhow::Result;
-    use std::ops::Deref;
+    use std::ops::{Deref, DerefMut};
 
     /// A test database.
     pub struct TestDB {
@@ -77,6 +95,12 @@ mod tests {
 
         fn deref(&self) -> &Self::Target {
             &self.inner
+        }
+    }
+
+    impl DerefMut for TestDB {
+        fn deref_mut(&mut self) -> &mut Self::Target {
+            &mut self.inner
         }
     }
 }
