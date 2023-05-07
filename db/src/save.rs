@@ -458,6 +458,10 @@ mod tests {
 
         // List
         let saves = Save::list().await.unwrap();
+        let saves = saves
+            .into_iter()
+            .filter(|s| &s.name != "test") // ignore the "test" save
+            .collect::<Vec<_>>();
         assert_eq!(saves.len(), 1);
         assert_eq!(&saves[0].name, new_name);
         let name2 = "Other save";
@@ -467,6 +471,10 @@ mod tests {
         assert_eq!(&other_save.metadata.name, name2);
         other_save.close().await.unwrap();
         let saves = Save::list().await.unwrap();
+        let saves = saves
+            .into_iter()
+            .filter(|s| &s.name != "test") // ignore the "test" save
+            .collect::<Vec<_>>();
         assert_eq!(saves.len(), 2);
         let save1 = saves.iter().find(|s| &s.name == new_name).unwrap();
         let save2 = saves.iter().find(|s| &s.name == name2).unwrap();
@@ -476,9 +484,17 @@ mod tests {
         // Delete
         Save::delete(new_name, new_password).await.unwrap();
         let saves = Save::list().await.unwrap();
+        let saves = saves
+            .into_iter()
+            .filter(|s| &s.name != "test") // ignore the "test" save
+            .collect::<Vec<_>>();
         assert_eq!(saves.len(), 1);
         Save::delete(name2, password2).await.unwrap();
         let saves = Save::list().await.unwrap();
+        let saves = saves
+            .into_iter()
+            .filter(|s| &s.name != "test") // ignore the "test" save
+            .collect::<Vec<_>>();
         assert!(saves.is_empty());
     }
 }

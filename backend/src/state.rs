@@ -5,7 +5,8 @@ use db::Save;
 use std::fmt::Display;
 use std::sync::Arc;
 use std::{error::Error as StdError, future::Future};
-use tokio::sync::{Mutex, MutexGuard};
+use tauri::WindowEvent;
+use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
 #[derive(Debug, Clone)]
 pub enum StateError {
@@ -27,13 +28,29 @@ impl StdError for StateError {}
 /// The backend application state.
 pub struct State {
     /// The backend database.
-    save: Option<Arc<Mutex<Save>>>,
+    save: Arc<Mutex<Option<Save>>>,
 }
 
 impl State {
     /// Initializes the backend state.
     pub fn new() -> Self {
-        Self { save: None }
+        Self {
+            save: Arc::new(Mutex::new(None)),
+        }
+    }
+
+    /// Handle a tauri window event.
+    pub async fn handle_event(&self, event: &WindowEvent) -> Result<()> {
+        match event {
+            WindowEvent::CloseRequested { .. } => {
+                if self.is_save_open().await {
+                    self.close_save().await?;
+                }
+            }
+            _ => {}
+        }
+
+        Ok(())
     }
 
     /// Checks if a save with the given name exists.
@@ -41,40 +58,50 @@ impl State {
         Save::exists(save_name)
     }
 
+    /// Checks if a save is currently open.
+    pub async fn is_save_open(&self) -> bool {
+        self.save.lock().await.is_some()
+    }
+
     /// Creates and opens a new save file.
     pub async fn create_save(
-        &mut self,
+        &self,
         save_name: &str,
         save_description: &str,
         save_password: &str,
     ) -> Result<()> {
-        if self.save.is_some() {
+        let mut save_option = self.save.lock().await;
+
+        if save_option.is_some() {
             Err(StateError::SaveAlreadyOpen)?;
         }
 
         let save = Save::create(save_name, save_description, save_password).await?;
-        self.save = Some(Arc::new(Mutex::new(save)));
+        *save_option = Some(save);
 
         Ok(())
     }
 
     /// Opens a save file.
-    pub async fn open_save(&mut self, save_name: &str, save_password: &str) -> Result<()> {
-        if self.save.is_some() {
+    pub async fn open_save(&self, save_name: &str, save_password: &str) -> Result<()> {
+        let mut save_option = self.save.lock().await;
+
+        if save_option.is_some() {
             Err(StateError::SaveAlreadyOpen)?;
         }
 
         let save = Save::open(save_name, save_password).await?;
-        self.save = Some(Arc::new(Mutex::new(save)));
+        *save_option = Some(save);
 
         Ok(())
     }
 
     /// Closes the open save file.
-    pub async fn close_save(&mut self) -> Result<()> {
-        match self.save.take() {
+    pub async fn close_save(&self) -> Result<()> {
+        let mut save_option = self.save.lock().await;
+
+        match save_option.take() {
             Some(save) => {
-                let save = Arc::try_unwrap(save).unwrap().into_inner();
                 save.close().await?;
 
                 Ok(())
@@ -84,9 +111,13 @@ impl State {
     }
 
     /// Returns a handle to the inner save instance.
-    pub async fn save_handle(&self) -> Result<MutexGuard<Save>> {
-        match &self.save {
-            Some(save) => Ok(save.lock().await),
+    pub async fn save_handle(&self) -> Result<MappedMutexGuard<Save>> {
+        let save_option = self.save.lock().await;
+
+        match &*save_option {
+            Some(_) => Ok(MutexGuard::map(save_option, |guard| {
+                guard.as_mut().unwrap()
+            })),
             None => Err(StateError::NoSaveOpen)?,
         }
     }
