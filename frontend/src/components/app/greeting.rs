@@ -6,7 +6,7 @@ use yewdux::prelude::*;
 
 /// Greeting properties.
 #[derive(Properties, PartialEq, Clone)]
-pub struct Props {
+pub struct GreetingProps {
     /// The name of the person to greet.
     #[prop_or("<unknown>".to_owned())]
     pub name: String,
@@ -14,7 +14,7 @@ pub struct Props {
 
 /// A personal greeting.
 #[function_component]
-pub fn Greeting(props: &Props) -> Html {
+pub fn Greeting(props: &GreetingProps) -> Html {
     let (state1, _) = use_store::<State>();
     let state2 = state1.clone();
 

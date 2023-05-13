@@ -1,0 +1,166 @@
+@use "common.scss";
+
+.base-text-smaller {
+  font-size: 0.8em;
+}
+
+.base-text-small {
+  font-size: 0.9em;
+}
+
+.base-text-medium {
+  font-size: 1em;
+}
+
+.base-text-large {
+  font-size: 1.25em;
+}
+
+.base-text-larger {
+  font-size: 1.5em;
+}
+
+.base-demo {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.5rem;
+}
+
+.base-demo-item {
+  background-color: common.$background-color-4;
+  padding: common.$padding-large;
+  border: common.$standard-border;
+  border-radius: common.$border-radius-large;
+  display: flex;
+  flex-direction: column;
+  gap: common.$padding-medium;
+}
+
+.base-demo-item-label {
+  text-align: center;
+}
+
+.base-error {
+  color: common.$error-color;
+}
+
+.base-input-container {
+  padding: common.$form-padding;
+  display: flex;
+  flex-direction: column;
+  gap: common.$padding-small;
+}
+
+.base-input {
+  background-color: common.$input-background-color;
+  color: common.$input-text-color;
+  padding: 6px 7px;
+  border: common.$standard-border;
+  border-radius: common.$input-border-radius;
+  outline: none;
+  transition: border 0.1s ease;
+}
+
+.base-input:focus {
+  border: common.$light-border;
+}
+
+.base-input-invalid,
+.base-input-invalid:focus {
+  border: common.$error-border;
+}
+
+.base-input-label {
+  color: common.$primary-text-label-color-1;
+  font-size: 0.9em;
+  transition: color 0.1s ease;
+}
+
+.base-input-container:focus-within .base-input-label {
+  color: common.$primary-text-color;
+}
+
+.base-button {
+  border: 0;
+  border-radius: common.$button-border-radius;
+  padding: 6px 12px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+}
+
+.base-button:disabled {
+  cursor: default;
+}
+
+.base-button-primary {
+  background-color: common.$button-primary-background-color;
+  color: common.$button-primary-text-color;
+}
+
+.base-button-primary:hover {
+  background-color: common.$button-primary-background-color-hover;
+}
+
+.base-button-primary:active {
+  background-color: common.$button-primary-background-color-active;
+}
+
+.base-button-primary:disabled {
+  background-color: common.$button-primary-background-color-disabled;
+  color: common.$button-primary-text-color-disabled;
+}
+
+.base-button-secondary {
+  background-color: common.$button-secondary-background-color;
+  color: common.$button-secondary-text-color;
+}
+
+.base-button-secondary:hover {
+  background-color: common.$button-secondary-background-color-hover;
+}
+
+.base-button-secondary:active {
+  background-color: common.$button-secondary-background-color-active;
+}
+
+.base-button-secondary:disabled {
+  background-color: common.$button-secondary-background-color-disabled;
+  color: common.$button-secondary-text-color-disabled;
+}
+
+.base-button-transparent {
+  background-color: common.$button-transparent-background-color;
+  color: common.$button-transparent-text-color;
+}
+
+.base-button-transparent:hover {
+  background-color: common.$button-transparent-background-color-hover;
+}
+
+.base-button-transparent:active {
+  background-color: common.$button-transparent-background-color-active;
+}
+
+.base-button-transparent:disabled {
+  background-color: common.$button-transparent-background-color-disabled;
+  color: common.$button-transparent-text-color-disabled;
+}
+
+.base-button-danger {
+  background-color: common.$button-danger-background-color;
+  color: common.$button-danger-text-color;
+}
+
+.base-button-danger:hover {
+  background-color: common.$button-danger-background-color-hover;
+}
+
+.base-button-danger:active {
+  background-color: common.$button-danger-background-color-active;
+}
+
+.base-button-danger:disabled {
+  background-color: common.$button-danger-background-color-disabled;
+  color: common.$button-danger-text-color-disabled;
+}

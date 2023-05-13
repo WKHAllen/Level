@@ -4,7 +4,7 @@ mod components;
 mod hooks;
 mod state;
 
-use components::App;
+use components::app::App;
 
 /// Start the frontend Yew application.
 fn main() {

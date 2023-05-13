@@ -1,0 +1,100 @@
+$background-color-1: #1a1c1f;
+$background-color-2: #1e2023;
+$background-color-3: #222427;
+$background-color-4: #26282b;
+$background-color-5: #2a2c2f;
+
+$text-color: #ffffff;
+
+$selection-color: hsla(220, 100%, 50%, 0.4);
+$error-color: #cf0000;
+$mid-color: #7f7f7f;
+
+$primary-color: #006f00;
+$primary-color-hover: darken($primary-color, 5%);
+$primary-color-active: darken($primary-color, 8%);
+$primary-color-disabled: mix($primary-color, $mid-color, 60%);
+$primary-text-color: #ffffff;
+$primary-text-color-disabled: mix($primary-text-color, $mid-color, 60%);
+$primary-text-label-color-1: mix($primary-text-color, $mid-color, 70%);
+$primary-text-label-color-2: mix($primary-text-color, $mid-color, 60%);
+$primary-text-label-color-3: mix($primary-text-color, $mid-color, 50%);
+
+$secondary-color: #5a5c5f;
+$secondary-color-hover: darken($secondary-color, 5%);
+$secondary-color-active: darken($secondary-color, 8%);
+$secondary-color-disabled: mix($secondary-color, $mid-color, 60%);
+$secondary-text-color: #ffffff;
+$secondary-text-color-disabled: mix($secondary-text-color, $mid-color, 60%);
+$secondary-text-label-color-1: mix($secondary-text-color, $mid-color, 70%);
+$secondary-text-label-color-2: mix($secondary-text-color, $mid-color, 60%);
+$secondary-text-label-color-3: mix($secondary-text-color, $mid-color, 50%);
+
+$transparent-color: #00000000;
+$transparent-color-hover: darken($transparent-color, 5%);
+$transparent-color-active: darken($transparent-color, 8%);
+$transparent-color-disabled: $transparent-color; // mix($transparent-color, $mid-color, 60%);
+$transparent-text-color: #ffffff;
+$transparent-text-color-disabled: mix($transparent-text-color, $mid-color, 60%);
+$transparent-text-label-color-1: mix($transparent-text-color, $mid-color, 70%);
+$transparent-text-label-color-2: mix($transparent-text-color, $mid-color, 60%);
+$transparent-text-label-color-3: mix($transparent-text-color, $mid-color, 50%);
+
+$danger-color: #af0000;
+$danger-color-hover: darken($danger-color, 5%);
+$danger-color-active: darken($danger-color, 8%);
+$danger-color-disabled: mix($danger-color, $mid-color, 60%);
+$danger-text-color: #ffffff;
+$danger-text-color-disabled: mix($danger-text-color, $mid-color, 60%);
+$danger-text-label-color-1: mix($danger-text-color, $mid-color, 70%);
+$danger-text-label-color-2: mix($danger-text-color, $mid-color, 60%);
+$danger-text-label-color-3: mix($danger-text-color, $mid-color, 50%);
+
+$padding-small: 4px;
+$padding-medium: 8px;
+$padding-large: 16px;
+$form-padding: $padding-medium 0;
+
+$border-color: #4a4c4f;
+$standard-border: 1px solid $border-color;
+$light-border-color: #6a6c6f;
+$light-border: 1px solid $light-border-color;
+$error-border-color: $error-color;
+$error-border: 1px solid $error-border-color;
+$border-radius-small: 2px;
+$border-radius-medium: 4px;
+$border-radius-large: 8px;
+
+$input-background-color: $background-color-1;
+$input-text-color: $primary-text-color;
+$input-border-radius: $border-radius-medium;
+
+$button-primary-background-color: $primary-color;
+$button-primary-background-color-hover: $primary-color-hover;
+$button-primary-background-color-active: $primary-color-active;
+$button-primary-background-color-disabled: $primary-color-disabled;
+$button-primary-text-color: $primary-text-color;
+$button-primary-text-color-disabled: $primary-text-color-disabled;
+
+$button-secondary-background-color: $secondary-color;
+$button-secondary-background-color-hover: $secondary-color-hover;
+$button-secondary-background-color-active: $secondary-color-active;
+$button-secondary-background-color-disabled: $secondary-color-disabled;
+$button-secondary-text-color: $secondary-text-color;
+$button-secondary-text-color-disabled: $secondary-text-color-disabled;
+
+$button-transparent-background-color: $transparent-color;
+$button-transparent-background-color-hover: $transparent-color-hover;
+$button-transparent-background-color-active: $transparent-color-active;
+$button-transparent-background-color-disabled: $transparent-color-disabled;
+$button-transparent-text-color: $transparent-text-color;
+$button-transparent-text-color-disabled: $transparent-text-color-disabled;
+
+$button-danger-background-color: $danger-color;
+$button-danger-background-color-hover: $danger-color-hover;
+$button-danger-background-color-active: $danger-color-active;
+$button-danger-background-color-disabled: $danger-color-disabled;
+$button-danger-text-color: $danger-text-color;
+$button-danger-text-color-disabled: $danger-text-color-disabled;
+
+$button-border-radius: $border-radius-medium;
