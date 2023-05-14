@@ -16,6 +16,7 @@ pub enum ButtonStyle {
 }
 
 impl ButtonStyle {
+    /// Gets the name of the button style.
     pub fn style_name(&self) -> &'static str {
         match *self {
             Self::Primary => "primary",

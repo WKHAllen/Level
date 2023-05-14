@@ -41,6 +41,10 @@
   text-align: center;
 }
 
+.base-required-mark {
+  color: common.$error-color;
+}
+
 .base-error {
   color: common.$error-color;
 }
@@ -78,6 +82,58 @@
 }
 
 .base-input-container:focus-within .base-input-label {
+  color: common.$primary-text-color;
+}
+
+.base-textarea-container {
+  padding: common.$form-padding;
+  display: flex;
+  flex-direction: column;
+  gap: common.$padding-small;
+}
+
+.base-textarea {
+  background-color: common.$textarea-background-color;
+  color: common.$textarea-text-color;
+  padding: 6px 7px;
+  border: common.$standard-border;
+  border-radius: common.$textarea-border-radius;
+  outline: none;
+  transition: border 0.1s ease;
+}
+
+.base-textarea:focus {
+  border: common.$light-border;
+}
+
+.base-textarea-resize-none {
+  resize: none;
+}
+
+.base-textarea-resize-horizontal {
+  resize: horizontal;
+}
+
+.base-textarea-resize-vertical {
+  resize: vertical;
+}
+
+.base-textarea-resize-both {
+  resize: both;
+}
+
+.base-textarea-invalid,
+.base-textarea-invalid:focus {
+  border: common.$error-border;
+}
+
+.base-textarea-label {
+  color: common.$primary-text-label-color-1;
+  font-size: 0.9em;
+  transition: color 0.1s ease;
+}
+
+.base-textarea-container:focus-within .base-textarea-label {
   color: common.$primary-text-color;
 }
 

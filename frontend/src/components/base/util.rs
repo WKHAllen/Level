@@ -1,12 +1,20 @@
 use js_sys::Math;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
-use web_sys::{Event, HtmlInputElement, InputEvent};
+use web_sys::{Event, HtmlInputElement, HtmlTextAreaElement, InputEvent};
 
 /// Gets the value of an input element from an event.
 pub fn input_event_value(e: InputEvent) -> String {
     let event: Event = e.dyn_into().unwrap_throw();
     let event_target = event.target().unwrap_throw();
     let target: HtmlInputElement = event_target.dyn_into().unwrap_throw();
+    target.value()
+}
+
+/// Gets the value of a textarea element from an event.
+pub fn textarea_event_value(e: InputEvent) -> String {
+    let event: Event = e.dyn_into().unwrap_throw();
+    let event_target = event.target().unwrap_throw();
+    let target: HtmlTextAreaElement = event_target.dyn_into().unwrap_throw();
     target.value()
 }
 

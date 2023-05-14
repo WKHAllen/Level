@@ -20,6 +20,7 @@ pub enum InputType {
 }
 
 impl InputType {
+    /// Gets the HTML input element type corresponding to the current input type.
     pub fn html_input_type(&self) -> &'static str {
         match *self {
             Self::Text => "text",
@@ -42,9 +43,15 @@ pub struct InputProps {
     /// The input label.
     #[prop_or_default]
     pub label: String,
+    /// Input placeholder text.
+    #[prop_or_default]
+    pub placeholder: String,
     /// The maximum number of characters allowed.
     #[prop_or(524288)]
     pub max_length: usize,
+    /// Whether the input is required to be filled out.
+    #[prop_or(false)]
+    pub required: bool,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<String>,
@@ -60,7 +67,9 @@ pub fn Input(props: &InputProps) -> Html {
         state,
         input_type,
         label,
+        placeholder,
         max_length,
+        required,
         error,
         disabled,
     } = props.clone();
@@ -74,11 +83,16 @@ pub fn Input(props: &InputProps) -> Html {
 
     html! {
         <div class="base-input-container">
-            <label for={id.clone()} class="base-input-label">{label}</label>
+            <label for={id.clone()} class="base-input-label">
+                {label}
+                <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
+            </label>
             <input
                 type={html_input_type}
                 {id}
                 {oninput}
+                {placeholder}
+                {required}
                 {disabled}
                 maxlength={max_length.to_string()}
                 class={classes!("base-input", error.clone().map(|_| "base-input-invalid"))}

@@ -69,6 +69,10 @@ $input-background-color: $background-color-1;
 $input-text-color: $primary-text-color;
 $input-border-radius: $border-radius-medium;
 
+$textarea-background-color: $input-background-color;
+$textarea-text-color: $input-text-color;
+$textarea-border-radius: $input-border-radius;
+
 $button-primary-background-color: $primary-color;
 $button-primary-background-color-hover: $primary-color-hover;
 $button-primary-background-color-active: $primary-color-active;
