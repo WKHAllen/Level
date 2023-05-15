@@ -74,6 +74,7 @@ pub fn Input(props: &InputProps) -> Html {
         disabled,
     } = props.clone();
 
+    let value = (*state).clone();
     let id = new_id();
     let html_input_type = input_type.html_input_type();
     let oninput = move |event: InputEvent| {
@@ -89,6 +90,7 @@ pub fn Input(props: &InputProps) -> Html {
             </label>
             <input
                 type={html_input_type}
+                {value}
                 {id}
                 {oninput}
                 {placeholder}

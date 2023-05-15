@@ -4,12 +4,16 @@ use yew::prelude::*;
 /// A demo of the base components.
 #[function_component]
 pub fn Demo() -> Html {
-    let input_state = use_state(|| String::new());
+    let input_state = use_state(|| "Input value".to_owned());
     let input_value = (*input_state).clone();
-    let textarea_state = use_state(|| String::new());
+    let textarea_state = use_state(|| "Textarea value".to_owned());
     let textarea_value = (*textarea_state).clone();
     let textarea_state1 = use_state(|| String::new());
     let textarea_state2 = use_state(|| String::new());
+    let numberinput_int_state = use_state(|| 3u16);
+    let numberinput_int_value = *numberinput_int_state;
+    let numberinput_float_state = use_state(|| 1.618f64);
+    let numberinput_float_value = *numberinput_float_state;
     let button_state = use_state(|| ButtonStyle::Primary);
     let button_state_primary = button_state.clone();
     let button_state_secondary = button_state.clone();
@@ -36,6 +40,14 @@ pub fn Demo() -> Html {
                 <TextArea state={textarea_state} label="Disabled textarea" disabled={true} resize={TextAreaResize::Horizontal} />
                 <TextArea state={textarea_state1} label="Vertical resize" resize={TextAreaResize::Vertical} />
                 <TextArea state={textarea_state2} label="Full resize" resize={TextAreaResize::Both} />
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Number input"}</span>
+                <NumberInput<u16> state={numberinput_int_state.clone()} label="Int number input label" placeholder="Placeholder!" min={0} max={100} required={true} error={(numberinput_int_value == 3).then_some("How about something other than 3")} />
+                <span>{"Value: "}{numberinput_int_value}</span>
+                <NumberInput<f64> state={numberinput_float_state} label="Float number input label" placeholder="Placeholder!" min={-5.0} max={5.0} decimals={5} required={true} error={(numberinput_float_value == 3.14).then_some("No pi, please")} />
+                <span>{"Value: "}{numberinput_float_value}</span>
+                <NumberInput<u16> state={numberinput_int_state} label="Disabled number input" disabled={true} />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Button"}</span>
