@@ -75,7 +75,8 @@ pub fn Input(props: &InputProps) -> Html {
     } = props.clone();
 
     let value = (*state).clone();
-    let id = new_id();
+    let id_state = use_state(|| new_id());
+    let id = (*id_state).clone();
     let html_input_type = input_type.html_input_type();
     let oninput = move |event: InputEvent| {
         let new_value = input_event_value(event);

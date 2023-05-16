@@ -20,6 +20,10 @@ pub fn Demo() -> Html {
     let button_state_transparent = button_state.clone();
     let button_state_danger = button_state.clone();
     let button_value = *button_state;
+    let checkbox_state = use_state(|| true);
+    let checkbox_value = *checkbox_state;
+    let switch_state = use_state(|| true);
+    let switch_value = *switch_state;
 
     html! {
         <div class="base-demo">
@@ -57,6 +61,18 @@ pub fn Demo() -> Html {
                 <Button text="Danger" style={ButtonStyle::Danger} on_click={move |_| button_state_danger.set(ButtonStyle::Danger)} />
                 <Button text="Disabled" style={*button_state} disabled={true} />
                 <span>{"Last clicked: "}{button_value.style_name()}</span>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Checkbox"}</span>
+                <Checkbox state={checkbox_state.clone()} label="Checkbox label" />
+                <span>{"Value: "}{checkbox_value.to_string()}</span>
+                <Checkbox state={checkbox_state} label="Disabled checkbox" disabled={true} />
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Switch"}</span>
+                <Switch state={switch_state.clone()} label="Switch label" />
+                <span>{"Value: "}{switch_value.to_string()}</span>
+                <Switch state={switch_state} label="Disabled switch" disabled={true} />
             </div>
         </div>
     }

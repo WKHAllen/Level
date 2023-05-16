@@ -1,5 +1,9 @@
 @use "common.scss";
 
+//////////////////////////////////////////////////////////////////////////////
+/// MISC
+//////////////////////////////////////////////////////////////////////////////
+
 .base-text-smaller {
   font-size: 0.8em;
 }
@@ -19,6 +23,14 @@
 .base-text-larger {
   font-size: 1.5em;
 }
+
+.base-required-mark {
+  color: common.$error-color;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// DEMO
+//////////////////////////////////////////////////////////////////////////////
 
 .base-demo {
   padding: 1rem;
@@ -41,13 +53,17 @@
   text-align: center;
 }
 
-.base-required-mark {
-  color: common.$error-color;
-}
+//////////////////////////////////////////////////////////////////////////////
+/// ERROR
+//////////////////////////////////////////////////////////////////////////////
 
 .base-error {
   color: common.$error-color;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+/// INPUT
+//////////////////////////////////////////////////////////////////////////////
 
 .base-input-container {
   padding: common.$form-padding;
@@ -84,6 +100,10 @@
 .base-input-container:focus-within .base-input-label {
   color: common.$primary-text-color;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+/// TEXTAREA
+//////////////////////////////////////////////////////////////////////////////
 
 .base-textarea-container {
   padding: common.$form-padding;
@@ -136,6 +156,10 @@
 .base-textarea-container:focus-within .base-textarea-label {
   color: common.$primary-text-color;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+/// BUTTON
+//////////////////////////////////////////////////////////////////////////////
 
 .base-button {
   border: 0;
@@ -219,4 +243,185 @@
 .base-button-danger:disabled {
   background-color: common.$button-danger-background-color-disabled;
   color: common.$button-danger-text-color-disabled;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// CHECKBOX
+//////////////////////////////////////////////////////////////////////////////
+
+.base-checkbox-container {
+  width: 100%;
+  display: flex;
+}
+
+.base-checkbox-label {
+  color: common.$checkbox-label-color;
+  font-size: 0.9em;
+}
+
+.base-checkbox {
+  display: flex;
+  position: relative;
+  padding-left: common.$checkbox-label-offset-left;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.base-checkbox .base-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.base-checkbox:hover .base-checkbox-input ~ .base-checkmark {
+  transition: all 0.075s ease-in-out;
+}
+
+.base-checkbox .base-checkbox-input:checked ~ .base-checkmark {
+  background-color: common.$checkbox-background-color-checked;
+  border-color: common.$checkbox-background-color-checked;
+}
+
+.base-checkbox .base-checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: common.$checkbox-size;
+  width: common.$checkbox-size;
+  background-color: common.$checkbox-background-color-unchecked;
+  border: common.$standard-border;
+  border-radius: common.$checkbox-border-radius;
+}
+
+.base-checkbox .base-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.base-checkbox .base-checkbox-input:checked ~ .base-checkmark:after {
+  display: block;
+}
+
+.base-checkbox .base-checkmark:after {
+  left: 6px;
+  top: 2px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.base-checkbox-disabled .base-checkbox-label {
+  color: common.$checkbox-label-color-disabled;
+  cursor: default;
+}
+
+.base-checkbox-disabled,
+.base-checkbox-disabled .base-checkbox-input,
+.base-checkbox-disabled .base-checkmark {
+  cursor: default;
+}
+
+.base-checkbox-disabled .base-checkbox-input:checked ~ .base-checkmark {
+  background-color: common.$checkbox-background-color-checked-disabled;
+  border-color: common.$checkbox-background-color-checked-disabled;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// SWITCH
+//////////////////////////////////////////////////////////////////////////////
+
+.base-switch-container {
+  width: 100%;
+  display: flex;
+}
+
+.base-switch-label {
+  color: common.$switch-label-color;
+  font-size: 0.9em;
+}
+
+.base-switch {
+  display: flex;
+  position: relative;
+  padding-left: common.$switch-label-offset-left;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.base-switch .base-switch-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.base-switch:hover .base-switch-input ~ .base-switch-toggle {
+  transition: all 0.075s ease-in-out;
+}
+
+.base-switch .base-switch-input:checked ~ .base-switch-toggle {
+  background-color: common.$switch-background-color-checked;
+  border-color: common.$switch-background-color-checked;
+}
+
+.base-switch .base-switch-toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: common.$switch-height;
+  width: common.$switch-width;
+  background-color: common.$switch-background-color-unchecked;
+  border: common.$standard-border;
+  border-radius: 100vw;
+}
+
+.base-switch .base-switch-toggle:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.base-switch .base-switch-toggle:after {
+  display: block;
+  left: common.$switch-head-offset-off;
+  top: common.$switch-inner-padding;
+  width: common.$switch-head-size;
+  height: common.$switch-head-size;
+  background-color: common.$switch-head-background-color;
+  border-radius: 100vw;
+  transition: left 0.075s ease-out;
+}
+
+.base-switch .base-switch-input:checked ~ .base-switch-toggle:after {
+  left: common.$switch-head-offset-on;
+}
+
+.base-switch-disabled .base-switch-label {
+  color: common.$switch-label-color-disabled;
+  cursor: default;
+}
+
+.base-switch-disabled,
+.base-switch-disabled .base-switch-input,
+.base-switch-disabled .base-switch-toggle {
+  cursor: default;
+}
+
+.base-switch-disabled .base-switch-input:checked ~ .base-switch-toggle {
+  background-color: common.$switch-background-color-checked-disabled;
+  border-color: common.$switch-background-color-checked-disabled;
 }

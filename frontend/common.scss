@@ -1,3 +1,7 @@
+//////////////////////////////////////////////////////////////////////////////
+/// MISC
+//////////////////////////////////////////////////////////////////////////////
+
 $background-color-1: #1a1c1f;
 $background-color-2: #1e2023;
 $background-color-3: #222427;
@@ -65,13 +69,25 @@ $border-radius-small: 2px;
 $border-radius-medium: 4px;
 $border-radius-large: 8px;
 
+//////////////////////////////////////////////////////////////////////////////
+/// INPUT
+//////////////////////////////////////////////////////////////////////////////
+
 $input-background-color: $background-color-1;
 $input-text-color: $primary-text-color;
 $input-border-radius: $border-radius-medium;
 
+//////////////////////////////////////////////////////////////////////////////
+/// TEXTAREA
+//////////////////////////////////////////////////////////////////////////////
+
 $textarea-background-color: $input-background-color;
 $textarea-text-color: $input-text-color;
 $textarea-border-radius: $input-border-radius;
+
+//////////////////////////////////////////////////////////////////////////////
+/// BUTTON
+//////////////////////////////////////////////////////////////////////////////
 
 $button-primary-background-color: $primary-color;
 $button-primary-background-color-hover: $primary-color-hover;
@@ -102,3 +118,36 @@ $button-danger-text-color: $danger-text-color;
 $button-danger-text-color-disabled: $danger-text-color-disabled;
 
 $button-border-radius: $border-radius-medium;
+
+//////////////////////////////////////////////////////////////////////////////
+/// CHECKBOX
+//////////////////////////////////////////////////////////////////////////////
+
+$checkbox-background-color-checked: $primary-color;
+$checkbox-background-color-checked-disabled: $primary-color-disabled;
+$checkbox-background-color-unchecked: $input-background-color;
+$checkbox-check-color: $primary-text-color;
+$checkbox-label-color: $primary-text-color;
+$checkbox-label-color-disabled: $primary-text-color-disabled;
+$checkbox-size: 18px;
+$checkbox-label-offset-left: $checkbox-size + 10px;
+$checkbox-border-radius: $border-radius-medium;
+
+//////////////////////////////////////////////////////////////////////////////
+/// SWITCH
+//////////////////////////////////////////////////////////////////////////////
+
+$switch-head-background-color: $primary-text-color;
+$switch-height: 18px;
+$switch-width: $switch-height * 2;
+$switch-inner-padding: 2px;
+$switch-head-size: $switch-height - ($switch-inner-padding * 2);
+$switch-head-offset-off: $switch-inner-padding;
+$switch-head-offset-on: $switch-width - $switch-head-size -
+  $switch-inner-padding;
+$switch-label-offset-left: $switch-width + 10px;
+$switch-label-color: $primary-text-color;
+$switch-background-color-checked: $primary-color;
+$switch-background-color-checked-disabled: $primary-color-disabled;
+$switch-background-color-unchecked: $input-background-color;
+$switch-label-color-disabled: $primary-text-color-disabled;

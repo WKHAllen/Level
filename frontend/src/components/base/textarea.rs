@@ -72,7 +72,8 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
     } = props.clone();
 
     let value = (*state).clone();
-    let id = new_id();
+    let id_state = use_state(|| new_id());
+    let id = (*id_state).clone();
     let resize_class = format!("base-textarea-resize-{}", resize.resize_option_name());
     let oninput = move |event: InputEvent| {
         let new_value = textarea_event_value(event);

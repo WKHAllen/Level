@@ -4,6 +4,7 @@ use std::fmt::Display;
 use std::str::FromStr;
 use yew::prelude::*;
 
+/// A trait for numeric values.
 pub trait Number:
     PartialEq + PartialOrd + FromStr + ToString + Default + Clone + Copy + Display
 {
@@ -13,6 +14,7 @@ pub trait Number:
     const DECIMAL: bool;
 }
 
+/// Implements the `Number` trait for integer primitives.
 macro_rules! impl_number_int {
     ( $($ty:ty),* ) => {
         $(
@@ -26,6 +28,7 @@ macro_rules! impl_number_int {
     };
 }
 
+/// Implements the `Number` trait for floating point primitives.
 macro_rules! impl_number_float {
     ( $($ty:ty),* ) => {
         $(
@@ -232,7 +235,8 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
     }
 
     let value_str = (*number_state).to_string();
-    let id = new_id();
+    let id_state = use_state(|| new_id());
+    let id = (*id_state).clone();
 
     let oninput = move |event: InputEvent| {
         let new_value_str = input_event_value(event);
