@@ -24,6 +24,12 @@ pub fn Demo() -> Html {
     let checkbox_value = *checkbox_state;
     let switch_state = use_state(|| true);
     let switch_value = *switch_state;
+    let radio_state = use_state(|| None);
+    let radio_value = *radio_state;
+    let slider_int_state = use_state(|| 3u8);
+    let slider_int_value = *slider_int_state;
+    let slider_float_state = use_state(|| 1.6f32);
+    let slider_float_value = *slider_float_state;
 
     html! {
         <div class="base-demo">
@@ -73,6 +79,29 @@ pub fn Demo() -> Html {
                 <Switch state={switch_state.clone()} label="Switch label" />
                 <span>{"Value: "}{switch_value.to_string()}</span>
                 <Switch state={switch_state} label="Disabled switch" disabled={true} />
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Radio group"}</span>
+                <RadioGroup state={radio_state.clone()}>
+                    <RadioButton>{"Option 1"}</RadioButton>
+                    <RadioButton>{"Option 2"}</RadioButton>
+                    <RadioButton>{"Option 3"}</RadioButton>
+                    <RadioButton disabled={true}>{"Option 4"}</RadioButton>
+                </RadioGroup>
+                <span>{"Value: "}{radio_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+                <RadioGroup state={radio_state} orientation={RadioGroupOrientation::Horizontal} disabled={true}>
+                    <RadioButton>{"Option 1"}</RadioButton>
+                    <RadioButton>{"Option 2"}</RadioButton>
+                    <RadioButton>{"Option 3"}</RadioButton>
+                </RadioGroup>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Slider"}</span>
+                <Slider<u8> state={slider_int_state.clone()} min={1} max={9} step={2} label="Int slider label" />
+                <span>{"Value: "}{slider_int_value.to_string()}</span>
+                <Slider<f32> state={slider_float_state.clone()} min={-10.0} max={10.0} step={0.1} label="Float slider label" />
+                <span>{"Value: "}{slider_float_value.to_string()}</span>
+                <Slider<u8> state={slider_int_state} min={1} max={17} label="Disabled slider" disabled={true} />
             </div>
         </div>
     }
