@@ -58,6 +58,7 @@ pub fn Select(props: &SelectProps) -> Html {
     let dropdown_open = use_state(|| false);
     let dropdown_open_focus_in = dropdown_open.clone();
     let dropdown_open_focus_out = dropdown_open.clone();
+    let dropdown_open_mouse_down = dropdown_open.clone();
 
     let onfocusin = move |_| {
         if !*dropdown_open_focus_in {
@@ -68,6 +69,9 @@ pub fn Select(props: &SelectProps) -> Html {
         if *dropdown_open_focus_out {
             dropdown_open_focus_out.set(false);
         }
+    };
+    let onmousedown = move |_| {
+        dropdown_open_mouse_down.set(!*dropdown_open_mouse_down);
     };
 
     let selected_child = if *state < children.len() {
@@ -88,14 +92,14 @@ pub fn Select(props: &SelectProps) -> Html {
             } = (*child.props).clone();
 
             let child_state = state.clone();
-            let onmousedown = move |_| {
+            let child_onmousedown = move |_| {
                 if !child_disabled {
                     child_state.set(index);
                 }
             };
 
             html! {
-                <div class={classes!("base-select-option", child_disabled.then_some("base-select-option-disabled"))} {onmousedown}>
+                <div class={classes!("base-select-option", child_disabled.then_some("base-select-option-disabled"))} onmousedown={child_onmousedown}>
                     {child_children}
                 </div>
             }
@@ -110,6 +114,7 @@ pub fn Select(props: &SelectProps) -> Html {
                     {id}
                     {onfocusin}
                     {onfocusout}
+                    {onmousedown}
                     {disabled}
                     class={classes!("base-select-button", error.clone().map(|_| "base-select-button-invalid"))}
                 >
