@@ -81,7 +81,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
     };
 
     html! {
-        <div class="base-textarea-container">
+        <div class={classes!("base-textarea-container", disabled.then_some("base-textarea-container-disabled"))}>
             <label for={id.clone()} class="base-textarea-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>

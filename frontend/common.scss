@@ -14,7 +14,7 @@ $selection-color: hsla(220, 100%, 50%, 0.4);
 $error-color: #cf0000;
 $mid-color: #7f7f7f;
 
-$primary-color: #006f00;
+$primary-color: #006f00; // #2851ff
 $primary-color-hover: darken($primary-color, 5%);
 $primary-color-active: darken($primary-color, 8%);
 $primary-color-disabled: mix($primary-color, $mid-color, 30%);
@@ -23,6 +23,10 @@ $primary-text-color-disabled: mix($primary-text-color, $mid-color, 40%);
 $primary-text-label-color-1: mix($primary-text-color, $mid-color, 70%);
 $primary-text-label-color-2: mix($primary-text-color, $mid-color, 60%);
 $primary-text-label-color-3: mix($primary-text-color, $mid-color, 50%);
+$primary-svg-filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(177deg)
+  brightness(102%) contrast(101%); // https://codepen.io/sosuke/pen/Pjoqqp
+$primary-svg-filter-disabled: invert(81%) sepia(0%) saturate(0%)
+  hue-rotate(170deg) brightness(89%) contrast(92%);
 
 $secondary-color: #5a5c5f;
 $secondary-color-hover: darken($secondary-color, 5%);
@@ -68,6 +72,8 @@ $error-border: 1px solid $error-border-color;
 $border-radius-small: 2px;
 $border-radius-medium: 4px;
 $border-radius-large: 8px;
+
+$standard-box-shadow: 0 0 8px #7f7f7f7f;
 
 //////////////////////////////////////////////////////////////////////////////
 /// INPUT
@@ -161,6 +167,7 @@ $radio-border-size-checked: $radio-size * 0.3;
 $radio-border-color-checked: $primary-color;
 $radio-background-color-checked: $primary-text-color;
 $radio-background-color-checked-disabled: $primary-color-disabled;
+$radio-background-color-unchecked: $input-background-color;
 $radio-label-color-disabled: $primary-text-color-disabled;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -174,7 +181,7 @@ $slider-width-inner: calc(100% - 2px);
 $slider-margin: $padding-small;
 $slider-track-offset: ($slider-thumb-size - $slider-track-size) * 0.5;
 $slider-thumb-container-size: calc(100% - $slider-thumb-size);
-$slider-track-empty-color: $background-color-1;
+$slider-track-empty-color: $input-background-color;
 $slider-track-empty-border: $standard-border;
 $slider-track-filled-color: $primary-color;
 $slider-track-filled-color-disabled: $primary-color-disabled;
@@ -183,3 +190,39 @@ $slider-track-filled-border-disabled: 1px solid $primary-color-disabled;
 $slider-thumb-color: $primary-text-color;
 $slider-thumb-color-disabled: $primary-text-color-disabled;
 $slider-label-color-disabled: $primary-text-color-disabled;
+
+//////////////////////////////////////////////////////////////////////////////
+/// ICON
+//////////////////////////////////////////////////////////////////////////////
+
+$icon-size: 12px;
+$icon-filter: $primary-svg-filter;
+$icon-filter-disabled: $primary-svg-filter-disabled;
+
+//////////////////////////////////////////////////////////////////////////////
+/// ICON BUTTON
+//////////////////////////////////////////////////////////////////////////////
+
+$button-icon-size: $icon-size;
+$button-icon-padding: 8px;
+$button-icon-button-size: $icon-size + ($button-icon-padding * 2);
+$button-icon-border-radius: 100vw;
+$button-icon-button-background-color: #7f7f7f00;
+$button-icon-button-background-color-hover: #7f7f7f30;
+$button-icon-button-background-color-active: #7f7f7f40;
+$button-icon-filter: $primary-svg-filter;
+$button-icon-filter-disabled: $primary-svg-filter-disabled;
+
+//////////////////////////////////////////////////////////////////////////////
+/// SELECT
+//////////////////////////////////////////////////////////////////////////////
+
+$select-button-background-color: $background-color-1;
+$select-button-text-color: $primary-text-color;
+$select-button-border-radius: $border-radius-medium;
+$select-label-color-disabled: $primary-text-color-disabled;
+$select-popup-background-color: $background-color-3;
+$select-popup-background-color-hover: $background-color-5;
+$select-popup-border-radius: $border-radius-medium;
+$select-popup-max-height: 300px;
+$select-option-color-disabled: $primary-text-color-disabled;

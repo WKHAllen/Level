@@ -206,7 +206,7 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
     };
 
     html! {
-        <div class="base-input-container">
+        <div class={classes!("base-input-container", disabled.then_some("base-input-container-disabled"))}>
             <label for={id.clone()} class="base-input-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
