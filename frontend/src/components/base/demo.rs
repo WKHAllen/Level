@@ -34,6 +34,8 @@ pub fn Demo() -> Html {
     let icon_button_value = *icon_button_state;
     let select_state = use_state(|| 0);
     let select_value = *select_state;
+    let select_with_null_state = use_state(|| None);
+    let select_with_null_value = *select_with_null_state;
 
     html! {
         <div class="base-demo">
@@ -120,7 +122,7 @@ pub fn Demo() -> Html {
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Select"}</span>
-                <Select state={select_state.clone()} label="Select label" error={(select_value == 3).then_some("This option isn't available for the disabled select box below")}>
+                <Select state={select_state.clone()} label="Select label" required={true} error={(select_value == 3).then_some("This option isn't available for the disabled select box below")}>
                     <SelectOption>{"Option 1"}</SelectOption>
                     <SelectOption>{"Option 2"}</SelectOption>
                     <SelectOption>{"Option 3"}</SelectOption>
@@ -143,6 +145,22 @@ pub fn Demo() -> Html {
                     <SelectOption>{"Option 2"}</SelectOption>
                     <SelectOption>{"Option 3"}</SelectOption>
                 </Select>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Select with null"}</span>
+                <SelectWithNull state={select_with_null_state.clone()} label="Select with null label" null_label="Select an option..." required={true} error={select_with_null_value.is_none().then_some("Please select a value")}>
+                    <SelectOption>{"Option 1"}</SelectOption>
+                    <SelectOption>{"Option 2"}</SelectOption>
+                    <SelectOption disabled={true}>{"Option 3 (disabled)"}</SelectOption>
+                    <SelectOption disabled={true}>{"Option 4 (disabled)"}</SelectOption>
+                    <SelectOption>{"Option 5"}</SelectOption>
+                </SelectWithNull>
+                <span>{"Value: "}{select_with_null_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+                <SelectWithNull state={select_with_null_state} label="Disabled select with null label" disabled={true}>
+                    <SelectOption>{"Option 1"}</SelectOption>
+                    <SelectOption>{"Option 2"}</SelectOption>
+                    <SelectOption>{"Option 3"}</SelectOption>
+                </SelectWithNull>
             </div>
         </div>
     }
