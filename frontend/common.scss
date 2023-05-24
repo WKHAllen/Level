@@ -73,7 +73,7 @@ $border-radius-small: 2px;
 $border-radius-medium: 4px;
 $border-radius-large: 8px;
 
-$standard-box-shadow: 0 0 8px #7f7f7f7f;
+$standard-box-shadow: 0 0 8px #0000007f;
 
 //////////////////////////////////////////////////////////////////////////////
 /// INPUT
@@ -226,3 +226,29 @@ $select-popup-background-color-hover: $background-color-5;
 $select-popup-border-radius: $border-radius-medium;
 $select-popup-max-height: 300px;
 $select-option-color-disabled: $primary-text-color-disabled;
+
+//////////////////////////////////////////////////////////////////////////////
+/// DIALOG
+//////////////////////////////////////////////////////////////////////////////
+
+$dialog-overlay-background-color: #00000060;
+$dialog-background-color: $background-color-3;
+$dialog-margin: 32px;
+$dialog-padding: $padding-large;
+$dialog-border-radius: $border-radius-large;
+$dialog-width-small: 400px;
+$dialog-width-medium: 800px;
+$dialog-width-large: 1200px;
+$dialog-section-gap: $padding-medium;
+$dialog-actions-gap: $padding-medium;
+
+//////////////////////////////////////////////////////////////////////////////
+/// ALERT
+//////////////////////////////////////////////////////////////////////////////
+
+$alert-background-color: $background-color-4;
+$alert-margin: 16px;
+$alert-padding: $padding-large;
+$alert-border-radius: $border-radius-large;
+$alert-max-width: 400px;
+$alert-section-gap: $padding-medium;

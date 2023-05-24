@@ -1,6 +1,8 @@
+mod alert;
 mod button;
 mod checkbox;
 mod demo;
+mod dialog;
 mod error;
 mod icon;
 mod iconbutton;
@@ -13,9 +15,11 @@ mod switch;
 mod textarea;
 mod util;
 
+pub use alert::*;
 pub use button::*;
 pub use checkbox::*;
 pub use demo::*;
+pub use dialog::*;
 pub use error::*;
 pub use icon::*;
 pub use iconbutton::*;

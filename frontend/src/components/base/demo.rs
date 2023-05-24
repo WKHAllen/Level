@@ -36,6 +36,30 @@ pub fn Demo() -> Html {
     let select_value = *select_state;
     let select_with_null_state = use_state(|| None);
     let select_with_null_value = *select_with_null_state;
+    let dialog_close_state = use_state(|| None);
+    let dialog_small_state = use_state(|| false);
+    let dialog_small_button_state = dialog_small_state.clone();
+    let dialog_small_close_state = dialog_close_state.clone();
+    let dialog_medium_state = use_state(|| false);
+    let dialog_medium_button_state = dialog_medium_state.clone();
+    let dialog_medium_close_state = dialog_close_state.clone();
+    let dialog_large_state = use_state(|| false);
+    let dialog_large_button_state = dialog_large_state.clone();
+    let dialog_large_close_state = dialog_close_state.clone();
+    let dialog_max_state = use_state(|| false);
+    let dialog_max_button_state = dialog_max_state.clone();
+    let dialog_max_close_state = dialog_close_state.clone();
+    let dialog_auto_state = use_state(|| false);
+    let dialog_auto_button_state = dialog_auto_state.clone();
+    let dialog_auto_close_state = dialog_close_state.clone();
+    let dialog_select_state = use_state(|| 0);
+    let alert_close_state = use_state(|| None);
+    let alert_finite_state = use_state(|| false);
+    let alert_finite_button_state = alert_finite_state.clone();
+    let alert_finite_close_state = alert_close_state.clone();
+    let alert_infinite_state = use_state(|| false);
+    let alert_infinite_button_state = alert_infinite_state.clone();
+    let alert_infinite_close_state = alert_close_state.clone();
 
     html! {
         <div class="base-demo">
@@ -161,6 +185,118 @@ pub fn Demo() -> Html {
                     <SelectOption>{"Option 2"}</SelectOption>
                     <SelectOption>{"Option 3"}</SelectOption>
                 </SelectWithNull>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Dialog"}</span>
+                <Button text="Open small dialog" on_click={move |_| dialog_small_button_state.set(true)} />
+                <Dialog
+                    state={dialog_small_state}
+                    size={DialogSize::Small}
+                    title="Small dialog"
+                    ok_label="OK"
+                    cancel_label="Cancel"
+                    on_close={move |ok| dialog_small_close_state.set(Some(ok))}
+                    actions_layout={DialogActionsLayout::Left}
+                >
+                    <p>{"A small dialog with left-aligned actions."}</p>
+                </Dialog>
+                <Button text="Open medium dialog" on_click={move |_| dialog_medium_button_state.set(true)} />
+                <Dialog
+                    state={dialog_medium_state}
+                    size={DialogSize::Medium}
+                    title="Medium dialog"
+                    ok_label="OK"
+                    cancel_label="Cancel"
+                    on_close={move |ok| dialog_medium_close_state.set(Some(ok))}
+                    actions_layout={DialogActionsLayout::Right}
+                >
+                    <p>{"A medium dialog with right-aligned actions."}</p>
+                    <p>{"Test"}</p>
+                    <p>{"Scrolling"}</p>
+                    <p>{"Behavior"}</p>
+                    <p>{"Test"}</p>
+                    <p>{"Scrolling"}</p>
+                    <p>{"Behavior"}</p>
+                    <p>{"Test"}</p>
+                    <p>{"Scrolling"}</p>
+                    <p>{"Behavior"}</p>
+                    <p>{"Test"}</p>
+                    <p>{"Scrolling"}</p>
+                    <p>{"Behavior"}</p>
+                    <p>{"Test"}</p>
+                    <p>{"Scrolling"}</p>
+                    <p>{"Behavior"}</p>
+                    <p>{"Test"}</p>
+                    <p>{"Scrolling"}</p>
+                    <p>{"Behavior"}</p>
+                    <p>{"Test"}</p>
+                    <p>{"Scrolling"}</p>
+                    <p>{"Behavior"}</p>
+                    <p>{"Test"}</p>
+                    <p>{"Scrolling"}</p>
+                    <p>{"Behavior"}</p>
+                </Dialog>
+                <Button text="Open large dialog" on_click={move |_| dialog_large_button_state.set(true)} />
+                <Dialog
+                    state={dialog_large_state}
+                    size={DialogSize::Large}
+                    title="Large dialog"
+                    ok_label="OK"
+                    cancel_label="Cancel"
+                    on_close={move |ok| dialog_large_close_state.set(Some(ok))}
+                    actions_layout={DialogActionsLayout::Spaced}
+                >
+                    <p>{"A large dialog with spaced actions."}</p>
+                    <Select state={dialog_select_state} label="Dialog select label">
+                        <SelectOption>{"Option 1"}</SelectOption>
+                        <SelectOption>{"Option 2"}</SelectOption>
+                        <SelectOption>{"Option 3"}</SelectOption>
+                        <SelectOption>{"Option 4"}</SelectOption>
+                        <SelectOption>{"Option 5"}</SelectOption>
+                    </Select>
+                </Dialog>
+                <Button text="Open max dialog" on_click={move |_| dialog_max_button_state.set(true)} />
+                <Dialog
+                    state={dialog_max_state}
+                    size={DialogSize::Max}
+                    title="Max dialog"
+                    on_close={move |ok| dialog_max_close_state.set(Some(ok))}
+                >
+                    <p>{"A maximum size dialog with no actions."}</p>
+                </Dialog>
+                <Button text="Open auto dialog" on_click={move |_| dialog_auto_button_state.set(true)} />
+                <Dialog
+                    state={dialog_auto_state}
+                    size={DialogSize::Auto}
+                    title="Auto dialog"
+                    ok_label="OK"
+                    on_close={move |ok| dialog_auto_close_state.set(Some(ok))}
+                >
+                    <p>{"An auto size dialog with only an OK action."}</p>
+                </Dialog>
+                <span>{"Close value: "}{(*dialog_close_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Alert"}</span>
+                <Button text="Open 5 second alert" on_click={move |_| alert_finite_button_state.set(true)} />
+                <Alert
+                    state={alert_finite_state}
+                    title="Finite alert"
+                    duration={AlertDuration::Finite(5)}
+                    on_close={move |manual| alert_finite_close_state.set(Some(manual))}
+                >
+                    <p>{"This alert will only remain open for 5 seconds."}</p>
+                </Alert>
+                <Button text="Open infinite alert" on_click={move |_| alert_infinite_button_state.set(true)} />
+                <Alert
+                    state={alert_infinite_state}
+                    title="Infinite alert"
+                    duration={AlertDuration::Infinite}
+                    on_close={move |manual| alert_infinite_close_state.set(Some(manual))}
+                >
+                    <p>{"This alert will remain open until the 'x' button is pressed."}</p>
+                </Alert>
+                <span>{"Close value: "}{(*alert_close_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
             </div>
         </div>
     }

@@ -10,6 +10,7 @@ async-trait = "0.1"
 commands = { path = "../commands" }
 frontend_macros = { path = "../frontend_macros" }
 getrandom = { version = "0.2", default-features = false, features = ["custom"] }
+gloo-timers = "0.2.6"
 js-sys = { version = "0.3.60" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
