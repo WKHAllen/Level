@@ -325,6 +325,7 @@ pub fn Demo() -> Html {
                 <ProgressBar progress={0.8} />
                 <ProgressBar progress={0.95} />
                 <ProgressBar progress={1.0} />
+                <ProgressBar progress={0.5} disabled={true} />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Spinner"}</span>

@@ -272,6 +272,7 @@ $progress-bar-empty-width: calc(100% - 2px);
 $progress-bar-empty-height: $progress-bar-height - 2px;
 $progress-bar-empty-color: $input-background-color;
 $progress-bar-filled-color: $primary-color;
+$progress-bar-filled-color-disabled: $primary-color-disabled;
 
 //////////////////////////////////////////////////////////////////////////////
 /// SPINNER

@@ -1,4 +1,5 @@
 use super::util::*;
+use super::*;
 use yew::prelude::*;
 
 /// Slider properties.
@@ -38,9 +39,9 @@ pub fn Slider<N: Number + 'static>(props: &SliderProps<N>) -> Html {
     let id_state = use_state(|| new_id());
     let id = (*id_state).clone();
     let value = *state;
+    let progress = (value.as_f64() - min.as_f64()) / (max.as_f64() - min.as_f64());
     let width_percentage =
         ((value.as_f64() - min.as_f64()) * 100.0f64) / (max.as_f64() - min.as_f64());
-    let track_width_style = format!("width: {}%;", width_percentage);
     let thumb_transform_style = format!("left: {}%", width_percentage);
     let oninput = move |event: InputEvent| {
         let value_str = input_event_value(event);
@@ -55,9 +56,8 @@ pub fn Slider<N: Number + 'static>(props: &SliderProps<N>) -> Html {
         <div class={classes!("base-slider-container", disabled.then_some("base-slider-disabled"))}>
             <label for={id.clone()} class="base-slider-label">{label}</label>
             <div class="base-slider">
-                <div class="base-slider-track-empty"></div>
-                <div class="base-slider-track-filled-container">
-                    <div class="base-slider-track-filled" style={track_width_style}></div>
+                <div class="base-slider-track">
+                    <ProgressBar {progress} {disabled} />
                 </div>
                 <div class="base-slider-thumb-container">
                     <div class="base-slider-thumb" style={thumb_transform_style}></div>
