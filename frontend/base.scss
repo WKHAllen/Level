@@ -894,3 +894,129 @@
   width: common.$button-icon-button-size;
   height: common.$button-icon-button-size;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+/// CARD
+//////////////////////////////////////////////////////////////////////////////
+
+.base-card {
+  background-color: common.$card-background-color;
+  padding: common.$card-padding;
+  border: common.$standard-border;
+  border-radius: common.$card-border-radius;
+}
+
+.base-card-interactive {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.base-card-interactive:hover {
+  transform: scale(common.$hover-zoom-scale);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// PROGRESS BAR
+//////////////////////////////////////////////////////////////////////////////
+
+.base-progress {
+  width: 100%;
+  height: common.$progress-bar-height;
+  border-radius: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+.base-progress-empty {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: common.$progress-bar-empty-width;
+  height: common.$progress-bar-empty-height;
+  border-radius: 100vw;
+  background-color: common.$progress-bar-empty-color;
+  border: common.$standard-border;
+}
+
+.base-progress-filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: common.$progress-bar-height;
+  background-color: common.$progress-bar-filled-color;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// SPINNER
+//////////////////////////////////////////////////////////////////////////////
+
+.base-spinner-container {
+  display: flex;
+}
+
+.base-spinner-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.base-spinner {
+  animation: spinner-rotate 1s linear infinite;
+}
+
+.base-spinner-small {
+  width: common.$spinner-size-small;
+  height: common.$spinner-size-small;
+}
+
+.base-spinner-medium {
+  width: common.$spinner-size-medium;
+  height: common.$spinner-size-medium;
+}
+
+.base-spinner-large {
+  width: common.$spinner-size-large;
+  height: common.$spinner-size-large;
+}
+
+.base-spinner-max {
+  width: unset;
+  height: unset;
+}
+
+.base-spinner .path {
+  stroke: common.$spinner-color;
+  stroke-linecap: round;
+  animation: common.$spinner-animation-dynamic;
+}
+
+@keyframes spinner-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinner-dash-simple {
+  0% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+}
+
+@keyframes spinner-dash-dynamic {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}

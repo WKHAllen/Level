@@ -60,6 +60,9 @@ pub fn Demo() -> Html {
     let alert_infinite_state = use_state(|| false);
     let alert_infinite_button_state = alert_infinite_state.clone();
     let alert_infinite_close_state = alert_close_state.clone();
+    let card_state = use_state(|| None);
+    let card_interactive_state = card_state.clone();
+    let card_not_interactive_state = card_state.clone();
 
     html! {
         <div class="base-demo">
@@ -297,6 +300,38 @@ pub fn Demo() -> Html {
                     <p>{"This alert will remain open until the 'x' button is pressed."}</p>
                 </Alert>
                 <span>{"Close value: "}{(*alert_close_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Card"}</span>
+                <Card
+                    interactive={true}
+                    on_click={move |_| card_interactive_state.set(Some(1))}
+                >
+                    <h3>{"Interactive card"}</h3>
+                    <p>{"Notice the zoom animation and pointer cursor when hovering."}</p>
+                </Card>
+                <Card on_click={move |_| card_not_interactive_state.set(Some(2))}>
+                    <h3>{"Not an interactive card"}</h3>
+                    <p>{"No hover animation or pointer cursor on this one."}</p>
+                </Card>
+                <span>{"Card click state: "}{(*card_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Progress bar"}</span>
+                <ProgressBar progress={0.0} />
+                <ProgressBar progress={0.05} />
+                <ProgressBar progress={0.2} />
+                <ProgressBar progress={0.5} />
+                <ProgressBar progress={0.8} />
+                <ProgressBar progress={0.95} />
+                <ProgressBar progress={1.0} />
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Spinner"}</span>
+                <Spinner size={SpinnerSize::Small} center={false} />
+                <Spinner size={SpinnerSize::Medium} center={false} />
+                <Spinner size={SpinnerSize::Large} center={false} />
+                <Spinner size={SpinnerSize::Max} />
             </div>
         </div>
     }

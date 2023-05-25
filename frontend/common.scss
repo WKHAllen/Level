@@ -75,6 +75,8 @@ $border-radius-large: 8px;
 
 $standard-box-shadow: 0 0 8px #0000007f;
 
+$hover-zoom-scale: 1.05;
+
 //////////////////////////////////////////////////////////////////////////////
 /// INPUT
 //////////////////////////////////////////////////////////////////////////////
@@ -252,3 +254,32 @@ $alert-padding: $padding-large;
 $alert-border-radius: $border-radius-large;
 $alert-max-width: 400px;
 $alert-section-gap: $padding-medium;
+
+//////////////////////////////////////////////////////////////////////////////
+/// CARD
+//////////////////////////////////////////////////////////////////////////////
+
+$card-padding: $padding-large;
+$card-border-radius: $border-radius-large;
+$card-background-color: $background-color-4;
+
+//////////////////////////////////////////////////////////////////////////////
+/// PROGRESS BAR
+//////////////////////////////////////////////////////////////////////////////
+
+$progress-bar-height: 8px;
+$progress-bar-empty-width: calc(100% - 2px);
+$progress-bar-empty-height: $progress-bar-height - 2px;
+$progress-bar-empty-color: $input-background-color;
+$progress-bar-filled-color: $primary-color;
+
+//////////////////////////////////////////////////////////////////////////////
+/// SPINNER
+//////////////////////////////////////////////////////////////////////////////
+
+$spinner-color: $primary-color;
+$spinner-size-small: 25px;
+$spinner-size-medium: 40px;
+$spinner-size-large: 60px;
+$spinner-animation-simple: spinner-dash-simple 1.5s linear infinite;
+$spinner-animation-dynamic: spinner-dash-dynamic 1.5s ease-in-out infinite;
