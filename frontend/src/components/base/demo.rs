@@ -66,15 +66,14 @@ pub fn Demo() -> Html {
     let card_state = use_state(|| None);
     let card_interactive_state = card_state.clone();
     let card_not_interactive_state = card_state.clone();
-    let current_chips_state = use_state(|| {
+    let chips_state = use_state(|| {
         vec!["Java", "Go", "Rust"]
             .into_iter()
             .map(|s| s.to_owned())
             .collect::<Vec<_>>()
     });
-    let current_chips_value = (*current_chips_state).clone();
-    let next_chip_state = use_state(String::new);
-    let all_chip_options = vec![
+    let chips_value = (*chips_state).clone();
+    let chip_options = vec![
         "C",
         "C++",
         "C#",
@@ -87,10 +86,6 @@ pub fn Demo() -> Html {
     .into_iter()
     .map(|s| s.to_owned())
     .collect::<Vec<_>>();
-    let chip_options = all_chip_options
-        .iter()
-        .filter_map(|s| (!(*current_chips_state).contains(s)).then_some(s.to_owned()))
-        .collect::<Vec<_>>();
 
     html! {
         <div class="base-demo">
@@ -369,16 +364,15 @@ pub fn Demo() -> Html {
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Chips"}</span>
                 <Chips
-                    current_chips_state={current_chips_state.clone()}
-                    next_chip_state={next_chip_state.clone()}
+                    state={chips_state.clone()}
                     options={chip_options.clone()}
+                    option_limit={5}
                     label="Chips label"
                     placeholder="Placeholder!"
-                    error={current_chips_value.is_empty().then_some("Please select at least one language")}
+                    error={chips_value.is_empty().then_some("Please select at least one language")}
                 />
                 <Chips
-                    {current_chips_state}
-                    {next_chip_state}
+                    state={chips_state}
                     options={chip_options}
                     label="Disabled chips label"
                     disabled={true}

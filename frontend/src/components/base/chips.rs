@@ -2,15 +2,99 @@ use super::util::*;
 use super::*;
 use yew::prelude::*;
 
+/// Compares an option to a typed out value, returning a score indicating the
+/// strength of the match, or `None` if the strings do not match.
+fn option_match(option: &str, value: &str) -> Option<usize> {
+    let option = option.to_lowercase();
+    let value = value.to_lowercase();
+    let mut score = 0;
+    let mut indices_since_last_match = 0;
+    let option_chars = option.chars();
+    let mut value_chars = value.chars().peekable();
+    let mut any_match = false;
+
+    if option == value {
+        return Some(0);
+    }
+
+    for option_char in option_chars {
+        indices_since_last_match += 1;
+
+        match value_chars.peek() {
+            Some(value_char) => {
+                if option_char == *value_char {
+                    score += indices_since_last_match;
+                    indices_since_last_match = 0;
+                    value_chars.next();
+                    any_match = true;
+                }
+            }
+            None => break,
+        }
+    }
+
+    if any_match && value_chars.next().is_none() {
+        Some(score)
+    } else {
+        None
+    }
+}
+
+/// Limits the number of options.
+fn limit_options<T: Clone>(options: &[T], limit: usize) -> Vec<T> {
+    let limit_index = if options.len() > limit {
+        limit
+    } else {
+        options.len()
+    };
+
+    let limited_matches = (&options[..limit_index]).to_owned();
+    limited_matches
+}
+
+/// Returns a list of possible options, taking into account the complete list
+/// of options, the currently selected options, and the option the user has
+/// begun to type out.
+fn get_possible_options(
+    all_options: &[String],
+    selected_options: &[String],
+    next_option: &str,
+    limit: usize,
+) -> Vec<String> {
+    let unselected_options = all_options
+        .iter()
+        .filter_map(|option| (!selected_options.contains(option)).then_some(option.to_owned()))
+        .collect::<Vec<_>>();
+
+    if next_option.is_empty() {
+        return limit_options(&unselected_options, limit);
+    }
+
+    let mut matches = unselected_options
+        .into_iter()
+        .filter_map(|option| option_match(&option, next_option).map(|score| (option, score)))
+        .collect::<Vec<_>>();
+
+    matches.sort_by(|(_, score1), (_, score2)| score1.cmp(score2));
+
+    let limited_matches = limit_options(&matches, limit);
+
+    limited_matches
+        .into_iter()
+        .map(|(option, _)| option)
+        .collect()
+}
+
 /// Chips properties.
 #[derive(Properties, PartialEq, Clone)]
 pub struct ChipsProps {
     /// The state of the currently selected chips.
-    pub current_chips_state: UseStateHandle<Vec<String>>,
-    /// The state of the chip being typed.
-    pub next_chip_state: UseStateHandle<String>,
+    pub state: UseStateHandle<Vec<String>>,
     /// The list of chip options.
     pub options: Vec<String>,
+    /// The maximum number of options to display in the dropdown.
+    #[prop_or(10)]
+    pub option_limit: usize,
     /// The chips input label.
     #[prop_or_default]
     pub label: String,
@@ -32,9 +116,9 @@ pub struct ChipsProps {
 #[function_component]
 pub fn Chips(props: &ChipsProps) -> Html {
     let ChipsProps {
-        current_chips_state,
-        next_chip_state,
+        state,
         options,
+        option_limit,
         label,
         placeholder,
         max_length,
@@ -42,10 +126,12 @@ pub fn Chips(props: &ChipsProps) -> Html {
         disabled,
     } = props.clone();
 
+    let next_chip_state = use_state(String::new);
     let next_chip = (*next_chip_state).clone();
     let id_state = use_state(new_id);
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
+    let possible_options = get_possible_options(&options, &*state, &*next_chip_state, option_limit);
     let oninput = {
         let oninput_next_chip_state = next_chip_state.clone();
         move |event: InputEvent| {
@@ -66,8 +152,8 @@ pub fn Chips(props: &ChipsProps) -> Html {
         }
     };
     let onkeydown = {
-        let first_option = options.first().map(|option| option.to_owned());
-        let onkeydown_current_chips = current_chips_state.clone();
+        let first_option = possible_options.first().map(|option| option.to_owned());
+        let onkeydown_current_chips = state.clone();
         let onkeydown_next_chip = next_chip_state.clone();
         move |event: KeyboardEvent| {
             if event.key_code() == 13 {
@@ -81,11 +167,11 @@ pub fn Chips(props: &ChipsProps) -> Html {
         }
     };
 
-    let chip_list = (*current_chips_state)
+    let chip_list = (*state)
         .iter()
         .enumerate()
         .map(|(index, this_chip)| {
-            let local_chips_state = current_chips_state.clone();
+            let local_chips_state = state.clone();
 
             let on_click = move |_| {
                 let mut current_chips_without_this = (*local_chips_state).clone();
@@ -108,7 +194,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
         })
         .collect::<Html>();
 
-    let conditional_chip_list = if (*current_chips_state).is_empty() {
+    let conditional_chip_list = if (*state).is_empty() {
         html! {}
     } else {
         html! {
@@ -118,12 +204,12 @@ pub fn Chips(props: &ChipsProps) -> Html {
         }
     };
 
-    let chip_options = options
+    let chip_options = possible_options
         .iter()
         .map(|this_option| {
             let this_option = this_option.clone();
             let this_option_html = this_option.clone();
-            let option_current_chips_state = current_chips_state.clone();
+            let option_current_chips_state = state.clone();
             let option_next_chip_state = next_chip_state.clone();
             let option_onmousedown = move |_| {
                 let mut option_chips = (*option_current_chips_state).clone();
@@ -140,7 +226,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
         })
         .collect::<Html>();
 
-    let conditional_chip_options = if options.is_empty() {
+    let conditional_chip_options = if possible_options.is_empty() {
         html! {}
     } else {
         html! {
