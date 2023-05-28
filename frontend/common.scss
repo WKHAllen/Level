@@ -14,7 +14,7 @@ $selection-color: hsla(220, 100%, 50%, 0.4);
 $error-color: #cf0000;
 $mid-color: #7f7f7f;
 
-$primary-color: #006f00; // #2851ff
+$primary-color: #006f00; // #2851ff // #6928ff
 $primary-color-hover: darken($primary-color, 5%);
 $primary-color-active: darken($primary-color, 8%);
 $primary-color-disabled: mix($primary-color, $mid-color, 30%);
@@ -76,6 +76,8 @@ $border-radius-large: 8px;
 $standard-box-shadow: 0 0 8px #0000007f;
 
 $hover-zoom-scale: 1.05;
+
+$standard-label-size: 0.9em;
 
 //////////////////////////////////////////////////////////////////////////////
 /// INPUT
@@ -197,7 +199,9 @@ $slider-label-color-disabled: $primary-text-color-disabled;
 /// ICON
 //////////////////////////////////////////////////////////////////////////////
 
-$icon-size: 12px;
+$icon-size-small: 9px;
+$icon-size-medium: 12px;
+$icon-size-large: 16px;
 $icon-filter: $primary-svg-filter;
 $icon-filter-disabled: $primary-svg-filter-disabled;
 
@@ -205,9 +209,13 @@ $icon-filter-disabled: $primary-svg-filter-disabled;
 /// ICON BUTTON
 //////////////////////////////////////////////////////////////////////////////
 
-$button-icon-size: $icon-size;
-$button-icon-padding: 8px;
-$button-icon-button-size: $icon-size + ($button-icon-padding * 2);
+$button-icon-size-small: $icon-size-small;
+$button-icon-size-medium: $icon-size-medium;
+$button-icon-size-large: $icon-size-large;
+$button-icon-scale: 1.6;
+$button-icon-button-size-small: $button-icon-size-small * $button-icon-scale;
+$button-icon-button-size-medium: $button-icon-size-medium * $button-icon-scale;
+$button-icon-button-size-large: $button-icon-size-large * $button-icon-scale;
 $button-icon-border-radius: 100vw;
 $button-icon-button-background-color: #7f7f7f00;
 $button-icon-button-background-color-hover: #7f7f7f30;
@@ -284,3 +292,18 @@ $spinner-size-medium: 40px;
 $spinner-size-large: 60px;
 $spinner-animation-simple: spinner-dash-simple 1.5s linear infinite;
 $spinner-animation-dynamic: spinner-dash-dynamic 1.5s ease-in-out infinite;
+
+//////////////////////////////////////////////////////////////////////////////
+/// CHIPS
+//////////////////////////////////////////////////////////////////////////////
+
+$chips-container-padding: $padding-medium;
+$chips-chip-list-padding: $padding-small;
+$chips-chip-padding: 2px 8px;
+$chips-chip-inner-padding: 4px;
+$chips-chip-background-color: $background-color-5;
+$chips-chip-label-size: 0.8em;
+$chips-popup-background-color: $select-popup-background-color;
+$chips-popup-border-radius: $select-popup-border-radius;
+$chips-popup-max-height: $select-popup-max-height;
+$chips-popup-background-color-hover: $select-popup-background-color-hover;

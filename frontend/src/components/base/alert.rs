@@ -92,7 +92,11 @@ pub fn Alert(props: &AlertProps) -> Html {
                 <div class="base-alert-header">
                     <div class="base-alert-header-space"></div>
                     <h4 class="base-alert-title">{title}</h4>
-                    <IconButton name="xmark-solid" on_click={x_close} />
+                    <IconButton
+                        name="xmark-solid"
+                        size={IconButtonSize::Medium}
+                        on_click={x_close}
+                    />
                 </div>
                 <div class="base-alert-body">
                     {children}

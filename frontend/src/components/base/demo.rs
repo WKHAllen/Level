@@ -31,6 +31,9 @@ pub fn Demo() -> Html {
     let slider_float_state = use_state(|| 1.6f32);
     let slider_float_value = *slider_float_state;
     let icon_button_state = use_state(|| 0usize);
+    let icon_button_small_state = icon_button_state.clone();
+    let icon_button_medium_state = icon_button_state.clone();
+    let icon_button_large_state = icon_button_state.clone();
     let icon_button_value = *icon_button_state;
     let select_state = use_state(|| 0);
     let select_value = *select_state;
@@ -63,6 +66,31 @@ pub fn Demo() -> Html {
     let card_state = use_state(|| None);
     let card_interactive_state = card_state.clone();
     let card_not_interactive_state = card_state.clone();
+    let current_chips_state = use_state(|| {
+        vec!["Java", "Go", "Rust"]
+            .into_iter()
+            .map(|s| s.to_owned())
+            .collect::<Vec<_>>()
+    });
+    let current_chips_value = (*current_chips_state).clone();
+    let next_chip_state = use_state(String::new);
+    let all_chip_options = vec![
+        "C",
+        "C++",
+        "C#",
+        "Java",
+        "JavaScript/TypeScript",
+        "Python",
+        "Go",
+        "Rust",
+    ]
+    .into_iter()
+    .map(|s| s.to_owned())
+    .collect::<Vec<_>>();
+    let chip_options = all_chip_options
+        .iter()
+        .filter_map(|s| (!(*current_chips_state).contains(s)).then_some(s.to_owned()))
+        .collect::<Vec<_>>();
 
     html! {
         <div class="base-demo">
@@ -138,14 +166,18 @@ pub fn Demo() -> Html {
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Icon"}</span>
-                <Icon name="angle-down-solid" />
-                <Icon name="angle-down-solid" disabled={true} />
+                <Icon name="xmark-solid" size={IconSize::Small} />
+                <Icon name="xmark-solid" size={IconSize::Medium} />
+                <Icon name="xmark-solid" size={IconSize::Large} />
+                <Icon name="xmark-solid" disabled={true} />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Icon button"}</span>
-                <IconButton name="angle-down-solid" on_click={move |_| icon_button_state.set(icon_button_value + 1)} />
+                <IconButton name="xmark-solid" size={IconButtonSize::Small} on_click={move |_| icon_button_small_state.set(icon_button_value + 1)} />
+                <IconButton name="xmark-solid" size={IconButtonSize::Medium} on_click={move |_| icon_button_medium_state.set(icon_button_value + 1)} />
+                <IconButton name="xmark-solid" size={IconButtonSize::Large} on_click={move |_| icon_button_large_state.set(icon_button_value + 1)} />
                 <span>{"Icon button has been clicked "}{icon_button_value}{" times"}</span>
-                <IconButton name="angle-down-solid" disabled={true} />
+                <IconButton name="xmark-solid" disabled={true} />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Select"}</span>
@@ -333,6 +365,24 @@ pub fn Demo() -> Html {
                 <Spinner size={SpinnerSize::Medium} center={false} />
                 <Spinner size={SpinnerSize::Large} center={false} />
                 <Spinner size={SpinnerSize::Max} />
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Chips"}</span>
+                <Chips
+                    current_chips_state={current_chips_state.clone()}
+                    next_chip_state={next_chip_state.clone()}
+                    options={chip_options.clone()}
+                    label="Chips label"
+                    placeholder="Placeholder!"
+                    error={current_chips_value.is_empty().then_some("Please select at least one language")}
+                />
+                <Chips
+                    {current_chips_state}
+                    {next_chip_state}
+                    options={chip_options}
+                    label="Disabled chips label"
+                    disabled={true}
+                />
             </div>
         </div>
     }

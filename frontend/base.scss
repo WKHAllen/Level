@@ -103,8 +103,7 @@
 
 .base-input-label {
   color: common.$primary-text-color;
-  font-size: 0.9em;
-  transition: color 0.1s ease;
+  font-size: common.$standard-label-size;
 }
 
 .base-input-container-disabled .base-input-label {
@@ -159,8 +158,7 @@
 
 .base-textarea-label {
   color: common.$primary-text-color;
-  font-size: 0.9em;
-  transition: color 0.1s ease;
+  font-size: common.$standard-label-size;
 }
 
 .base-textarea-container-disabled .base-textarea-label {
@@ -266,7 +264,7 @@
 
 .base-checkbox-label {
   color: common.$checkbox-label-color;
-  font-size: 0.9em;
+  font-size: common.$standard-label-size;
 }
 
 .base-checkbox {
@@ -357,7 +355,7 @@
 
 .base-switch-label {
   color: common.$switch-label-color;
-  font-size: 0.9em;
+  font-size: common.$standard-label-size;
 }
 
 .base-switch {
@@ -479,7 +477,7 @@
 }
 
 .base-radio-label {
-  font-size: 0.9em;
+  font-size: common.$standard-label-size;
   padding-left: 8px;
   cursor: pointer;
 }
@@ -503,7 +501,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 .base-slider-label {
-  font-size: 0.9em;
+  font-size: common.$standard-label-size;
 }
 
 .base-slider {
@@ -563,12 +561,26 @@
 //////////////////////////////////////////////////////////////////////////////
 
 .base-icon {
-  width: common.$icon-size;
   filter: common.$icon-filter;
 }
 
 .base-icon-disabled {
   filter: common.$icon-filter-disabled;
+}
+
+.base-icon-small {
+  width: common.$icon-size-small;
+  height: common.$icon-size-small;
+}
+
+.base-icon-medium {
+  width: common.$icon-size-medium;
+  height: common.$icon-size-medium;
+}
+
+.base-icon-large {
+  width: common.$icon-size-large;
+  height: common.$icon-size-large;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -578,8 +590,6 @@
 .base-icon-button {
   background-color: common.$button-icon-button-background-color;
   border: 0;
-  width: common.$button-icon-button-size;
-  height: common.$button-icon-button-size;
   border-radius: common.$button-icon-border-radius;
   display: flex;
   justify-content: center;
@@ -597,7 +607,6 @@
 }
 
 .base-icon-button-icon {
-  width: common.$button-icon-size;
   filter: common.$button-icon-filter;
 }
 
@@ -608,6 +617,36 @@
 
 .base-icon-button:disabled .base-icon-button-icon {
   filter: common.$button-icon-filter-disabled;
+}
+
+.base-icon-button-small {
+  width: common.$button-icon-button-size-small;
+  height: common.$button-icon-button-size-small;
+}
+
+.base-icon-button-medium {
+  width: common.$button-icon-button-size-medium;
+  height: common.$button-icon-button-size-medium;
+}
+
+.base-icon-button-large {
+  width: common.$button-icon-button-size-large;
+  height: common.$button-icon-button-size-large;
+}
+
+.base-icon-button-small .base-icon-button-icon {
+  width: common.$button-icon-size-small;
+  height: common.$button-icon-size-small;
+}
+
+.base-icon-button-medium .base-icon-button-icon {
+  width: common.$button-icon-size-medium;
+  height: common.$button-icon-size-medium;
+}
+
+.base-icon-button-large .base-icon-button-icon {
+  width: common.$button-icon-size-large;
+  height: common.$button-icon-size-large;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -621,7 +660,7 @@
 }
 
 .base-select-label {
-  font-size: 0.9em;
+  font-size: common.$standard-label-size;
 }
 
 .base-select {
@@ -704,9 +743,6 @@
   padding: 2px 10px;
   font-size: 0.9em;
   cursor: pointer;
-}
-
-.base-select-option {
   transition: background-color 0.1s linear;
 }
 
@@ -810,8 +846,8 @@
 }
 
 .base-dialog-header-space {
-  width: common.$button-icon-button-size;
-  height: common.$button-icon-button-size;
+  width: common.$button-icon-button-size-medium;
+  height: common.$button-icon-button-size-medium;
 }
 
 .base-dialog-actions {
@@ -867,12 +903,12 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .base-alert-header-space {
-  width: common.$button-icon-button-size;
-  height: common.$button-icon-button-size;
+  width: common.$button-icon-button-size-medium;
+  height: common.$button-icon-button-size-medium;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1003,4 +1039,116 @@
     stroke-dasharray: 90, 150;
     stroke-dashoffset: -124;
   }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// CHIPS
+//////////////////////////////////////////////////////////////////////////////
+
+.base-chips-container {
+  padding: common.$form-padding;
+  display: flex;
+  flex-direction: column;
+  gap: common.$padding-small;
+}
+
+.base-chips-label {
+  font-size: common.$standard-label-size;
+}
+
+.base-chips-inner {
+  background-color: common.$input-background-color;
+  color: common.$input-text-color;
+  padding: common.$chips-container-padding;
+  border: common.$standard-border;
+  border-radius: common.$input-border-radius;
+  transition: border 0.1s ease;
+  display: flex;
+  flex-direction: column;
+  gap: common.$padding-small;
+}
+
+.base-chips-inner:focus-within {
+  border: common.$light-border;
+}
+
+.base-chips-container-invalid .base-chips-inner,
+.base-chips-container-invalid .base-chips-inner:focus-within {
+  border: common.$error-border;
+}
+
+.base-chips-label {
+  color: common.$primary-text-color;
+  font-size: common.$standard-label-size;
+}
+
+.base-chips-container-disabled .base-chips-label {
+  color: common.$primary-text-color-disabled;
+}
+
+.base-chips-chip-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: common.$chips-chip-list-padding;
+}
+
+.base-chips-chip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: common.$chips-chip-inner-padding;
+  background-color: common.$chips-chip-background-color;
+  padding: common.$chips-chip-padding;
+  border-radius: 100vw;
+}
+
+.base-chips-chip-label {
+  font-size: common.$chips-chip-label-size;
+}
+
+.base-chips-input {
+  background-color: inherit;
+  color: inherit;
+  border: none;
+  outline: none;
+}
+
+.base-chips-options-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.base-chips-options-popup {
+  position: absolute;
+  width: 100%;
+  visibility: hidden;
+  opacity: 0;
+  max-height: 0;
+  overflow: auto;
+  z-index: 1;
+  transition: max-height 0.5s ease, visibility 0.5s, opacity 0.2s linear 0.125s;
+  background-color: common.$chips-popup-background-color;
+  border-radius: common.$chips-popup-border-radius;
+  box-shadow: common.$standard-box-shadow;
+  padding: 4px 0;
+}
+
+.base-chips-container-open .base-chips-options-popup {
+  visibility: visible;
+  opacity: 1;
+  max-height: common.$chips-popup-max-height;
+  overflow-y: auto;
+  transition: max-height 0.5s ease, visibility 0s, opacity 0.2s linear;
+}
+
+.base-chips-option {
+  padding: 2px 10px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background-color 0.1s linear;
+}
+
+.base-chips-container-open .base-chips-option:hover {
+  background-color: common.$chips-popup-background-color-hover;
 }

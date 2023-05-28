@@ -55,7 +55,9 @@ pub fn Button(props: &ButtonProps) -> Html {
 
     let style_class = format!("base-button-{}", style.style_name());
     let onclick = move |_| {
-        on_click.emit(());
+        if !disabled {
+            on_click.emit(());
+        }
     };
 
     html! {

@@ -157,7 +157,11 @@ pub fn Dialog(props: &DialogProps) -> Html {
                     <div class="base-dialog-header">
                         <div class="base-dialog-header-space"></div>
                         <h3 class="base-dialog-title">{title}</h3>
-                        <IconButton name="xmark-solid" on_click={x_close} />
+                        <IconButton
+                            name="xmark-solid"
+                            size={IconButtonSize::Medium}
+                            on_click={x_close}
+                        />
                     </div>
                     <div class="base-dialog-body">
                         {children}
