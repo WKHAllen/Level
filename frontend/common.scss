@@ -107,28 +107,24 @@ $button-primary-background-color-active: $primary-color-active;
 $button-primary-background-color-disabled: $primary-color-disabled;
 $button-primary-text-color: $primary-text-color;
 $button-primary-text-color-disabled: $primary-text-color-disabled;
-
 $button-secondary-background-color: $secondary-color;
 $button-secondary-background-color-hover: $secondary-color-hover;
 $button-secondary-background-color-active: $secondary-color-active;
 $button-secondary-background-color-disabled: $secondary-color-disabled;
 $button-secondary-text-color: $secondary-text-color;
 $button-secondary-text-color-disabled: $secondary-text-color-disabled;
-
 $button-transparent-background-color: $transparent-color;
 $button-transparent-background-color-hover: $transparent-color-hover;
 $button-transparent-background-color-active: $transparent-color-active;
 $button-transparent-background-color-disabled: $transparent-color-disabled;
 $button-transparent-text-color: $transparent-text-color;
 $button-transparent-text-color-disabled: $transparent-text-color-disabled;
-
 $button-danger-background-color: $danger-color;
 $button-danger-background-color-hover: $danger-color-hover;
 $button-danger-background-color-active: $danger-color-active;
 $button-danger-background-color-disabled: $danger-color-disabled;
 $button-danger-text-color: $danger-text-color;
 $button-danger-text-color-disabled: $danger-text-color-disabled;
-
 $button-border-radius: $border-radius-medium;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -325,3 +321,19 @@ $tooltip-background-color: #4f4f4fef;
 $tooltip-text-color: $primary-text-color;
 $tooltip-font-size: 0.8em;
 $tooltip-border-radius: $border-radius-small;
+
+//////////////////////////////////////////////////////////////////////////////
+/// BADGE
+//////////////////////////////////////////////////////////////////////////////
+
+$badge-height: 14px;
+$badge-padding: 0 $badge-height * 0.5;
+$badge-font-size: $badge-height * 0.75;
+$badge-primary-background-color: $primary-color;
+$badge-primary-text-color: $primary-text-color;
+$badge-secondary-background-color: $secondary-color;
+$badge-secondary-text-color: $secondary-text-color;
+$badge-transparent-background-color: $transparent-color;
+$badge-transparent-text-color: $transparent-text-color;
+$badge-danger-background-color: $danger-color;
+$badge-danger-text-color: $danger-text-color;

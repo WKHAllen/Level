@@ -387,6 +387,21 @@ pub fn Demo() -> Html {
                 <Tooltip text="Tooltip hover text">{"Hover here to view the tooltip text"}</Tooltip>
                 <Tooltip text="This should not show" disabled={true}>{"This tooltip is disabled, and should show nothing when hovered over"}</Tooltip>
             </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Badge"}</span>
+                <div class="base-demo-item-row">
+                    {"Primary badge"}
+                    <Badge value={3} style={BadgeStyle::Primary} />
+                </div>
+                <div class="base-demo-item-row">
+                    {"Secondary badge"}
+                    <Badge value={42} style={BadgeStyle::Secondary} />
+                </div>
+                <div class="base-demo-item-row">
+                    {"Danger badge"}
+                    <Badge<f64> value={1.618} style={BadgeStyle::Danger} />
+                </div>
+            </div>
         </div>
     }
 }

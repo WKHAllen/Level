@@ -63,6 +63,12 @@
   margin: 0;
 }
 
+.base-demo-item-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /// ERROR
 //////////////////////////////////////////////////////////////////////////////
@@ -1212,4 +1218,39 @@
 .base-tooltip-container.base-tooltip-container-disabled:hover .base-tooltip {
   visibility: hidden;
   opacity: 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// BADGE
+//////////////////////////////////////////////////////////////////////////////
+
+.base-badge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.base-badge {
+  height: common.$badge-height;
+  padding: common.$badge-padding;
+  border-radius: 100vw;
+  font-size: common.$badge-font-size;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.base-badge-primary {
+  background-color: common.$badge-primary-background-color;
+  color: common.$badge-primary-text-color;
+}
+
+.base-badge-secondary {
+  background-color: common.$badge-secondary-background-color;
+  color: common.$badge-secondary-text-color;
+}
+
+.base-badge-danger {
+  background-color: common.$badge-danger-background-color;
+  color: common.$badge-danger-text-color;
 }
