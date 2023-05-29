@@ -40,7 +40,9 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
                     {disabled}
                     class="base-checkbox-input"
                 />
-                <span class="base-checkmark"></span>
+                <span class="base-checkmark">
+                    <img src="assets/svg/check-solid.svg" class="base-checkmark-icon" />
+                </span>
             </label>
         </div>
     }

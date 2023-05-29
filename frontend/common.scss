@@ -136,12 +136,14 @@ $button-border-radius: $border-radius-medium;
 $checkbox-background-color-checked: $primary-color;
 $checkbox-background-color-checked-disabled: $primary-color-disabled;
 $checkbox-background-color-unchecked: $input-background-color;
-$checkbox-check-color: $primary-text-color;
 $checkbox-label-color: $primary-text-color;
 $checkbox-label-color-disabled: $primary-text-color-disabled;
 $checkbox-size: 18px;
 $checkbox-label-offset-left: $checkbox-size + 10px;
 $checkbox-border-radius: $border-radius-medium;
+$checkbox-icon-size: $checkbox-size * 0.9;
+$checkbox-icon-filter: $primary-svg-filter;
+$checkbox-icon-filter-disabled: $primary-svg-filter-disabled;
 
 //////////////////////////////////////////////////////////////////////////////
 /// SWITCH
