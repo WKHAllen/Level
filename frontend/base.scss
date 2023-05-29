@@ -101,6 +101,10 @@
   border: common.$error-border;
 }
 
+.base-input-container-disabled .base-input {
+  color: common.$input-text-color-disabled;
+}
+
 .base-input-label {
   color: common.$primary-text-color;
   font-size: common.$standard-label-size;
@@ -154,6 +158,10 @@
 .base-textarea-invalid,
 .base-textarea-invalid:focus {
   border: common.$error-border;
+}
+
+.base-textarea-container-disabled .base-textarea {
+  color: common.$textarea-text-color-disabled;
 }
 
 .base-textarea-label {
@@ -436,6 +444,10 @@
   border-color: common.$switch-background-color-checked-disabled;
 }
 
+.base-switch-disabled .base-switch-toggle:after {
+  background-color: common.$switch-head-background-color-disabled;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /// RADIO
 //////////////////////////////////////////////////////////////////////////////
@@ -490,8 +502,9 @@
 }
 
 .base-radio-option-disabled .base-radio-input:checked {
+  background-color: common.$radio-background-color-checked-disabled;
   border: common.$radio-border-size-checked solid
-    common.$radio-background-color-checked-disabled;
+    common.$radio-border-color-checked-disabled;
 }
 
 .base-radio-option-disabled .base-radio-label {
@@ -691,6 +704,7 @@
 }
 
 .base-select-button:disabled {
+  color: common.$select-button-text-color-disabled;
   cursor: default;
 }
 
@@ -1101,8 +1115,13 @@
   align-items: center;
   gap: common.$chips-chip-inner-padding;
   background-color: common.$chips-chip-background-color;
+  color: common.$chips-chip-text-color;
   padding: common.$chips-chip-padding;
   border-radius: 100vw;
+}
+
+.base-chips-container-disabled .base-chips-chip {
+  color: common.$chips-chip-text-color-disabled;
 }
 
 .base-chips-chip-label {

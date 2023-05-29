@@ -85,6 +85,7 @@ $standard-label-size: 0.9em;
 
 $input-background-color: $background-color-1;
 $input-text-color: $primary-text-color;
+$input-text-color-disabled: $primary-text-color-disabled;
 $input-border-radius: $border-radius-medium;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -93,6 +94,7 @@ $input-border-radius: $border-radius-medium;
 
 $textarea-background-color: $input-background-color;
 $textarea-text-color: $input-text-color;
+$textarea-text-color-disabled: $input-text-color-disabled;
 $textarea-border-radius: $input-border-radius;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -150,6 +152,7 @@ $checkbox-icon-filter-disabled: $primary-svg-filter-disabled;
 //////////////////////////////////////////////////////////////////////////////
 
 $switch-head-background-color: $primary-text-color;
+$switch-head-background-color-disabled: $primary-text-color-disabled;
 $switch-height: 18px;
 $switch-width: $switch-height * 2;
 $switch-inner-padding: 2px;
@@ -171,8 +174,9 @@ $switch-label-color-disabled: $primary-text-color-disabled;
 $radio-size: 18px;
 $radio-border-size-checked: $radio-size * 0.3;
 $radio-border-color-checked: $primary-color;
+$radio-border-color-checked-disabled: $primary-color-disabled;
 $radio-background-color-checked: $primary-text-color;
-$radio-background-color-checked-disabled: $primary-color-disabled;
+$radio-background-color-checked-disabled: $primary-text-color-disabled;
 $radio-background-color-unchecked: $input-background-color;
 $radio-label-color-disabled: $primary-text-color-disabled;
 
@@ -231,6 +235,7 @@ $button-icon-filter-disabled: $primary-svg-filter-disabled;
 
 $select-button-background-color: $background-color-1;
 $select-button-text-color: $primary-text-color;
+$select-button-text-color-disabled: $primary-text-color-disabled;
 $select-button-border-radius: $border-radius-medium;
 $select-label-color-disabled: $primary-text-color-disabled;
 $select-popup-background-color: $background-color-3;
@@ -304,6 +309,8 @@ $chips-chip-list-padding: $padding-small;
 $chips-chip-padding: 2px 8px;
 $chips-chip-inner-padding: 4px;
 $chips-chip-background-color: $background-color-5;
+$chips-chip-text-color: $primary-text-color;
+$chips-chip-text-color-disabled: $primary-text-color-disabled;
 $chips-chip-label-size: 0.8em;
 $chips-popup-background-color: $select-popup-background-color;
 $chips-popup-border-radius: $select-popup-border-radius;

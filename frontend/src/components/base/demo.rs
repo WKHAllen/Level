@@ -91,7 +91,11 @@ pub fn Demo() -> Html {
         <div class="base-demo">
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Error"}</span>
-                <Error message="A large error message" size={ErrorSize::Larger} />
+                <Error message="The smallest error message" size={ErrorSize::Smaller} />
+                <Error message="The small error message" size={ErrorSize::Small} />
+                <Error message="The medium size error message" size={ErrorSize::Medium} />
+                <Error message="The large error message" size={ErrorSize::Large} />
+                <Error message="The largest error message" size={ErrorSize::Larger} />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Input"}</span>
