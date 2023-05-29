@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 use std::ops::{Add, Div, Mul, Sub};
 use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
-use web_sys::{Event, HtmlInputElement, HtmlTextAreaElement, InputEvent, MouseEvent};
+use web_sys::{Event, HtmlElement, HtmlInputElement, HtmlTextAreaElement, InputEvent, MouseEvent};
 
 /// Gets the value of an input element from an event.
 pub fn input_event_value(e: InputEvent) -> String {
@@ -27,6 +27,20 @@ pub fn checkbox_checked(e: MouseEvent) -> bool {
     let event_target = event.target().unwrap_throw();
     let target: HtmlInputElement = event_target.dyn_into().unwrap_throw();
     target.checked()
+}
+
+/// Focuses an element in the DOM.
+pub fn focus_element(element_id: &str) {
+    let window = web_sys::window().expect("should have a window in this context");
+    let document = window.document().expect("window should have a document");
+
+    document
+        .get_element_by_id(element_id)
+        .unwrap()
+        .dyn_ref::<HtmlElement>()
+        .unwrap()
+        .focus()
+        .unwrap();
 }
 
 /// Generates a random ID for an element.

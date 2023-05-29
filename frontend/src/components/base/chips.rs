@@ -131,6 +131,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
     let id_state = use_state(new_id);
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
+    let clicking_option = use_state(|| false);
     let possible_options = get_possible_options(&options, &*state, &*next_chip_state, option_limit);
     let oninput = {
         let oninput_next_chip_state = next_chip_state.clone();
@@ -147,16 +148,24 @@ pub fn Chips(props: &ChipsProps) -> Html {
     };
     let onfocusout = {
         let dropdown_open_focusout = dropdown_open.clone();
+        let focusout_clicking_option = clicking_option.clone();
+        let focusout_id = id.clone();
         move |_| {
-            dropdown_open_focusout.set(false);
+            if !*focusout_clicking_option {
+                dropdown_open_focusout.set(false);
+            } else {
+                focusout_clicking_option.set(false);
+                focus_element(&focusout_id);
+            }
         }
     };
     let onkeydown = {
         let first_option = possible_options.first().map(|option| option.to_owned());
         let onkeydown_current_chips = state.clone();
         let onkeydown_next_chip = next_chip_state.clone();
-        move |event: KeyboardEvent| {
-            if event.key_code() == 13 {
+        move |event: KeyboardEvent| match event.key_code() {
+            13 => {
+                // enter
                 if let Some(ref option) = first_option {
                     let mut chips = (*onkeydown_current_chips).clone();
                     chips.push(option.to_owned());
@@ -164,6 +173,15 @@ pub fn Chips(props: &ChipsProps) -> Html {
                     onkeydown_next_chip.set(String::new());
                 }
             }
+            8 => {
+                // backspace
+                if onkeydown_next_chip.is_empty() && !onkeydown_current_chips.is_empty() {
+                    let mut chips = (*onkeydown_current_chips).clone();
+                    chips.remove(chips.len() - 1);
+                    onkeydown_current_chips.set(chips);
+                }
+            }
+            _ => {}
         }
     };
 
@@ -211,11 +229,13 @@ pub fn Chips(props: &ChipsProps) -> Html {
             let this_option_html = this_option.clone();
             let option_current_chips_state = state.clone();
             let option_next_chip_state = next_chip_state.clone();
+            let option_clicking_option = clicking_option.clone();
             let option_onmousedown = move |_| {
                 let mut option_chips = (*option_current_chips_state).clone();
                 option_chips.push(this_option.clone());
                 option_current_chips_state.set(option_chips);
                 option_next_chip_state.set(String::new());
+                option_clicking_option.set(true);
             };
 
             html! {
