@@ -382,6 +382,11 @@ pub fn Demo() -> Html {
                     disabled={true}
                 />
             </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Tooltip"}</span>
+                <Tooltip text="Tooltip hover text">{"Hover here to view the tooltip text"}</Tooltip>
+                <Tooltip text="This should not show" disabled={true}>{"This tooltip is disabled, and should show nothing when hovered over"}</Tooltip>
+            </div>
         </div>
     }
 }

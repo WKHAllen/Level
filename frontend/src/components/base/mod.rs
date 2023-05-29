@@ -17,6 +17,7 @@ mod slider;
 mod spinner;
 mod switch;
 mod textarea;
+mod tooltip;
 mod util;
 
 pub use alert::*;
@@ -38,3 +39,4 @@ pub use slider::*;
 pub use spinner::*;
 pub use switch::*;
 pub use textarea::*;
+pub use tooltip::*;

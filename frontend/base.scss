@@ -1173,3 +1173,43 @@
 .base-chips-container-open .base-chips-option:hover {
   background-color: common.$chips-popup-background-color-hover;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+/// TOOLTIP
+//////////////////////////////////////////////////////////////////////////////
+
+.base-tooltip-container {
+  position: relative;
+}
+
+.base-tooltip {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  visibility: hidden;
+  opacity: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  transition: all 0.15s ease-in-out;
+}
+
+.base-tooltip-text {
+  background-color: common.$tooltip-background-color;
+  color: common.$tooltip-text-color;
+  font-size: common.$tooltip-font-size;
+  padding: 2px 6px;
+  border-radius: common.$tooltip-border-radius;
+  box-shadow: common.$standard-box-shadow;
+}
+
+.base-tooltip-container:hover .base-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.base-tooltip-container.base-tooltip-container-disabled:hover .base-tooltip {
+  visibility: hidden;
+  opacity: 0;
+}
