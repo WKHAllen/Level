@@ -214,7 +214,7 @@ $icon-filter-disabled: $primary-svg-filter-disabled;
 $button-icon-size-small: $icon-size-small;
 $button-icon-size-medium: $icon-size-medium;
 $button-icon-size-large: $icon-size-large;
-$button-icon-scale: 1.6;
+$button-icon-scale: 1.8;
 $button-icon-button-size-small: $button-icon-size-small * $button-icon-scale;
 $button-icon-button-size-medium: $button-icon-size-medium * $button-icon-scale;
 $button-icon-button-size-large: $button-icon-size-large * $button-icon-scale;
@@ -333,7 +333,26 @@ $badge-primary-background-color: $primary-color;
 $badge-primary-text-color: $primary-text-color;
 $badge-secondary-background-color: $secondary-color;
 $badge-secondary-text-color: $secondary-text-color;
-$badge-transparent-background-color: $transparent-color;
-$badge-transparent-text-color: $transparent-text-color;
 $badge-danger-background-color: $danger-color;
 $badge-danger-text-color: $danger-text-color;
+
+//////////////////////////////////////////////////////////////////////////////
+/// DATE PICKER
+//////////////////////////////////////////////////////////////////////////////
+
+$date-picker-container-padding: $padding-medium;
+$date-picker-text-color: $primary-text-color;
+$date-picker-text-color-disabled: $primary-text-color-disabled;
+$date-picker-input-font-size: 0.9em;
+$date-picker-popup-background-color: $select-popup-background-color;
+$date-picker-popup-border-radius: $select-popup-border-radius;
+$date-picker-popup-padding: $padding-medium;
+$date-picker-calendar-section-padding: $padding-medium;
+$date-picker-calendar-font-size: 0.8em;
+$date-picker-calendar-days-of-week-padding: $padding-small;
+$date-picker-day-size: 30px;
+$date-picker-day-text-color: $primary-text-color;
+$date-picker-day-text-color-disabled: $primary-text-color-disabled;
+$date-picker-day-background-color-hover: $select-popup-background-color-hover;
+// $date-picker-day-background-color-active: $select-popup-background-color-active;
+$date-picker-day-background-color-selected: $primary-color;

@@ -994,6 +994,7 @@
 
 .base-spinner-container {
   display: flex;
+  overflow: hidden;
 }
 
 .base-spinner-center {
@@ -1253,4 +1254,169 @@
 .base-badge-danger {
   background-color: common.$badge-danger-background-color;
   color: common.$badge-danger-text-color;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// DATE PICKER
+//////////////////////////////////////////////////////////////////////////////
+
+.base-date-picker-container {
+  padding: common.$form-padding;
+  display: flex;
+  flex-direction: column;
+  gap: common.$padding-small;
+}
+
+.base-date-picker-label {
+  color: common.$date-picker-text-color;
+  font-size: common.$standard-label-size;
+}
+
+.base-date-picker-container-disabled .base-date-picker-label {
+  color: common.$date-picker-text-color-disabled;
+}
+
+.base-date-picker-outer {
+  display: flex;
+  flex-direction: column;
+}
+
+.base-date-picker {
+  background-color: common.$input-background-color;
+  color: common.$date-picker-text-color;
+  padding: common.$date-picker-container-padding;
+  border: common.$standard-border;
+  border-radius: common.$input-border-radius;
+  transition: border 0.1s ease;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.base-date-picker:focus-within {
+  border: common.$light-border;
+}
+
+.base-date-picker-invalid,
+.base-date-picker-invalid:focus-within {
+  border: common.$error-border;
+}
+
+.base-date-picker-container-disabled .base-date-picker {
+  color: common.$date-picker-text-color-disabled;
+}
+
+.base-date-picker-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.base-date-picker-input {
+  background-color: inherit;
+  color: inherit;
+  border: none;
+  outline: none;
+  font-size: common.$date-picker-input-font-size;
+}
+
+.base-date-picker-popup-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.base-date-picker-popup {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  max-height: 0;
+  z-index: 1;
+  transition: max-height 0.5s ease, visibility 0.5s, opacity 0.2s linear 0.125s;
+  background-color: common.$date-picker-popup-background-color;
+  border-radius: common.$date-picker-popup-border-radius;
+  box-shadow: common.$standard-box-shadow;
+}
+
+.base-date-picker-popup-container-open .base-date-picker-popup {
+  visibility: visible;
+  opacity: 1;
+  max-height: 100%;
+  transition: max-height 0.5s ease, visibility 0s, opacity 0.2s linear;
+}
+
+.base-date-picker-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: common.$date-picker-calendar-section-padding;
+  padding: common.$date-picker-popup-padding;
+}
+
+.base-date-picker-calendar-month-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.base-date-picker-calendar-month {
+  font-size: common.$date-picker-calendar-font-size;
+}
+
+.base-date-picker-calendar-days-of-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: common.$date-picker-calendar-days-of-week-padding;
+  font-size: common.$date-picker-calendar-font-size;
+  text-align: center;
+}
+
+.base-date-picker-calendar-view {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+}
+
+.base-date-picker-calendar-day {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: common.$date-picker-day-size;
+  height: common.$date-picker-day-size;
+  font-size: common.$date-picker-calendar-font-size;
+}
+
+.base-date-picker-calendar-day-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  color: common.$date-picker-day-text-color;
+  width: common.$date-picker-day-size;
+  height: common.$date-picker-day-size;
+  border: none;
+  border-radius: 100vw;
+  cursor: pointer;
+}
+
+.base-date-picker-calendar-day-button:hover {
+  background-color: common.$date-picker-day-background-color-hover;
+}
+
+.base-date-picker-calendar-day-button:active {
+  // background-color: common.$date-picker-day-background-color-active;
+}
+
+.base-date-picker-calendar-day-today .base-date-picker-calendar-day-button {
+  border: common.$standard-border;
+}
+
+.base-date-picker-calendar-day-selected .base-date-picker-calendar-day-button {
+  border: none;
+  background-color: common.$date-picker-day-background-color-selected;
+}
+
+.base-date-picker-calendar-day-disabled .base-date-picker-calendar-day-button {
+  color: common.$date-picker-day-text-color-disabled;
+  cursor: default;
 }

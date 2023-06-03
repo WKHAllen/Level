@@ -1,4 +1,5 @@
 use super::*;
+use chrono::{Datelike, NaiveDate};
 use yew::prelude::*;
 
 /// A demo of the base components.
@@ -86,6 +87,16 @@ pub fn Demo() -> Html {
     .into_iter()
     .map(|s| s.to_owned())
     .collect::<Vec<_>>();
+    let datepicker_state = use_state(|| None);
+    let datepicker_value = (*datepicker_state).clone();
+    let date_min = NaiveDate::from_ymd_opt(2023, 03, 21).unwrap();
+    let date_max = NaiveDate::from_ymd_opt(2026, 03, 21).unwrap();
+    let date_error = (*datepicker_state)
+        .as_ref()
+        .map(|date: &NaiveDate| {
+            (date.month() == 2).then_some("Please pick a month other than February".to_owned())
+        })
+        .flatten();
 
     html! {
         <div class="base-demo">
@@ -381,6 +392,7 @@ pub fn Demo() -> Html {
                     label="Disabled chips label"
                     disabled={true}
                 />
+                <span>{"Selected: "}{chips_value.join(", ")}</span>
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Tooltip"}</span>
@@ -401,6 +413,12 @@ pub fn Demo() -> Html {
                     {"Danger badge"}
                     <Badge<f64> value={1.618} style={BadgeStyle::Danger} />
                 </div>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Date picker"}</span>
+                <DatePicker state={datepicker_state.clone()} label="Date picker label" min={date_min} max={date_max} required={true} error={date_error} />
+                <span>{"Selected date: "}{datepicker_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+                <DatePicker state={datepicker_state} label="Disabled date picker label" disabled={true} />
             </div>
         </div>
     }

@@ -21,6 +21,14 @@ pub fn textarea_event_value(e: InputEvent) -> String {
     target.value()
 }
 
+/// Gets the value of a content-editable element from an event.
+pub fn content_editable_event_value(e: InputEvent) -> String {
+    let event: Event = e.dyn_into().unwrap_throw();
+    let event_target = event.target().unwrap_throw();
+    let target: HtmlElement = event_target.dyn_into().unwrap_throw();
+    target.inner_text()
+}
+
 /// Gets the value of a checkbox from a mouse click event.
 pub fn checkbox_checked(e: MouseEvent) -> bool {
     let event: Event = e.dyn_into().unwrap_throw();
@@ -31,8 +39,8 @@ pub fn checkbox_checked(e: MouseEvent) -> bool {
 
 /// Focuses an element in the DOM.
 pub fn focus_element(element_id: &str) {
-    let window = web_sys::window().expect("should have a window in this context");
-    let document = window.document().expect("window should have a document");
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
 
     document
         .get_element_by_id(element_id)
@@ -41,6 +49,51 @@ pub fn focus_element(element_id: &str) {
         .unwrap()
         .focus()
         .unwrap();
+}
+
+/// Selects the content of an element in the DOM.
+pub fn select_element_content(element_id: &str) {
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
+
+    let element = document.get_element_by_id(element_id).unwrap();
+
+    let range = web_sys::Range::new().unwrap();
+    range.select_node_contents(&element).unwrap();
+
+    let selection = window.get_selection().unwrap().unwrap();
+    selection.remove_all_ranges().unwrap();
+    selection.add_range(&range).unwrap();
+}
+
+/// Sets the cursor position to the end within an element in the DOM.
+pub fn go_to_end(element_id: &str) {
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
+
+    let element = document.get_element_by_id(element_id).unwrap();
+
+    let selection = window.get_selection().unwrap().unwrap();
+    selection
+        .set_position_with_offset(Some(&element), 1)
+        .unwrap();
+}
+
+/// Clears all selections.
+pub fn clear_selections() {
+    let window = web_sys::window().unwrap();
+
+    let selection = window.get_selection().unwrap().unwrap();
+    selection.remove_all_ranges().unwrap();
+}
+
+/// Sets the inner text of an element in the DOM.
+pub fn set_inner_text(element_id: &str, text: &str) {
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
+
+    let element = document.get_element_by_id(element_id).unwrap();
+    element.set_text_content(Some(text));
 }
 
 /// Generates a random ID for an element.
