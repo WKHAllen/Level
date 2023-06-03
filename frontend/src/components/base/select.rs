@@ -1,6 +1,7 @@
 use super::util::*;
 use super::*;
 use yew::prelude::*;
+use yew_hooks::use_click_away;
 
 /// Select option properties.
 #[derive(Properties, PartialEq, Clone)]
@@ -60,25 +61,23 @@ pub fn Select(props: &SelectProps) -> Html {
     let id_state = use_state(|| new_id());
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
-    let dropdown_open_focus_in = dropdown_open.clone();
-    let dropdown_open_focus_out = dropdown_open.clone();
-    let dropdown_open_mouse_down = dropdown_open.clone();
 
-    let onfocusin = move |_| {
-        if !*dropdown_open_focus_in {
-            dropdown_open_focus_in.set(true);
+    let on_button_click = {
+        let dropdown_open_local = dropdown_open.clone();
+        move |_| {
+            if !disabled {
+                dropdown_open_local.set(!*dropdown_open_local);
+            }
         }
     };
-    let onfocusout = move |_| {
-        if *dropdown_open_focus_out {
-            dropdown_open_focus_out.set(false);
+
+    let select_node = use_node_ref();
+    use_click_away(select_node.clone(), {
+        let dropdown_open_local = dropdown_open.clone();
+        move |_| {
+            dropdown_open_local.set(false);
         }
-    };
-    let onmousedown = move |_| {
-        if !disabled {
-            dropdown_open_mouse_down.set(!*dropdown_open_mouse_down);
-        }
-    };
+    });
 
     let selected_child = if *state < children.len() {
         children.iter().skip(*state).next().clone().unwrap().into()
@@ -98,14 +97,16 @@ pub fn Select(props: &SelectProps) -> Html {
             } = (*child.props).clone();
 
             let child_state = state.clone();
-            let child_onmousedown = move |_| {
+            let child_dropdown_open = dropdown_open.clone();
+            let on_child_click = move |_| {
                 if !child_disabled {
                     child_state.set(index);
+                    child_dropdown_open.set(false);
                 }
             };
 
             html! {
-                <div class={classes!("base-select-option", child_disabled.then_some("base-select-option-disabled"))} onmousedown={child_onmousedown}>
+                <div onclick={on_child_click} class={classes!("base-select-option", child_disabled.then_some("base-select-option-disabled"))}>
                     {child_children}
                 </div>
             }
@@ -118,12 +119,10 @@ pub fn Select(props: &SelectProps) -> Html {
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
             </label>
-            <div class="base-select">
+            <div ref={select_node} class="base-select">
                 <button
                     {id}
-                    {onfocusin}
-                    {onfocusout}
-                    {onmousedown}
+                    onclick={on_button_click}
                     {disabled}
                     class={classes!("base-select-button", error.clone().map(|_| "base-select-button-invalid"))}
                 >
@@ -183,25 +182,23 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
     let id_state = use_state(|| new_id());
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
-    let dropdown_open_focus_in = dropdown_open.clone();
-    let dropdown_open_focus_out = dropdown_open.clone();
-    let dropdown_open_mouse_down = dropdown_open.clone();
 
-    let onfocusin = move |_| {
-        if !*dropdown_open_focus_in {
-            dropdown_open_focus_in.set(true);
+    let on_button_click = {
+        let dropdown_open_local = dropdown_open.clone();
+        move |_| {
+            if !disabled {
+                dropdown_open_local.set(!*dropdown_open_local);
+            }
         }
     };
-    let onfocusout = move |_| {
-        if *dropdown_open_focus_out {
-            dropdown_open_focus_out.set(false);
+
+    let select_node = use_node_ref();
+    use_click_away(select_node.clone(), {
+        let dropdown_open_local = dropdown_open.clone();
+        move |_| {
+            dropdown_open_local.set(false);
         }
-    };
-    let onmousedown = move |_| {
-        if !disabled {
-            dropdown_open_mouse_down.set(!*dropdown_open_mouse_down);
-        }
-    };
+    });
 
     let selected_child = if let Some(state_value) = *state {
         if state_value < children.len() {
@@ -233,24 +230,28 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
             } = (*child.props).clone();
 
             let child_state = state.clone();
-            let child_onmousedown = move |_| {
+            let child_dropdown_open = dropdown_open.clone();
+            let on_child_click = move |_| {
                 if !child_disabled {
                     child_state.set(Some(index));
+                    child_dropdown_open.set(false);
                 }
             };
 
             html! {
-                <div class={classes!("base-select-option", child_disabled.then_some("base-select-option-disabled"))} onmousedown={child_onmousedown}>
+                <div onclick={on_child_click} class={classes!("base-select-option", child_disabled.then_some("base-select-option-disabled"))}>
                     {child_children}
                 </div>
             }
         })
         .collect::<Html>();
 
-    let null_onmousedown = {
+    let on_null_click = {
         let null_state = state.clone();
+        let null_dropdown_open = dropdown_open.clone();
         move |_| {
             null_state.set(None);
+            null_dropdown_open.set(false);
         }
     };
 
@@ -260,12 +261,10 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
             </label>
-            <div class="base-select">
+            <div ref={select_node} class="base-select">
                 <button
                     {id}
-                    {onfocusin}
-                    {onfocusout}
-                    {onmousedown}
+                    onclick={on_button_click}
                     {disabled}
                     class={classes!("base-select-button", error.clone().map(|_| "base-select-button-invalid"))}
                 >
@@ -276,7 +275,7 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
                 </button>
                 <div class="base-select-dropdown">
                     <div class="base-select-popup">
-                        <div class="base-select-option" onmousedown={null_onmousedown}>
+                        <div onclick={on_null_click} class="base-select-option">
                             <SelectOption>{null_label}</SelectOption>
                         </div>
                         {new_children}

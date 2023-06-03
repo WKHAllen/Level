@@ -1,6 +1,7 @@
 use super::util::*;
 use super::*;
 use yew::prelude::*;
+use yew_hooks::use_click_away;
 
 /// Compares an option to a typed out value, returning a score indicating the
 /// strength of the match, or `None` if the strings do not match.
@@ -131,7 +132,6 @@ pub fn Chips(props: &ChipsProps) -> Html {
     let id_state = use_state(new_id);
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
-    let clicking_option = use_state(|| false);
     let possible_options = get_possible_options(&options, &*state, &*next_chip_state, option_limit);
     let oninput = {
         let oninput_next_chip_state = next_chip_state.clone();
@@ -144,19 +144,6 @@ pub fn Chips(props: &ChipsProps) -> Html {
         let dropdown_open_focusin = dropdown_open.clone();
         move |_| {
             dropdown_open_focusin.set(true);
-        }
-    };
-    let onfocusout = {
-        let dropdown_open_focusout = dropdown_open.clone();
-        let focusout_clicking_option = clicking_option.clone();
-        let focusout_id = id.clone();
-        move |_| {
-            if !*focusout_clicking_option {
-                dropdown_open_focusout.set(false);
-            } else {
-                focusout_clicking_option.set(false);
-                focus_element(&focusout_id);
-            }
         }
     };
     let onkeydown = {
@@ -222,6 +209,14 @@ pub fn Chips(props: &ChipsProps) -> Html {
         }
     };
 
+    let chips_node = use_node_ref();
+    use_click_away(chips_node.clone(), {
+        let dropdown_open_local = dropdown_open.clone();
+        move |_| {
+            dropdown_open_local.set(false);
+        }
+    });
+
     let chip_options = possible_options
         .iter()
         .map(|this_option| {
@@ -229,17 +224,15 @@ pub fn Chips(props: &ChipsProps) -> Html {
             let this_option_html = this_option.clone();
             let option_current_chips_state = state.clone();
             let option_next_chip_state = next_chip_state.clone();
-            let option_clicking_option = clicking_option.clone();
-            let option_onmousedown = move |_| {
+            let on_option_click = move |_| {
                 let mut option_chips = (*option_current_chips_state).clone();
                 option_chips.push(this_option.clone());
                 option_current_chips_state.set(option_chips);
                 option_next_chip_state.set(String::new());
-                option_clicking_option.set(true);
             };
 
             html! {
-                <div class={classes!("base-chips-option")} onmousedown={option_onmousedown}>
+                <div onclick={on_option_click} class={classes!("base-chips-option")}>
                     {this_option_html}
                 </div>
             }
@@ -261,7 +254,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
     html! {
         <div class={classes!("base-chips-container", disabled.then_some("base-chips-container-disabled"), (*dropdown_open).then_some("base-chips-container-open"), error.as_ref().map(|_| "base-chips-container-invalid"))}>
             <label for={id.clone()} class="base-chips-label">{label}</label>
-            <div class="base-chips">
+            <div ref={chips_node} class="base-chips">
                 <div class="base-chips-inner">
                     {conditional_chip_list}
                     <input
@@ -270,7 +263,6 @@ pub fn Chips(props: &ChipsProps) -> Html {
                         {id}
                         {oninput}
                         {onfocusin}
-                        {onfocusout}
                         {onkeydown}
                         {placeholder}
                         {disabled}

@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use js_sys::Math;
 use std::fmt::{Debug, Display};
 use std::ops::{Add, Div, Mul, Sub};

@@ -2,7 +2,7 @@ use super::util::*;
 use super::*;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use yew::prelude::*;
-use yew_hooks::*;
+use yew_hooks::use_click_away;
 
 /// Month names.
 const MONTHS: &[&str; 12] = &[

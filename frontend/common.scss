@@ -7,6 +7,7 @@ $background-color-2: #1e2023;
 $background-color-3: #222427;
 $background-color-4: #26282b;
 $background-color-5: #2a2c2f;
+$background-color-6: #2e3033;
 
 $text-color: #ffffff;
 
@@ -236,6 +237,7 @@ $select-button-border-radius: $border-radius-medium;
 $select-label-color-disabled: $primary-text-color-disabled;
 $select-popup-background-color: $background-color-3;
 $select-popup-background-color-hover: $background-color-5;
+$select-popup-background-color-active: $background-color-6;
 $select-popup-border-radius: $border-radius-medium;
 $select-popup-max-height: 300px;
 $select-option-color-disabled: $primary-text-color-disabled;
@@ -312,6 +314,7 @@ $chips-popup-background-color: $select-popup-background-color;
 $chips-popup-border-radius: $select-popup-border-radius;
 $chips-popup-max-height: $select-popup-max-height;
 $chips-popup-background-color-hover: $select-popup-background-color-hover;
+$chips-popup-background-color-active: $select-popup-background-color-active;
 
 //////////////////////////////////////////////////////////////////////////////
 /// TOOLTIP
@@ -354,5 +357,5 @@ $date-picker-day-size: 30px;
 $date-picker-day-text-color: $primary-text-color;
 $date-picker-day-text-color-disabled: $primary-text-color-disabled;
 $date-picker-day-background-color-hover: $select-popup-background-color-hover;
-// $date-picker-day-background-color-active: $select-popup-background-color-active;
+$date-picker-day-background-color-active: $select-popup-background-color-active;
 $date-picker-day-background-color-selected: $primary-color;
