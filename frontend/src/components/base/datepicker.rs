@@ -261,10 +261,13 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
 
     let year_id_state = use_state(|| new_id());
     let year_id = (*year_id_state).clone();
+    let year_node = use_node_ref();
     let month_id_state = use_state(|| new_id());
     let month_id = (*month_id_state).clone();
+    let month_node = use_node_ref();
     let day_id_state = use_state(|| new_id());
     let day_id = (*day_id_state).clone();
+    let day_node = use_node_ref();
     let calendar_open = use_state(|| false);
     let today = date_picker_today();
     let year_state = use_state(|| year_to_string((*state).unwrap_or(today).year()));
@@ -309,59 +312,59 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         .or(error);
 
     let year_on_focus_in = {
-        let focus_in_year_id = year_id.clone();
+        let year_node_local = year_node.clone();
         move |_| {
-            select_element_content(&focus_in_year_id);
+            select_element_content(&year_node_local);
         }
     };
     let month_on_focus_in = {
-        let focus_in_month_id = month_id.clone();
+        let month_node_local = month_node.clone();
         move |_| {
-            select_element_content(&focus_in_month_id);
+            select_element_content(&month_node_local);
         }
     };
     let day_on_focus_in = {
-        let focus_in_day_id = day_id.clone();
+        let day_node_local = day_node.clone();
         move |_| {
-            select_element_content(&focus_in_day_id);
+            select_element_content(&day_node_local);
         }
     };
 
     let year_on_input = {
-        let input_year_id = year_id.clone();
+        let year_node_local = year_node.clone();
         let year_input_state = year_state.clone();
         let local_update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
             let new_value = new_year_value(&*year_input_state, &new_typed_value);
-            set_inner_text(&input_year_id, &new_value);
-            go_to_end(&input_year_id);
+            set_inner_text(&year_node_local, &new_value);
+            go_to_end(&year_node_local);
             year_input_state.set(new_value.clone());
             local_update_state(Some(&new_value), None, None);
         }
     };
     let month_on_input = {
-        let input_month_id = month_id.clone();
+        let month_node_local = month_node.clone();
         let month_input_state = month_state.clone();
         let local_update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
             let new_value = new_month_value(&*month_input_state, &new_typed_value);
-            set_inner_text(&input_month_id, &new_value);
-            go_to_end(&input_month_id);
+            set_inner_text(&month_node_local, &new_value);
+            go_to_end(&month_node_local);
             month_input_state.set(new_value.clone());
             local_update_state(None, Some(&new_value), None);
         }
     };
     let day_on_input = {
-        let input_day_id = day_id.clone();
+        let day_node_local = day_node.clone();
         let day_input_state = day_state.clone();
         let local_update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
             let new_value = new_day_value(&*day_input_state, &new_typed_value);
-            set_inner_text(&input_day_id, &new_value);
-            go_to_end(&input_day_id);
+            set_inner_text(&day_node_local, &new_value);
+            go_to_end(&day_node_local);
             day_input_state.set(new_value.clone());
             local_update_state(None, None, Some(&new_value));
         }
@@ -422,12 +425,22 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
             let day_today = this_day == today;
             let day_disabled = !date_within_range(&this_day, &min, &max);
 
+            let year_node_local = year_node.clone();
+            let month_node_local = month_node.clone();
+            let day_node_local = day_node.clone();
+
             let day_on_click = move |_| {
                 state_local.set(Some(this_day));
                 calendar_open_local.set(false);
-                year_state_local.set(year_to_string(this_day.year()));
-                month_state_local.set(month_to_string(this_day.month()));
-                day_state_local.set(day_to_string(this_day.day()));
+                let year_str = year_to_string(this_day.year());
+                let month_str = month_to_string(this_day.month());
+                let day_str = day_to_string(this_day.day());
+                set_inner_text(&year_node_local, &year_str);
+                set_inner_text(&month_node_local, &month_str);
+                set_inner_text(&day_node_local, &day_str);
+                year_state_local.set(year_str);
+                month_state_local.set(month_str);
+                day_state_local.set(day_str);
             };
 
             html! {
@@ -463,6 +476,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
                 <div class={classes!("base-date-picker", error_msg.as_ref().map(|_| "base-date-picker-invalid"))}>
                     <div class="base-date-picker-section">
                         <span
+                            ref={year_node}
                             id={year_id}
                             contenteditable={(!disabled).to_string()}
                             onfocusin={year_on_focus_in}
@@ -471,6 +485,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
                         >{year_value}</span>
                         <span>{"-"}</span>
                         <span
+                            ref={month_node}
                             id={month_id}
                             contenteditable={(!disabled).to_string()}
                             onfocusin={month_on_focus_in}
@@ -479,6 +494,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
                         >{month_value}</span>
                         <span>{"-"}</span>
                         <span
+                            ref={day_node}
                             id={day_id}
                             contenteditable={(!disabled).to_string()}
                             onfocusin={day_on_focus_in}

@@ -6,6 +6,7 @@ use std::ops::{Add, Div, Mul, Sub};
 use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
 use web_sys::{Event, HtmlElement, HtmlInputElement, HtmlTextAreaElement, InputEvent, MouseEvent};
+use yew::prelude::*;
 
 /// Gets the value of an input element from an event.
 pub fn input_event_value(e: InputEvent) -> String {
@@ -40,45 +41,34 @@ pub fn checkbox_checked(e: MouseEvent) -> bool {
 }
 
 /// Focuses an element in the DOM.
-pub fn focus_element(element_id: &str) {
-    let window = web_sys::window().unwrap();
-    let document = window.document().unwrap();
-
-    document
-        .get_element_by_id(element_id)
-        .unwrap()
-        .dyn_ref::<HtmlElement>()
-        .unwrap()
-        .focus()
-        .unwrap();
+pub fn focus_element(node: &NodeRef) {
+    if let Some(node) = node.get() {
+        node.dyn_ref::<HtmlElement>().unwrap().focus().unwrap();
+    }
 }
 
 /// Selects the content of an element in the DOM.
-pub fn select_element_content(element_id: &str) {
-    let window = web_sys::window().unwrap();
-    let document = window.document().unwrap();
+pub fn select_element_content(node: &NodeRef) {
+    if let Some(node) = node.get() {
+        let window = web_sys::window().unwrap();
 
-    let element = document.get_element_by_id(element_id).unwrap();
+        let range = web_sys::Range::new().unwrap();
+        range.select_node_contents(&node).unwrap();
 
-    let range = web_sys::Range::new().unwrap();
-    range.select_node_contents(&element).unwrap();
-
-    let selection = window.get_selection().unwrap().unwrap();
-    selection.remove_all_ranges().unwrap();
-    selection.add_range(&range).unwrap();
+        let selection = window.get_selection().unwrap().unwrap();
+        selection.remove_all_ranges().unwrap();
+        selection.add_range(&range).unwrap();
+    }
 }
 
 /// Sets the cursor position to the end within an element in the DOM.
-pub fn go_to_end(element_id: &str) {
-    let window = web_sys::window().unwrap();
-    let document = window.document().unwrap();
+pub fn go_to_end(node: &NodeRef) {
+    if let Some(node) = node.get() {
+        let window = web_sys::window().unwrap();
 
-    let element = document.get_element_by_id(element_id).unwrap();
-
-    let selection = window.get_selection().unwrap().unwrap();
-    selection
-        .set_position_with_offset(Some(&element), 1)
-        .unwrap();
+        let selection = window.get_selection().unwrap().unwrap();
+        selection.set_position_with_offset(Some(&node), 1).unwrap();
+    }
 }
 
 /// Clears all selections.
@@ -90,12 +80,10 @@ pub fn clear_selections() {
 }
 
 /// Sets the inner text of an element in the DOM.
-pub fn set_inner_text(element_id: &str, text: &str) {
-    let window = web_sys::window().unwrap();
-    let document = window.document().unwrap();
-
-    let element = document.get_element_by_id(element_id).unwrap();
-    element.set_text_content(Some(text));
+pub fn set_inner_text(node: &NodeRef, text: &str) {
+    if let Some(node) = node.get() {
+        node.set_text_content(Some(text));
+    }
 }
 
 /// Generates a random ID for an element.
