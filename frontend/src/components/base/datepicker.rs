@@ -396,7 +396,6 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
     };
 
     let calendar_days_prev = (0..num_days_before_month)
-        .into_iter()
         .map(|_| {
             html! {
                 <div class="base-date-picker-calendar-day base-date-picker-calendar-day-hidden"></div>
@@ -404,7 +403,6 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         })
         .collect::<Html>();
     let calendar_days_current = (1..=num_days_in_month)
-        .into_iter()
         .map(|i| {
             let state_local = state.clone();
             let calendar_open_local = calendar_open.clone();
@@ -450,7 +448,6 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         })
         .collect::<Html>();
     let calendar_days_next = (0..num_days_after_month)
-        .into_iter()
         .map(|_| {
             html! {
                 <div class="base-date-picker-calendar-day base-date-picker-calendar-day-hidden"></div>
