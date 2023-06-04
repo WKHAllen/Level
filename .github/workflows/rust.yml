@@ -53,3 +53,5 @@ jobs:
 
       - name: Lint
         run: cargo clippy --verbose -- -D warnings
+        env:
+          DATABASE_URL: sqlite:temp/test_db.db
