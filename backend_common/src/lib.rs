@@ -26,10 +26,10 @@ pub fn encode_section_size(mut size: usize) -> [u8; LEN_SIZE] {
 pub fn decode_section_size(encoded_size: &[u8; LEN_SIZE]) -> usize {
     let mut size: usize = 0;
 
-    for i in 0..LEN_SIZE {
+    encoded_size.iter().for_each(|val| {
         size <<= 8;
-        size += usize::from(encoded_size[i]);
-    }
+        size += usize::from(*val);
+    });
 
     size
 }
@@ -64,7 +64,7 @@ pub async fn write_section(file: &mut File, data: &[u8]) -> io::Result<()> {
     let encoded_size = encode_section_size(data.len());
 
     file.write_all(&encoded_size).await?;
-    file.write_all(&data).await?;
+    file.write_all(data).await?;
 
     Ok(())
 }

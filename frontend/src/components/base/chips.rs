@@ -49,8 +49,7 @@ fn limit_options<T: Clone>(options: &[T], limit: usize) -> Vec<T> {
         options.len()
     };
 
-    let limited_matches = (&options[..limit_index]).to_owned();
-    limited_matches
+    (options[..limit_index]).to_owned()
 }
 
 /// Returns a list of possible options, taking into account the complete list
@@ -132,7 +131,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
     let id_state = use_state(new_id);
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
-    let possible_options = get_possible_options(&options, &*state, &*next_chip_state, option_limit);
+    let possible_options = get_possible_options(&options, &state, &next_chip_state, option_limit);
     let oninput = {
         let oninput_next_chip_state = next_chip_state.clone();
         move |event: InputEvent| {

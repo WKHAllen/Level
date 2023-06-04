@@ -32,7 +32,7 @@ where
     E: Into<Box<dyn std::error::Error + Send + Sync>> + ToString,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &*self {
+        match self {
             Self::AesError(e) => f.write_str(&e.to_string()),
             Self::IOError(e) => f.write_str(&e.to_string()),
             Self::Error(e) => f.write_str(&e.to_string()),
@@ -102,7 +102,7 @@ pub async fn encrypt_file(src: &mut File, dest: &mut File, key: &[u8; AES_KEY_SI
             break;
         }
 
-        let encrypted_data = aes_encrypt(&key, &buffer[..n])?;
+        let encrypted_data = aes_encrypt(key, &buffer[..n])?;
         write_section(dest, &encrypted_data).await?;
     }
 
@@ -120,7 +120,7 @@ pub async fn decrypt_file(src: &mut File, dest: &mut File, key: &[u8; AES_KEY_SI
             None => break,
         };
 
-        let decrypted_data = aes_decrypt(&key, &data)?;
+        let decrypted_data = aes_decrypt(key, &data)?;
 
         dest.write_all(&decrypted_data).await?;
     }
@@ -139,7 +139,7 @@ pub async fn try_decrypt_file(src: &mut File, key: &[u8; AES_KEY_SIZE]) -> Resul
             None => break,
         };
 
-        aes_decrypt(&key, &data)?;
+        aes_decrypt(key, &data)?;
     }
 
     Ok(())
@@ -148,7 +148,7 @@ pub async fn try_decrypt_file(src: &mut File, key: &[u8; AES_KEY_SIZE]) -> Resul
 /// Convert a password of arbitrary length to an AES key by performing a SHA-256 hash.
 pub fn password_to_key(password: &str) -> [u8; AES_KEY_SIZE] {
     let mut hasher = Sha256::new();
-    hasher.update(&password);
+    hasher.update(password);
     let result = hasher.finalize();
     result.into()
 }
@@ -172,7 +172,7 @@ mod tests {
 
     fn random_save_path() -> String {
         let id: u64 = random();
-        let hex_id = format!("{:x}", id);
+        let hex_id = format!("{id:x}");
         let root_path = project_root::get_project_root().unwrap();
         let save_path = format!(
             "{}/{}/test_{}.{}",

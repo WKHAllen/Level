@@ -3,7 +3,7 @@ use yew::prelude::*;
 
 /// The root element of the application.
 #[function_component]
-pub fn App() -> Html {
+pub fn Root() -> Html {
     html! {
         <>
             <Demo />

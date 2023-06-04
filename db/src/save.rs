@@ -5,6 +5,7 @@ use backend_common::*;
 use chrono::{NaiveDateTime, Utc};
 use crypto::{decrypt_file, encrypt_file, password_to_key, try_decrypt_file, AES_KEY_SIZE};
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::io;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
@@ -28,7 +29,7 @@ pub(crate) fn get_saves_path() -> String {
 
 /// Gets the path to a database save file.
 pub(crate) fn get_save_path(name: &str) -> String {
-    let file_name = convert_file_name(&name);
+    let file_name = convert_file_name(name);
     let root_path = project_root::get_project_root().unwrap();
     let save_path = format!(
         "{}/{}/{}.{}",
@@ -42,7 +43,7 @@ pub(crate) fn get_save_path(name: &str) -> String {
 
 /// Gets the path to a temporary database save file.
 pub(crate) fn get_tmp_save_path(name: &str) -> String {
-    format!("{}.{}", get_save_path(&name), TMP_SAVE_EXT)
+    format!("{}.{}", get_save_path(name), TMP_SAVE_EXT)
 }
 
 async fn read_save_metadata(save_file: &mut File) -> Result<String> {
@@ -77,9 +78,9 @@ impl SaveMetadata {
     pub fn parse(metadata: &str, save_name: &str) -> Self {
         let metadata_pairs = metadata
             .split('\n')
-            .filter_map(|line| match line.split_once("=") {
-                Some((key, value)) => Some((key.to_owned(), value.to_owned())),
-                None => None,
+            .filter_map(|line| {
+                line.split_once('=')
+                    .map(|(key, value)| (key.to_owned(), value.to_owned()))
             })
             .collect::<HashMap<String, String>>();
 
@@ -117,15 +118,18 @@ impl SaveMetadata {
             last_opened_at,
         }
     }
+}
 
-    /// Write the metadata properties to a string.
-    pub fn to_string(&self) -> String {
+impl Display for SaveMetadata {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let name = format!("name={}", self.name);
         let description = format!("description={}", self.description);
         let created_at = format!("created_at={}", self.created_at.timestamp());
         let last_opened_at = format!("last_opened_at={}", self.last_opened_at.timestamp());
 
-        vec![name, description, created_at, last_opened_at].join("\n")
+        let metadata_str = vec![name, description, created_at, last_opened_at].join("\n");
+
+        f.write_str(&metadata_str)
     }
 }
 
@@ -145,7 +149,7 @@ impl Save {
     pub async fn create(name: &str, description: &str, password: &str) -> Result<Self> {
         Self::verify_does_not_exist(name)?;
 
-        let key = password_to_key(&password);
+        let key = password_to_key(password);
         let now = Utc::now().naive_utc();
 
         let metadata = SaveMetadata {
@@ -164,14 +168,14 @@ impl Save {
 
     /// Opens and decrypts a save file.
     pub async fn open(name: &str, password: &str) -> Result<Self> {
-        let key = password_to_key(&password);
+        let key = password_to_key(password);
 
-        let save_path = get_save_path(&name);
+        let save_path = get_save_path(name);
         let mut save_file = File::open(&save_path).await?;
         let metadata_str = read_save_metadata(&mut save_file).await?;
-        let mut metadata = SaveMetadata::parse(&metadata_str, &name);
+        let mut metadata = SaveMetadata::parse(&metadata_str, name);
 
-        let maybe_db = DB::create_with(&name, move |mut db_file| async move {
+        let maybe_db = DB::create_with(name, move |mut db_file| async move {
             decrypt_file(&mut save_file, &mut db_file, &key).await
         })
         .await;
@@ -185,7 +189,7 @@ impl Save {
         }?;
 
         metadata.last_opened_at = Utc::now().naive_utc();
-        Self::save_metadata(&name, &metadata).await?;
+        Self::save_metadata(name, &metadata).await?;
 
         Ok(Self { db, key, metadata })
     }
@@ -200,7 +204,7 @@ impl Save {
             let metadata_str = self.metadata.to_string();
             write_section(&mut tmp_save_file, metadata_str.as_bytes()).await?;
 
-            let key = self.key.clone();
+            let key = self.key;
 
             self.db
                 .pause_with(move |mut db_file| async move {
@@ -224,7 +228,7 @@ impl Save {
             let metadata_str = self.metadata.to_string();
             write_section(&mut tmp_save_file, metadata_str.as_bytes()).await?;
 
-            let key = self.key.clone();
+            let key = self.key;
 
             self.db
                 .delete_with(move |mut db_file| async move {
@@ -245,18 +249,18 @@ impl Save {
 
     /// Gets the metadata of the save file without needing to decrypt the file.
     pub async fn metadata(name: &str) -> Result<SaveMetadata> {
-        let save_path = get_save_path(&name);
+        let save_path = get_save_path(name);
         let mut save_file = File::open(&save_path).await?;
         let metadata_str = read_save_metadata(&mut save_file).await?;
-        let metadata = SaveMetadata::parse(&metadata_str, &name);
+        let metadata = SaveMetadata::parse(&metadata_str, name);
 
         Ok(metadata)
     }
 
     /// Save a save file's metadata.
     async fn save_metadata(name: &str, metadata: &SaveMetadata) -> Result<()> {
-        let save_path = get_save_path(&name);
-        let tmp_save_path = get_tmp_save_path(&name);
+        let save_path = get_save_path(name);
+        let tmp_save_path = get_tmp_save_path(name);
 
         {
             let mut save_file = File::open(&save_path).await?;
@@ -290,7 +294,7 @@ impl Save {
     async fn verify_password(name: &str, password: &str) -> Result<()> {
         let key = password_to_key(password);
 
-        let save_path = get_save_path(&name);
+        let save_path = get_save_path(name);
         let mut save_file = File::open(&save_path).await?;
         skip_metadata(&mut save_file).await?;
 
@@ -304,13 +308,13 @@ impl Save {
         Self::verify_password(old_name, password).await?;
         Self::verify_does_not_exist(new_name)?;
 
-        let mut metadata = Self::metadata(&old_name).await?;
+        let mut metadata = Self::metadata(old_name).await?;
         metadata.name = new_name.to_owned();
 
-        Self::save_metadata(&old_name, &metadata).await?;
+        Self::save_metadata(old_name, &metadata).await?;
 
-        let old_path = get_save_path(&old_name);
-        let new_path = get_save_path(&new_name);
+        let old_path = get_save_path(old_name);
+        let new_path = get_save_path(new_name);
         fs::rename(old_path, new_path).await?;
 
         Ok(())
@@ -320,10 +324,10 @@ impl Save {
     pub async fn set_description(name: &str, description: &str, password: &str) -> Result<()> {
         Self::verify_password(name, password).await?;
 
-        let mut metadata = Self::metadata(&name).await?;
+        let mut metadata = Self::metadata(name).await?;
         metadata.description = description.to_owned();
 
-        Self::save_metadata(&name, &metadata).await?;
+        Self::save_metadata(name, &metadata).await?;
 
         Ok(())
     }
@@ -341,7 +345,7 @@ impl Save {
     pub async fn delete(name: &str, password: &str) -> Result<()> {
         Self::verify_password(name, password).await?;
 
-        let save_path = get_save_path(&name);
+        let save_path = get_save_path(name);
 
         fs::remove_file(save_path).await?;
 
@@ -359,8 +363,8 @@ impl Save {
             if let Some(file_name) = file.file_name().to_str() {
                 if let Some(file_ext) = Path::new(file_name).extension() {
                     if file_ext == SAVE_EXT {
-                        if let Some((name, _)) = file_name.rsplit_once(".") {
-                            let metadata = Self::metadata(&name).await?;
+                        if let Some((name, _)) = file_name.rsplit_once('.') {
+                            let metadata = Self::metadata(name).await?;
                             saves.push(metadata);
                         }
                     }
@@ -476,8 +480,8 @@ mod tests {
             .filter(|s| &s.name != "test") // ignore the "test" save
             .collect::<Vec<_>>();
         assert_eq!(saves.len(), 2);
-        let save1 = saves.iter().find(|s| &s.name == new_name).unwrap();
-        let save2 = saves.iter().find(|s| &s.name == name2).unwrap();
+        let save1 = saves.iter().find(|s| s.name == new_name).unwrap();
+        let save2 = saves.iter().find(|s| s.name == name2).unwrap();
         assert_eq!(&save1.description, new_description);
         assert_eq!(&save2.description, description2);
 

@@ -21,7 +21,10 @@ pub fn Greeting(props: &GreetingProps) -> Html {
     let name = props.name.clone();
 
     use_async(
-        async move { Result::<_, ()>::Ok(state1.say_hi().await) },
+        async move {
+            state1.say_hi().await;
+            Result::<_, ()>::Ok(())
+        },
         true,
     );
     let greeting = use_async(

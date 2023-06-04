@@ -7,7 +7,7 @@ fn shorten_to(value_str: &str, decimals: u16) -> String {
     match value_str.find('.') {
         Some(index) => {
             if index + (decimals as usize) < value_str.len() {
-                (&value_str[..=index + (decimals as usize)]).to_owned()
+                (value_str[..=index + (decimals as usize)]).to_owned()
             } else {
                 value_str.to_owned()
             }
@@ -26,14 +26,14 @@ fn transform_number(value_str: &str, decimals: u16) -> String {
 
     if value_str.ends_with('-') {
         if value_str.starts_with('-') {
-            value_str = (&value_str[1..value_str.len() - 1]).to_owned()
+            value_str = (value_str[1..value_str.len() - 1]).to_owned()
         } else {
             value_str = format!("-{}", &value_str[..value_str.len() - 1])
         }
     }
 
-    if value_str.len() > 1 && value_str.starts_with("0") && !value_str.starts_with("0.") {
-        value_str = (&value_str[1..]).to_owned();
+    if value_str.len() > 1 && value_str.starts_with('0') && !value_str.starts_with("0.") {
+        value_str = (value_str[1..]).to_owned();
     }
 
     if value_str.len() > 2 && value_str.starts_with("-0") && !value_str.starts_with("-0.") {
@@ -191,7 +191,7 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
     }
 
     let value_str = (*number_state).to_string();
-    let id_state = use_state(|| new_id());
+    let id_state = use_state(new_id);
     let id = (*id_state).clone();
 
     let oninput = move |event: InputEvent| {

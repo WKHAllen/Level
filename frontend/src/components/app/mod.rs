@@ -1,7 +1,7 @@
-mod app;
 mod greeting;
 mod quote;
+mod root;
 
-pub use app::*;
 pub use greeting::*;
 pub use quote::*;
+pub use root::*;

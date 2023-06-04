@@ -41,13 +41,10 @@ impl State {
 
     /// Handle a tauri window event.
     pub async fn handle_event(&self, event: &WindowEvent) -> Result<()> {
-        match event {
-            WindowEvent::CloseRequested { .. } => {
-                if self.is_save_open().await {
-                    self.close_save().await?;
-                }
+        if let WindowEvent::CloseRequested { .. } = event {
+            if self.is_save_open().await {
+                self.close_save().await?;
             }
-            _ => {}
         }
 
         Ok(())
@@ -148,7 +145,7 @@ impl BackendCommands for State {
     }
 
     async fn greet(&self, name: String) -> String {
-        format!("Hello, {}!", name)
+        format!("Hello, {name}!")
     }
 
     async fn get_random_quote(&self) -> String {

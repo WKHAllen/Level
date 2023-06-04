@@ -78,7 +78,7 @@ mod tests {
         /// Creates a new test database.
         pub async fn new() -> Result<Self> {
             let db_id = new_id();
-            let db_name = format!("test_{}", db_id);
+            let db_name = format!("test_{db_id}");
             let db = DB::create(&db_name).await?;
 
             Ok(Self { inner: db })

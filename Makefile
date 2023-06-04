@@ -11,5 +11,8 @@ run:
 test:
 	cargo test -- --nocapture
 
+lint:
+	cargo clippy -- -D warnings
+
 clean:
 	cargo clean

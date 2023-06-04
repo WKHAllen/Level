@@ -24,7 +24,7 @@ impl AccountTransactionTag {
         .await
         .unwrap();
 
-        Self::get(db, &account_transaction, &tag).await.unwrap()
+        Self::get(db, account_transaction, tag).await.unwrap()
     }
 
     /// Gets an account transaction tag from the database.
@@ -41,7 +41,7 @@ impl AccountTransactionTag {
 
     /// Checks if an account transaction/tag link exists.
     pub async fn exists(db: &mut DB, account_transaction: &AccountTransaction, tag: &Tag) -> bool {
-        Self::get(db, &account_transaction, &tag).await.is_some()
+        Self::get(db, account_transaction, tag).await.is_some()
     }
 
     /// Lists all account transaction tags in the database.
@@ -129,7 +129,7 @@ mod tests {
             "Transaction 1",
             "",
             0.01,
-            NaiveDate::from_ymd_opt(2023, 04, 01).unwrap(),
+            NaiveDate::from_ymd_opt(2023, 4, 1).unwrap(),
             &category,
             None,
         )
@@ -141,7 +141,7 @@ mod tests {
             "Transaction 2",
             "",
             0.99,
-            NaiveDate::from_ymd_opt(2023, 03, 31).unwrap(),
+            NaiveDate::from_ymd_opt(2023, 3, 31).unwrap(),
             &category,
             None,
         )

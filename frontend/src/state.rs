@@ -31,14 +31,13 @@ where
     let js_args = serde_wasm_bindgen::to_value(&command_args).unwrap();
 
     let response = invoke_function
-        .call2(&invoke_function, &"command".into(), &js_args)
+        .call2(invoke_function, &"command".into(), &js_args)
         .unwrap();
     let response_promise = response.dyn_into::<Promise>().unwrap();
     let response_future = JsFuture::from(response_promise);
     let command_res = response_future.await.unwrap();
     let serialized_res: String = serde_wasm_bindgen::from_value(command_res).unwrap();
-    let res = serde_json::from_str(&serialized_res).unwrap();
-    res
+    serde_json::from_str(&serialized_res).unwrap()
 }
 
 /// The frontend application state.

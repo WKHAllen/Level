@@ -26,26 +26,17 @@ pub enum UseAsyncState<T, E> {
 impl<T, E> UseAsyncState<T, E> {
     /// Check if the future is loading.
     pub fn loading(&self) -> bool {
-        match *self {
-            Self::Loading(_) => true,
-            _ => false,
-        }
+        matches!(*self, Self::Loading(_))
     }
 
     /// Check if the future succeeded.
     pub fn succeeded(&self) -> bool {
-        match *self {
-            Self::Success(_) => true,
-            _ => false,
-        }
+        matches!(*self, Self::Success(_))
     }
 
     /// Check if the future failed.
     pub fn failed(&self) -> bool {
-        match *self {
-            Self::Failure(_) => true,
-            _ => false,
-        }
+        matches!(*self, Self::Failure(_))
     }
 }
 

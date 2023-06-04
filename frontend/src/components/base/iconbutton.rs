@@ -35,7 +35,7 @@ pub fn IconButton(props: &IconButtonProps) -> Html {
     } = props.clone();
 
     let size_class = format!("base-icon-button-{}", size.size_name());
-    let svg_path = format!("assets/svg/{}.svg", name);
+    let svg_path = format!("assets/svg/{name}.svg");
     class.push("base-icon-button-icon");
     let onclick = move |_| {
         if !disabled {

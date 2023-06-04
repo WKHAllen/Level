@@ -76,9 +76,9 @@ pub fn Alert(props: &AlertProps) -> Html {
     }
 
     let x_close = {
-        let x_close_callback = on_close.clone();
+        let x_close_callback = on_close; // .clone();
         let x_close_state = state.clone();
-        let x_close_timeout_state = timeout_state.clone();
+        let x_close_timeout_state = timeout_state; // .clone();
         move |_| {
             x_close_callback.emit(true);
             x_close_state.set(false);

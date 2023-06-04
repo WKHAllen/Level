@@ -58,7 +58,7 @@ pub fn Select(props: &SelectProps) -> Html {
         children,
     } = props.clone();
 
-    let id_state = use_state(|| new_id());
+    let id_state = use_state(new_id);
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
 
@@ -80,7 +80,7 @@ pub fn Select(props: &SelectProps) -> Html {
     });
 
     let selected_child = if *state < children.len() {
-        children.iter().skip(*state).next().clone().unwrap().into()
+        children.iter().nth(*state).unwrap().into()
     } else {
         html! {
             <SelectOption>{"Select..."}</SelectOption>
@@ -179,7 +179,7 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
         children,
     } = props.clone();
 
-    let id_state = use_state(|| new_id());
+    let id_state = use_state(new_id);
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
 
@@ -202,13 +202,7 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
 
     let selected_child = if let Some(state_value) = *state {
         if state_value < children.len() {
-            children
-                .iter()
-                .skip(state_value)
-                .next()
-                .clone()
-                .unwrap()
-                .into()
+            children.iter().nth(state_value).unwrap().into()
         } else {
             html! {
                 <SelectOption>{null_label.clone()}</SelectOption>
@@ -247,7 +241,7 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
         .collect::<Html>();
 
     let on_null_click = {
-        let null_state = state.clone();
+        let null_state = state; // .clone();
         let null_dropdown_open = dropdown_open.clone();
         move |_| {
             null_state.set(None);

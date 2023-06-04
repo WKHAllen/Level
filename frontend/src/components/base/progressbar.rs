@@ -17,7 +17,7 @@ pub fn ProgressBar(props: &ProgressBarProps) -> Html {
     let ProgressBarProps { progress, disabled } = props.clone();
 
     let width_percentage = progress * 100.0;
-    let width_style = format!("width: {}%;", width_percentage);
+    let width_style = format!("width: {width_percentage}%;");
 
     html! {
         <div class={classes!("base-progress", disabled.then_some("base-progress-disabled"))}>

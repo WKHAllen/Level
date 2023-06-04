@@ -48,7 +48,7 @@ fn new_year_value(old_year: &str, new_year: &str) -> String {
             if year_str.len() <= 4 {
                 year_str
             } else {
-                (&year_str[year_str.len() - 4..]).to_owned()
+                (year_str[year_str.len() - 4..]).to_owned()
             }
         }
         Err(_) => old_year.to_owned(),
@@ -68,7 +68,7 @@ fn new_month_value(old_month: &str, new_month: &str) -> String {
             if month_str.len() <= 2 {
                 month_str
             } else {
-                (&month_str[month_str.len() - 2..]).to_owned()
+                (month_str[month_str.len() - 2..]).to_owned()
             }
         }
         Err(_) => old_month.to_owned(),
@@ -88,7 +88,7 @@ fn new_day_value(old_day: &str, new_day: &str) -> String {
             if day_str.len() <= 2 {
                 day_str
             } else {
-                (&day_str[day_str.len() - 2..]).to_owned()
+                (day_str[day_str.len() - 2..]).to_owned()
             }
         }
         Err(_) => old_day.to_owned(),
@@ -124,16 +124,12 @@ fn check_state(
     min: &NaiveDate,
     max: &NaiveDate,
 ) -> Result<NaiveDate, String> {
-    let date = parse_date(&year_str, &month_str, &day_str)?;
+    let date = parse_date(year_str, month_str, day_str)?;
 
-    if date_within_range(&date, &min, &max) {
+    if date_within_range(&date, min, max) {
         Ok(date)
     } else {
-        Err(format!(
-            "Date must be between {} and {}",
-            min.to_string(),
-            max.to_string()
-        ))
+        Err(format!("Date must be between {min} and {max}"))
     }
 }
 
@@ -229,7 +225,7 @@ pub struct DatePickerProps {
     #[prop_or_default]
     pub label: String,
     /// The earliest date to allow.
-    #[prop_or(NaiveDate::from_ymd_opt(0000, 01, 01).unwrap())]
+    #[prop_or(NaiveDate::from_ymd_opt(0000, 1, 1).unwrap())]
     pub min: NaiveDate,
     /// The latest date to allow.
     #[prop_or(NaiveDate::from_ymd_opt(9999, 12, 31).unwrap())]
@@ -259,13 +255,13 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         disabled,
     } = props.clone();
 
-    let year_id_state = use_state(|| new_id());
+    let year_id_state = use_state(new_id);
     let year_id = (*year_id_state).clone();
     let year_node = use_node_ref();
-    let month_id_state = use_state(|| new_id());
+    let month_id_state = use_state(new_id);
     let month_id = (*month_id_state).clone();
     let month_node = use_node_ref();
-    let day_id_state = use_state(|| new_id());
+    let day_id_state = use_state(new_id);
     let day_id = (*day_id_state).clone();
     let day_node = use_node_ref();
     let calendar_open = use_state(|| false);
@@ -279,19 +275,17 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
     let viewing_calendar_month_state = use_state(|| date_picker_today().with_day(1).unwrap());
     let viewing_calendar_month_name = format!(
         "{} {}",
-        month_name(&*viewing_calendar_month_state),
+        month_name(&viewing_calendar_month_state),
         (*viewing_calendar_month_state).year()
     );
-    let prev_month_disabled = !prev_month_viewable(&*viewing_calendar_month_state, &min);
-    let next_month_disabled = !next_month_viewable(&*viewing_calendar_month_state, &max);
-    let num_days_before_month = days_before_month(&*viewing_calendar_month_state);
-    let num_days_in_month = days_in_month(&*viewing_calendar_month_state);
-    let num_days_after_month = days_after_month(&*viewing_calendar_month_state);
+    let prev_month_disabled = !prev_month_viewable(&viewing_calendar_month_state, &min);
+    let next_month_disabled = !next_month_viewable(&viewing_calendar_month_state, &max);
+    let num_days_before_month = days_before_month(&viewing_calendar_month_state);
+    let num_days_in_month = days_in_month(&viewing_calendar_month_state);
+    let num_days_after_month = days_after_month(&viewing_calendar_month_state);
 
     let update_state = {
         let local_state = state.clone();
-        let local_min = min.clone();
-        let local_max = max.clone();
         let current_year = year_value.clone();
         let current_month = month_value.clone();
         let current_day = day_value.clone();
@@ -299,8 +293,8 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
             year.unwrap_or(&current_year),
             month.unwrap_or(&current_month),
             day.unwrap_or(&current_day),
-            &local_min,
-            &local_max,
+            &min,
+            &max,
         ) {
             Ok(date) => local_state.set(Some(date)),
             Err(_) => local_state.set(None),
@@ -336,7 +330,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         let local_update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_year_value(&*year_input_state, &new_typed_value);
+            let new_value = new_year_value(&year_input_state, &new_typed_value);
             set_inner_text(&year_node_local, &new_value);
             go_to_end(&year_node_local);
             year_input_state.set(new_value.clone());
@@ -349,7 +343,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         let local_update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_month_value(&*month_input_state, &new_typed_value);
+            let new_value = new_month_value(&month_input_state, &new_typed_value);
             set_inner_text(&month_node_local, &new_value);
             go_to_end(&month_node_local);
             month_input_state.set(new_value.clone());
@@ -362,7 +356,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         let local_update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_day_value(&*day_input_state, &new_typed_value);
+            let new_value = new_day_value(&day_input_state, &new_typed_value);
             set_inner_text(&day_node_local, &new_value);
             go_to_end(&day_node_local);
             day_input_state.set(new_value.clone());
@@ -391,15 +385,13 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
     let on_prev_month_click = {
         let viewing_calendar_month_state_local = viewing_calendar_month_state.clone();
         move |_| {
-            viewing_calendar_month_state_local
-                .set(prev_month(&*viewing_calendar_month_state_local));
+            viewing_calendar_month_state_local.set(prev_month(&viewing_calendar_month_state_local));
         }
     };
     let on_next_month_click = {
         let viewing_calendar_month_state_local = viewing_calendar_month_state.clone();
         move |_| {
-            viewing_calendar_month_state_local
-                .set(next_month(&*viewing_calendar_month_state_local));
+            viewing_calendar_month_state_local.set(next_month(&viewing_calendar_month_state_local));
         }
     };
 
@@ -420,7 +412,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
             let month_state_local = month_state.clone();
             let day_state_local = day_state.clone();
 
-            let this_day = calendar_day(&*viewing_calendar_month_state, i).unwrap();
+            let this_day = calendar_day(&viewing_calendar_month_state, i).unwrap();
             let day_selected = *state == Some(this_day);
             let day_today = this_day == today;
             let day_disabled = !date_within_range(&this_day, &min, &max);

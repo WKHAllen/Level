@@ -128,7 +128,7 @@ impl AccountTransaction {
     /// Gets the subcategory in which the transaction exists.
     pub async fn get_subcategory(&self, db: &mut DB) -> Option<Subcategory> {
         match &self.subcategory_id {
-            Some(subcategory_id) => Some(Subcategory::get(db, &subcategory_id).await.unwrap()),
+            Some(subcategory_id) => Some(Subcategory::get(db, subcategory_id).await.unwrap()),
             None => None,
         }
     }
@@ -358,7 +358,7 @@ mod tests {
             "Breakfast",
             "Breakfast at IHOP",
             16.75,
-            NaiveDate::from_ymd_opt(2023, 04, 01).unwrap(),
+            NaiveDate::from_ymd_opt(2023, 4, 1).unwrap(),
             &category1,
             Some(&subcategory1),
         )
@@ -370,7 +370,7 @@ mod tests {
             "Another transaction",
             "",
             20.00,
-            NaiveDate::from_ymd_opt(2020, 03, 15).unwrap(),
+            NaiveDate::from_ymd_opt(2020, 3, 15).unwrap(),
             &category2,
             None,
         )
@@ -382,7 +382,7 @@ mod tests {
             "",
             "",
             0.00,
-            NaiveDate::from_ymd_opt(2023, 01, 01).unwrap(),
+            NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
             &category1,
             Some(&subcategory2)
         )
@@ -394,7 +394,7 @@ mod tests {
             "",
             "",
             0.00,
-            NaiveDate::from_ymd_opt(2023, 01, 01).unwrap(),
+            NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
             &category2,
             Some(&subcategory1)
         )
@@ -442,9 +442,9 @@ mod tests {
 
         // Get date
         let date1 = transaction1.get_date();
-        assert_eq!(date1, NaiveDate::from_ymd_opt(2023, 04, 01).unwrap());
+        assert_eq!(date1, NaiveDate::from_ymd_opt(2023, 4, 1).unwrap());
         let date2 = transaction2.get_date();
-        assert_eq!(date2, NaiveDate::from_ymd_opt(2020, 03, 15).unwrap());
+        assert_eq!(date2, NaiveDate::from_ymd_opt(2020, 3, 15).unwrap());
 
         // Get category
         let category3 = transaction1.get_category(&mut db).await;
@@ -509,11 +509,11 @@ mod tests {
 
         // Set date
         transaction1
-            .set_date(&mut db, NaiveDate::from_ymd_opt(2020, 06, 27).unwrap())
+            .set_date(&mut db, NaiveDate::from_ymd_opt(2020, 6, 27).unwrap())
             .await;
         assert_eq!(
             transaction1.transaction_date.date(),
-            NaiveDate::from_ymd_opt(2020, 06, 27).unwrap()
+            NaiveDate::from_ymd_opt(2020, 6, 27).unwrap()
         );
         let transaction11 = AccountTransaction::get(&mut db, &transaction1.id)
             .await

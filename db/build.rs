@@ -17,7 +17,7 @@ const TABLES: &[&str] = &[
 
 /// Initialize a database table.
 async fn init_table(conn: &mut SqliteConnection, table: &str) -> Result<()> {
-    let sql_path = format!("sql/init/{}.sql", table);
+    let sql_path = format!("sql/init/{table}.sql");
     let sql_bytes = fs::read(sql_path).await?;
     let sql_str = String::from_utf8(sql_bytes)?;
 

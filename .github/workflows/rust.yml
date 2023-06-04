@@ -50,3 +50,6 @@ jobs:
         run: cargo test --verbose -- --nocapture
         env:
           DATABASE_URL: sqlite:temp/test_db.db
+
+      - name: Lint
+        run: cargo clippy --verbose -- -D warnings

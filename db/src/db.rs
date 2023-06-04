@@ -18,7 +18,7 @@ pub(crate) const DB_EXT: &str = "db";
 
 /// Gets the path to a database file.
 pub(crate) fn get_db_path(name: &str) -> String {
-    let file_name = convert_file_name(&name);
+    let file_name = convert_file_name(name);
     let root_path = project_root::get_project_root().unwrap();
     let db_path = format!(
         "{}/{}/{}.{}",

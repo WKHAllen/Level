@@ -51,7 +51,7 @@ pub fn Icon(props: &IconProps) -> Html {
     } = props.clone();
 
     let size_class = format!("base-icon-{}", size.size_name());
-    let svg_path = format!("assets/svg/{}.svg", name);
+    let svg_path = format!("assets/svg/{name}.svg");
     class.push("base-icon");
     class.push(size_class);
 

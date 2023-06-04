@@ -73,7 +73,7 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
         children,
     } = props.clone();
 
-    let name_state = use_state(|| new_id());
+    let name_state = use_state(new_id);
     let name = (*name_state).clone();
     let id_states = use_state(|| {
         vec![false; children.len()]

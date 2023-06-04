@@ -36,18 +36,18 @@ pub fn Slider<N: Number + 'static>(props: &SliderProps<N>) -> Html {
         disabled,
     } = props.clone();
 
-    let id_state = use_state(|| new_id());
+    let id_state = use_state(new_id);
     let id = (*id_state).clone();
     let value = *state;
     let progress = (value.as_f64() - min.as_f64()) / (max.as_f64() - min.as_f64());
     let width_percentage =
         ((value.as_f64() - min.as_f64()) * 100.0f64) / (max.as_f64() - min.as_f64());
-    let thumb_transform_style = format!("left: {}%", width_percentage);
+    let thumb_transform_style = format!("left: {width_percentage}%");
     let oninput = move |event: InputEvent| {
         let value_str = input_event_value(event);
         let value = value_str
             .parse::<N>()
-            .map_err(|_| format!("failed to parse '{}' as a number", value_str))
+            .map_err(|_| format!("failed to parse '{value_str}' as a number"))
             .unwrap();
         state.set(value);
     };

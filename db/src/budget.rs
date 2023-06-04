@@ -35,14 +35,14 @@ impl Budget {
         timeframe: Timeframe,
         timeframe_offset: NaiveDateTime,
     ) -> Result<Self, BudgetError> {
-        match Self::get(db, &account).await {
+        match Self::get(db, account).await {
             Some(_budget) => Err(BudgetError::BudgetAlreadyExists),
             None => {
                 let timeframe_name = timeframe.to_internal_name();
 
                 sqlx::query!("INSERT INTO budget (account_id, note, total_limit, timeframe, timeframe_offset) VALUES (?, ?, ?, ?, ?);", account.id, note, limit, timeframe_name, timeframe_offset).execute(&mut **db).await.unwrap();
 
-                Ok(Self::get(db, &account).await.unwrap())
+                Ok(Self::get(db, account).await.unwrap())
             }
         }
     }
