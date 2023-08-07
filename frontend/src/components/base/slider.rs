@@ -9,7 +9,7 @@ pub struct SliderProps<N: Number> {
     pub state: UseStateHandle<N>,
     /// The slider label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// The minimum value.
     #[prop_or(N::NUMBER_MIN)]
     pub min: N,

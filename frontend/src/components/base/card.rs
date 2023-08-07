@@ -7,7 +7,7 @@ pub struct CardProps {
     #[prop_or(false)]
     pub interactive: bool,
     /// The card click callback.
-    #[prop_or(Callback::from(|_| ()))]
+    #[prop_or_default]
     pub on_click: Callback<()>,
     /// Elements within the card.
     pub children: Children,

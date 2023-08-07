@@ -97,16 +97,16 @@ pub struct ChipsProps {
     pub option_limit: usize,
     /// The chips input label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// Chips input placeholder text.
     #[prop_or_default]
-    pub placeholder: String,
+    pub placeholder: AttrValue,
     /// The maximum number of characters allowed in the chip input.
     #[prop_or(524288)]
     pub max_length: usize,
     /// An optional error message.
     #[prop_or_default]
-    pub error: Option<String>,
+    pub error: Option<AttrValue>,
     /// Whether the chip input is disabled.
     #[prop_or(false)]
     pub disabled: bool,

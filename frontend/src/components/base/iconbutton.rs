@@ -8,7 +8,7 @@ pub type IconButtonSize = IconSize;
 #[derive(Properties, PartialEq, Clone)]
 pub struct IconButtonProps {
     /// Icon name.
-    pub name: String,
+    pub name: AttrValue,
     /// The size of the icon button.
     #[prop_or_default]
     pub size: IconButtonSize,
@@ -16,7 +16,7 @@ pub struct IconButtonProps {
     #[prop_or(false)]
     pub disabled: bool,
     /// The icon button click callback.
-    #[prop_or(Callback::from(|_| ()))]
+    #[prop_or_default]
     pub on_click: Callback<()>,
     /// Classes to apply to the icon.
     #[prop_or_default]

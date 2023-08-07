@@ -223,7 +223,7 @@ pub struct DatePickerProps {
     pub state: UseStateHandle<Option<NaiveDate>>,
     /// The date picker label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// The earliest date to allow.
     #[prop_or(NaiveDate::from_ymd_opt(0000, 1, 1).unwrap())]
     pub min: NaiveDate,
@@ -236,7 +236,7 @@ pub struct DatePickerProps {
     /// An optional error message. This may not show at times, as it will be
     /// overridden by a different error message if validation fails.
     #[prop_or_default]
-    pub error: Option<String>,
+    pub error: Option<AttrValue>,
     /// Whether the date picker is disabled.
     #[prop_or(false)]
     pub disabled: bool,
@@ -303,6 +303,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
 
     let error_msg = check_state(&year_value, &month_value, &day_value, &min, &max)
         .err()
+        .map(|err| err.into())
         .or(error);
 
     let year_on_focus_in = {

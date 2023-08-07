@@ -323,7 +323,7 @@ pub fn Demo() -> Html {
                 <Button text="Open 5 second alert" on_click={move |_| alert_finite_button_state.set(true)} />
                 <Alert
                     state={alert_finite_state}
-                    title="Finite alert"
+                    title={"Finite alert".to_string()}
                     duration={AlertDuration::Finite(5)}
                     on_close={move |manual| alert_finite_close_state.set(Some(manual))}
                 >

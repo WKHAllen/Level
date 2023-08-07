@@ -42,10 +42,10 @@ pub struct InputProps {
     pub input_type: InputType,
     /// The input label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// Input placeholder text.
     #[prop_or_default]
-    pub placeholder: String,
+    pub placeholder: AttrValue,
     /// The maximum number of characters allowed.
     #[prop_or(524288)]
     pub max_length: usize,
@@ -54,7 +54,7 @@ pub struct InputProps {
     pub required: bool,
     /// An optional error message.
     #[prop_or_default]
-    pub error: Option<String>,
+    pub error: Option<AttrValue>,
     /// Whether the input is disabled.
     #[prop_or(false)]
     pub disabled: bool,

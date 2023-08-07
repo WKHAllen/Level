@@ -28,7 +28,7 @@ impl IconSize {
 #[derive(Properties, PartialEq, Clone)]
 pub struct IconProps {
     /// Icon name.
-    pub name: String,
+    pub name: AttrValue,
     /// The size of the icon.
     #[prop_or_default]
     pub size: IconSize,

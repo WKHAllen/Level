@@ -142,10 +142,10 @@ pub struct NumberInputProps<N: Number> {
     pub state: UseStateHandle<N>,
     /// The number input label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// Number input placeholder text.
     #[prop_or_default]
-    pub placeholder: String,
+    pub placeholder: AttrValue,
     /// The minimum value.
     #[prop_or(N::NUMBER_MIN)]
     pub min: N,
@@ -160,7 +160,7 @@ pub struct NumberInputProps<N: Number> {
     pub required: bool,
     /// An optional error message.
     #[prop_or_default]
-    pub error: Option<String>,
+    pub error: Option<AttrValue>,
     /// Whether the input is disabled.
     #[prop_or(false)]
     pub disabled: bool,

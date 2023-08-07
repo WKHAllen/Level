@@ -32,13 +32,13 @@ pub struct SelectProps {
     pub state: UseStateHandle<usize>,
     /// The selection label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// Whether a selection is required.
     #[prop_or(false)]
     pub required: bool,
     /// An optional error message.
     #[prop_or_default]
-    pub error: Option<String>,
+    pub error: Option<AttrValue>,
     /// Whether the selection is disabled.
     #[prop_or(false)]
     pub disabled: bool,
@@ -149,16 +149,16 @@ pub struct SelectWithNullProps {
     pub state: UseStateHandle<Option<usize>>,
     /// The selection label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// The null option label.
-    #[prop_or("Select...".to_owned())]
-    pub null_label: String,
+    #[prop_or("Select...".into())]
+    pub null_label: AttrValue,
     /// Whether the selection is required to be in a non-null state.
     #[prop_or(false)]
     pub required: bool,
     /// An optional error message.
     #[prop_or_default]
-    pub error: Option<String>,
+    pub error: Option<AttrValue>,
     /// Whether the selection is disabled.
     #[prop_or(false)]
     pub disabled: bool,

@@ -8,7 +8,7 @@ pub struct CheckboxProps {
     pub state: UseStateHandle<bool>,
     /// The checkbox label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// Whether the checkbox is disabled.
     #[prop_or(false)]
     pub disabled: bool,

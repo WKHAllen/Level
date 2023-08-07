@@ -60,16 +60,16 @@ pub struct DialogProps {
     pub size: DialogSize,
     /// The dialog title.
     #[prop_or_default]
-    pub title: String,
+    pub title: AttrValue,
     /// The ok button label. Will not be created if empty.
     #[prop_or_default]
-    pub ok_label: String,
+    pub ok_label: AttrValue,
     /// The cancel button label. Will not be created if empty.
     #[prop_or_default]
-    pub cancel_label: String,
+    pub cancel_label: AttrValue,
     /// The callback called with the dialog closing state. Receives `true` if
     /// the ok button was clicked and `false` otherwise.
-    #[prop_or(Callback::from(|_| ()))]
+    #[prop_or_default]
     pub on_close: Callback<bool>,
     /// The layout of action buttons.
     #[prop_or_default]

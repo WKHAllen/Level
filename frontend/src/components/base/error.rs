@@ -34,7 +34,7 @@ impl ErrorSize {
 pub struct ErrorProps {
     /// The error message.
     #[prop_or_default]
-    pub message: Option<String>,
+    pub message: Option<AttrValue>,
     /// The size of the error message.
     #[prop_or_default]
     pub size: ErrorSize,

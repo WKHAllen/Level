@@ -30,13 +30,13 @@ pub struct AlertProps {
     pub state: UseStateHandle<bool>,
     /// The alert title.
     #[prop_or_default]
-    pub title: String,
+    pub title: AttrValue,
     /// The duration of time for which the alert should exist.
     #[prop_or_default]
     pub duration: AlertDuration,
     /// The callback called with the alert closing state. Receives `true` if
     /// the alert was closed manually and `false` otherwise.
-    #[prop_or(Callback::from(|_| ()))]
+    #[prop_or_default]
     pub on_close: Callback<bool>,
     /// Elements within the alert.
     pub children: Children,

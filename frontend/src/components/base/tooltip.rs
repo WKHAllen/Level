@@ -4,7 +4,7 @@ use yew::prelude::*;
 #[derive(Properties, PartialEq, Clone)]
 pub struct TooltipProps {
     /// The tooltip text.
-    pub text: String,
+    pub text: AttrValue,
     /// Whether the tooltip is disabled.
     #[prop_or(false)]
     pub disabled: bool,

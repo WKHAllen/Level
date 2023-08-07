@@ -8,7 +8,7 @@ pub struct SwitchProps {
     pub state: UseStateHandle<bool>,
     /// The switch label.
     #[prop_or_default]
-    pub label: String,
+    pub label: AttrValue,
     /// Whether the switch is disabled.
     #[prop_or(false)]
     pub disabled: bool,

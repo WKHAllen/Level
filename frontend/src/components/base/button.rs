@@ -31,7 +31,7 @@ impl ButtonStyle {
 #[derive(Properties, PartialEq, Clone)]
 pub struct ButtonProps {
     /// The text on the button.
-    pub text: String,
+    pub text: AttrValue,
     /// The button style.
     #[prop_or_default]
     pub style: ButtonStyle,
@@ -39,7 +39,7 @@ pub struct ButtonProps {
     #[prop_or(false)]
     pub disabled: bool,
     /// The button click callback.
-    #[prop_or(Callback::from(|_| ()))]
+    #[prop_or_default]
     pub on_click: Callback<()>,
 }
 
