@@ -53,19 +53,21 @@ pub fn Alert(props: &AlertProps) -> Html {
         children,
     } = props.clone();
 
-    let timeout_close_callback = on_close.clone();
-    let timeout_close_state = state.clone();
     let timeout_state = use_state(|| None);
-    let timeout_state_close = timeout_state.clone();
 
     if *state && !duration.is_infinite() && timeout_state.is_none() {
         timeout_state.set(match duration {
             AlertDuration::Finite(seconds) => {
                 if *state {
-                    Some(Timeout::new(seconds * 1000, move || {
-                        timeout_close_callback.emit(false);
-                        timeout_close_state.set(false);
-                        timeout_state_close.set(None);
+                    Some(Timeout::new(seconds * 1000, {
+                        let on_close = on_close.clone();
+                        let state = state.clone();
+                        let timeout_state = timeout_state.clone();
+                        move || {
+                            on_close.emit(false);
+                            state.set(false);
+                            timeout_state.set(None);
+                        }
                     }))
                 } else {
                     None
@@ -76,13 +78,11 @@ pub fn Alert(props: &AlertProps) -> Html {
     }
 
     let x_close = {
-        let x_close_callback = on_close; // .clone();
-        let x_close_state = state.clone();
-        let x_close_timeout_state = timeout_state; // .clone();
+        let state = state.clone();
         move |_| {
-            x_close_callback.emit(true);
-            x_close_state.set(false);
-            x_close_timeout_state.set(None); // timeout is cancelled when dropped
+            on_close.emit(true);
+            state.set(false);
+            timeout_state.set(None); // timeout is cancelled when dropped
         }
     };
 

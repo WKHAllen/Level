@@ -96,9 +96,11 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
             let id = ids[index].clone();
             let checked = state.filter(|value| *value == index).is_some();
             let this_disabled = disabled || child_disabled;
-            let child_state = state.clone();
-            let oninput = move |_| {
-                child_state.set(Some(index));
+            let oninput = {
+                let state = state.clone();
+                move |_| {
+                    state.set(Some(index));
+                }
             };
 
             html! {

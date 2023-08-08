@@ -95,7 +95,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
                 {required}
                 {disabled}
                 maxlength={max_length.to_string()}
-                class={classes!("base-textarea", resize_class, error.clone().map(|_| "base-textarea-invalid"))}
+                class={classes!("base-textarea", resize_class, error.as_ref().map(|_| "base-textarea-invalid"))}
             />
             <Error message={error} size={ErrorSize::Small} />
         </div>

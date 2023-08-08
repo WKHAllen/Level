@@ -98,7 +98,7 @@ pub fn Input(props: &InputProps) -> Html {
                 {required}
                 {disabled}
                 maxlength={max_length.to_string()}
-                class={classes!("base-input", error.clone().map(|_| "base-input-invalid"))}
+                class={classes!("base-input", error.as_ref().map(|_| "base-input-invalid"))}
             />
             <Error message={error} size={ErrorSize::Small} />
         </div>

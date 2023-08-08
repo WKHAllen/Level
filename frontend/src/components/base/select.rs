@@ -63,19 +63,19 @@ pub fn Select(props: &SelectProps) -> Html {
     let dropdown_open = use_state(|| false);
 
     let on_button_click = {
-        let dropdown_open_local = dropdown_open.clone();
+        let dropdown_open = dropdown_open.clone();
         move |_| {
             if !disabled {
-                dropdown_open_local.set(!*dropdown_open_local);
+                dropdown_open.set(!*dropdown_open);
             }
         }
     };
 
     let select_node = use_node_ref();
     use_click_away(select_node.clone(), {
-        let dropdown_open_local = dropdown_open.clone();
+        let dropdown_open = dropdown_open.clone();
         move |_| {
-            dropdown_open_local.set(false);
+            dropdown_open.set(false);
         }
     });
 
@@ -96,12 +96,14 @@ pub fn Select(props: &SelectProps) -> Html {
                 children: child_children,
             } = (*child.props).clone();
 
-            let child_state = state.clone();
-            let child_dropdown_open = dropdown_open.clone();
-            let on_child_click = move |_| {
-                if !child_disabled {
-                    child_state.set(index);
-                    child_dropdown_open.set(false);
+            let on_child_click = {
+                let state = state.clone();
+                let dropdown_open = dropdown_open.clone();
+                move |_| {
+                    if !child_disabled {
+                        state.set(index);
+                        dropdown_open.set(false);
+                    }
                 }
             };
 
@@ -124,7 +126,7 @@ pub fn Select(props: &SelectProps) -> Html {
                     {id}
                     onclick={on_button_click}
                     {disabled}
-                    class={classes!("base-select-button", error.clone().map(|_| "base-select-button-invalid"))}
+                    class={classes!("base-select-button", error.as_ref().map(|_| "base-select-button-invalid"))}
                 >
                     <div class="base-select-button-selection">
                         {selected_child}
@@ -184,19 +186,19 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
     let dropdown_open = use_state(|| false);
 
     let on_button_click = {
-        let dropdown_open_local = dropdown_open.clone();
+        let dropdown_open = dropdown_open.clone();
         move |_| {
             if !disabled {
-                dropdown_open_local.set(!*dropdown_open_local);
+                dropdown_open.set(!*dropdown_open);
             }
         }
     };
 
     let select_node = use_node_ref();
     use_click_away(select_node.clone(), {
-        let dropdown_open_local = dropdown_open.clone();
+        let dropdown_open = dropdown_open.clone();
         move |_| {
-            dropdown_open_local.set(false);
+            dropdown_open.set(false);
         }
     });
 
@@ -223,12 +225,14 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
                 children: child_children,
             } = (*child.props).clone();
 
-            let child_state = state.clone();
-            let child_dropdown_open = dropdown_open.clone();
-            let on_child_click = move |_| {
-                if !child_disabled {
-                    child_state.set(Some(index));
-                    child_dropdown_open.set(false);
+            let on_child_click = {
+                let state = state.clone();
+                let dropdown_open = dropdown_open.clone();
+                move |_| {
+                    if !child_disabled {
+                        state.set(Some(index));
+                        dropdown_open.set(false);
+                    }
                 }
             };
 
@@ -241,11 +245,10 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
         .collect::<Html>();
 
     let on_null_click = {
-        let null_state = state; // .clone();
-        let null_dropdown_open = dropdown_open.clone();
+        let dropdown_open = dropdown_open.clone();
         move |_| {
-            null_state.set(None);
-            null_dropdown_open.set(false);
+            state.set(None);
+            dropdown_open.set(false);
         }
     };
 
@@ -260,7 +263,7 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
                     {id}
                     onclick={on_button_click}
                     {disabled}
-                    class={classes!("base-select-button", error.clone().map(|_| "base-select-button-invalid"))}
+                    class={classes!("base-select-button", error.as_ref().map(|_| "base-select-button-invalid"))}
                 >
                     <div class="base-select-button-selection">
                         {selected_child}

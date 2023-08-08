@@ -96,49 +96,49 @@ pub fn Dialog(props: &DialogProps) -> Html {
     let actions_layout_class = format!("base-dialog-actions-{}", actions_layout.layout_name());
 
     let x_close = {
-        let x_close_callback = on_close.clone();
-        let x_close_state = state.clone();
+        let on_close = on_close.clone();
+        let state = state.clone();
         move |_| {
-            x_close_callback.emit(false);
-            x_close_state.set(false);
+            on_close.emit(false);
+            state.set(false);
         }
     };
     let ok_close = {
-        let ok_close_callback = on_close.clone();
-        let ok_close_state = state.clone();
+        let on_close = on_close.clone();
+        let state = state.clone();
         move |_| {
-            ok_close_callback.emit(true);
-            ok_close_state.set(false);
+            on_close.emit(true);
+            state.set(false);
         }
     };
     let cancel_close = {
-        let cancel_close_callback = on_close.clone();
-        let cancel_close_state = state.clone();
+        let on_close = on_close.clone();
+        let state = state.clone();
         move |_| {
-            cancel_close_callback.emit(false);
-            cancel_close_state.set(false);
+            on_close.emit(false);
+            state.set(false);
         }
     };
 
     let mouse_in_state = use_state(|| false);
     let dialog_mousein = {
-        let dialog_mouse_in_state = mouse_in_state.clone();
+        let mouse_in_state = mouse_in_state.clone();
         move |_| {
-            dialog_mouse_in_state.set(true);
+            mouse_in_state.set(true);
         }
     };
     let dialog_mouseout = {
-        let dialog_mouse_out_state = mouse_in_state.clone();
+        let mouse_in_state = mouse_in_state.clone();
         move |_| {
-            dialog_mouse_out_state.set(false);
+            mouse_in_state.set(false);
         }
     };
     let container_click = {
-        let container_click_state = state.clone();
+        let state = state.clone();
         move |_| {
             if !*mouse_in_state {
                 on_close.emit(false);
-                container_click_state.set(false);
+                state.set(false);
             }
         }
     };

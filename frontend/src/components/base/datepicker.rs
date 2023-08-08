@@ -285,7 +285,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
     let num_days_after_month = days_after_month(&viewing_calendar_month_state);
 
     let update_state = {
-        let local_state = state.clone();
+        let state = state.clone();
         let current_year = year_value.clone();
         let current_month = month_value.clone();
         let current_day = day_value.clone();
@@ -296,8 +296,8 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
             &min,
             &max,
         ) {
-            Ok(date) => local_state.set(Some(date)),
-            Err(_) => local_state.set(None),
+            Ok(date) => state.set(Some(date)),
+            Err(_) => state.set(None),
         }
     };
 
@@ -307,92 +307,90 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         .or(error);
 
     let year_on_focus_in = {
-        let year_node_local = year_node.clone();
+        let year_node = year_node.clone();
         move |_| {
-            select_element_content(&year_node_local);
+            select_element_content(&year_node);
         }
     };
     let month_on_focus_in = {
-        let month_node_local = month_node.clone();
+        let month_node = month_node.clone();
         move |_| {
-            select_element_content(&month_node_local);
+            select_element_content(&month_node);
         }
     };
     let day_on_focus_in = {
-        let day_node_local = day_node.clone();
+        let day_node = day_node.clone();
         move |_| {
-            select_element_content(&day_node_local);
+            select_element_content(&day_node);
         }
     };
 
     let year_on_input = {
-        let year_node_local = year_node.clone();
-        let year_input_state = year_state.clone();
-        let local_update_state = update_state.clone();
+        let year_node = year_node.clone();
+        let year_state = year_state.clone();
+        let update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_year_value(&year_input_state, &new_typed_value);
-            set_inner_text(&year_node_local, &new_value);
-            go_to_end(&year_node_local);
-            year_input_state.set(new_value.clone());
-            local_update_state(Some(&new_value), None, None);
+            let new_value = new_year_value(&year_state, &new_typed_value);
+            set_inner_text(&year_node, &new_value);
+            go_to_end(&year_node);
+            year_state.set(new_value.clone());
+            update_state(Some(&new_value), None, None);
         }
     };
     let month_on_input = {
-        let month_node_local = month_node.clone();
-        let month_input_state = month_state.clone();
-        let local_update_state = update_state.clone();
+        let month_node = month_node.clone();
+        let month_state = month_state.clone();
+        let update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_month_value(&month_input_state, &new_typed_value);
-            set_inner_text(&month_node_local, &new_value);
-            go_to_end(&month_node_local);
-            month_input_state.set(new_value.clone());
-            local_update_state(None, Some(&new_value), None);
+            let new_value = new_month_value(&month_state, &new_typed_value);
+            set_inner_text(&month_node, &new_value);
+            go_to_end(&month_node);
+            month_state.set(new_value.clone());
+            update_state(None, Some(&new_value), None);
         }
     };
     let day_on_input = {
-        let day_node_local = day_node.clone();
-        let day_input_state = day_state.clone();
-        let local_update_state = update_state.clone();
+        let day_node = day_node.clone();
+        let day_state = day_state.clone();
+        let update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_day_value(&day_input_state, &new_typed_value);
-            set_inner_text(&day_node_local, &new_value);
-            go_to_end(&day_node_local);
-            day_input_state.set(new_value.clone());
-            local_update_state(None, None, Some(&new_value));
+            let new_value = new_day_value(&day_state, &new_typed_value);
+            set_inner_text(&day_node, &new_value);
+            go_to_end(&day_node);
+            day_state.set(new_value.clone());
+            update_state(None, None, Some(&new_value));
         }
     };
 
-    let on_calendar_focus_in = |_| {
-        clear_selections();
-    };
+    let on_calendar_focus_in = |_| clear_selections();
     let on_calendar_button_click = {
-        let calendar_open_local = calendar_open.clone();
+        let calendar_open = calendar_open.clone();
         move |_| {
-            calendar_open_local.set(true);
+            calendar_open.set(true);
         }
     };
 
     let popup_node = use_node_ref();
     use_click_away(popup_node.clone(), {
-        let calendar_open_local = calendar_open.clone();
+        let calendar_open = calendar_open.clone();
         move |_| {
-            calendar_open_local.set(false);
+            calendar_open.set(false);
         }
     });
 
     let on_prev_month_click = {
-        let viewing_calendar_month_state_local = viewing_calendar_month_state.clone();
+        let viewing_calendar_month_state = viewing_calendar_month_state.clone();
         move |_| {
-            viewing_calendar_month_state_local.set(prev_month(&viewing_calendar_month_state_local));
+            viewing_calendar_month_state.set(prev_month(&viewing_calendar_month_state));
         }
     };
     let on_next_month_click = {
-        let viewing_calendar_month_state_local = viewing_calendar_month_state.clone();
+        let viewing_calendar_month_state = viewing_calendar_month_state.clone();
         move |_| {
-            viewing_calendar_month_state_local.set(next_month(&viewing_calendar_month_state_local));
+            viewing_calendar_month_state.set(next_month(&viewing_calendar_month_state));
         }
     };
 
@@ -405,33 +403,33 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         .collect::<Html>();
     let calendar_days_current = (1..=num_days_in_month)
         .map(|i| {
-            let state_local = state.clone();
-            let calendar_open_local = calendar_open.clone();
-            let year_state_local = year_state.clone();
-            let month_state_local = month_state.clone();
-            let day_state_local = day_state.clone();
-
             let this_day = calendar_day(&viewing_calendar_month_state, i).unwrap();
             let day_selected = *state == Some(this_day);
             let day_today = this_day == today;
             let day_disabled = !date_within_range(&this_day, &min, &max);
 
-            let year_node_local = year_node.clone();
-            let month_node_local = month_node.clone();
-            let day_node_local = day_node.clone();
-
-            let day_on_click = move |_| {
-                state_local.set(Some(this_day));
-                calendar_open_local.set(false);
-                let year_str = year_to_string(this_day.year());
-                let month_str = month_to_string(this_day.month());
-                let day_str = day_to_string(this_day.day());
-                set_inner_text(&year_node_local, &year_str);
-                set_inner_text(&month_node_local, &month_str);
-                set_inner_text(&day_node_local, &day_str);
-                year_state_local.set(year_str);
-                month_state_local.set(month_str);
-                day_state_local.set(day_str);
+            let day_on_click = {
+                let year_node = year_node.clone();
+                let month_node = month_node.clone();
+                let day_node = day_node.clone();
+                let state = state.clone();
+                let calendar_open = calendar_open.clone();
+                let year_state = year_state.clone();
+                let month_state = month_state.clone();
+                let day_state = day_state.clone();
+                move |_| {
+                    state.set(Some(this_day));
+                    calendar_open.set(false);
+                    let year_str = year_to_string(this_day.year());
+                    let month_str = month_to_string(this_day.month());
+                    let day_str = day_to_string(this_day.day());
+                    set_inner_text(&year_node, &year_str);
+                    set_inner_text(&month_node, &month_str);
+                    set_inner_text(&day_node, &day_str);
+                    year_state.set(year_str);
+                    month_state.set(month_str);
+                    day_state.set(day_str);
+                }
             };
 
             html! {
