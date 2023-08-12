@@ -7,6 +7,9 @@ use yew::prelude::*;
 pub fn Demo() -> Html {
     let input_state = use_state(|| "Input value".to_owned());
     let input_value = (*input_state).clone();
+    let input_value1 = input_value.clone();
+    let input_submitted_state = use_state(|| None);
+    let input_submitted_value = (*input_submitted_state).clone();
     let textarea_state = use_state(|| "Textarea value".to_owned());
     let textarea_value = (*textarea_state).clone();
     let textarea_state1 = use_state(String::new);
@@ -99,54 +102,178 @@ pub fn Demo() -> Html {
         <div class="base-demo">
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Error"}</span>
-                <Error message="The smallest error message" size={ErrorSize::Smaller} />
-                <Error message="The small error message" size={ErrorSize::Small} />
-                <Error message="The medium size error message" size={ErrorSize::Medium} />
-                <Error message="The large error message" size={ErrorSize::Large} />
-                <Error message="The largest error message" size={ErrorSize::Larger} />
+                <Error
+                    message="The smallest error message"
+                    size={ErrorSize::Smaller}
+                />
+                <Error
+                    message="The small error message"
+                    size={ErrorSize::Small}
+                />
+                <Error
+                    message="The medium size error message"
+                    size={ErrorSize::Medium}
+                />
+                <Error
+                    message="The large error message"
+                    size={ErrorSize::Large}
+                />
+                <Error
+                    message="The largest error message"
+                    size={ErrorSize::Larger}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Input"}</span>
-                <Input state={input_state.clone()} label="Input label" placeholder="Placeholder!" required={true} error={input_value.is_empty().then_some("Please enter a value")} />
-                <span>{"Value: "}{input_value}</span>
-                <Input state={input_state} label="Disabled input" disabled={true} />
+                <Input
+                    state={input_state.clone()}
+                    label="Input label"
+                    placeholder="Placeholder!"
+                    on_submit={move |_| input_submitted_state.set(Some(input_value1.clone()))}
+                    required={true}
+                    error={input_value.is_empty().then_some("Please enter a value")}
+                />
+                <span>
+                    {"Value: "}
+                    {input_value}
+                </span>
+                <span>
+                    {"Submitted value: "}
+                    {input_submitted_value.unwrap_or("None".to_owned())}
+                </span>
+                <Input
+                    state={input_state}
+                    label="Disabled input"
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Textarea"}</span>
-                <TextArea state={textarea_state.clone()} label="Textarea label" placeholder="Placeholder!" required={true} error={textarea_value.is_empty().then_some("Please enter a value")} />
-                <span>{"Value: "}{textarea_value}</span>
-                <TextArea state={textarea_state} label="Disabled textarea" disabled={true} resize={TextAreaResize::Horizontal} />
-                <TextArea state={textarea_state1} label="Vertical resize" resize={TextAreaResize::Vertical} />
-                <TextArea state={textarea_state2} label="Full resize" resize={TextAreaResize::Both} />
+                <TextArea
+                    state={textarea_state.clone()}
+                    label="Textarea label"
+                    placeholder="Placeholder!"
+                    required={true}
+                    error={textarea_value.is_empty().then_some("Please enter a value")}
+                />
+                <span>
+                    {"Value: "}
+                    {textarea_value}
+                </span>
+                <TextArea
+                    state={textarea_state}
+                    label="Disabled textarea"
+                    disabled={true}
+                    resize={TextAreaResize::Horizontal}
+                />
+                <TextArea
+                    state={textarea_state1}
+                    label="Vertical resize"
+                    resize={TextAreaResize::Vertical}
+                />
+                <TextArea
+                    state={textarea_state2}
+                    label="Full resize"
+                    resize={TextAreaResize::Both}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Number input"}</span>
-                <NumberInput<u16> state={numberinput_int_state.clone()} label="Int number input label" placeholder="Placeholder!" min={0} max={100} required={true} error={(numberinput_int_value == 3).then_some("How about something other than 3")} />
-                <span>{"Value: "}{numberinput_int_value}</span>
-                <NumberInput<f64> state={numberinput_float_state} label="Float number input label" placeholder="Placeholder!" min={-5.0} max={5.0} decimals={5} required={true} error={(numberinput_float_value == 1.618).then_some("No phi, please")} />
-                <span>{"Value: "}{numberinput_float_value}</span>
-                <NumberInput<u16> state={numberinput_int_state} label="Disabled number input" disabled={true} />
+                <NumberInput<u16>
+                    state={numberinput_int_state.clone()}
+                    label="Int number input label"
+                    placeholder="Placeholder!"
+                    min={0}
+                    max={100}
+                    required={true}
+                    error={(numberinput_int_value == 3).then_some("How about something other than 3")}
+                />
+                <span>
+                    {"Value: "}
+                    {numberinput_int_value}
+                </span>
+                <NumberInput<f64>
+                    state={numberinput_float_state}
+                    label="Float number input label"
+                    placeholder="Placeholder!"
+                    min={-5.0}
+                    max={5.0}
+                    decimals={5}
+                    required={true}
+                    error={(numberinput_float_value == 1.618).then_some("No phi, please")}
+                />
+                <span>
+                    {"Value: "}
+                    {numberinput_float_value}
+                </span>
+                <NumberInput<u16>
+                    state={numberinput_int_state}
+                    label="Disabled number input"
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Button"}</span>
-                <Button text="Primary" on_click={move |_| button_state_primary.set(ButtonStyle::Primary)} />
-                <Button text="Secondary" style={ButtonStyle::Secondary} on_click={move |_| button_state_secondary.set(ButtonStyle::Secondary)} />
-                <Button text="Transparent" style={ButtonStyle::Transparent} on_click={move |_| button_state_transparent.set(ButtonStyle::Transparent)} />
-                <Button text="Danger" style={ButtonStyle::Danger} on_click={move |_| button_state_danger.set(ButtonStyle::Danger)} />
-                <Button text="Disabled" style={*button_state} disabled={true} />
-                <span>{"Last clicked: "}{button_value.style_name()}</span>
+                <Button
+                    text="Primary"
+                    on_click={move |_| button_state_primary.set(ButtonStyle::Primary)}
+                />
+                <Button
+                    text="Secondary"
+                    style={ButtonStyle::Secondary}
+                    on_click={move |_| button_state_secondary.set(ButtonStyle::Secondary)}
+                />
+                <Button
+                    text="Transparent"
+                    style={ButtonStyle::Transparent}
+                    on_click={move |_| button_state_transparent.set(ButtonStyle::Transparent)}
+                />
+                <Button
+                    text="Danger"
+                    style={ButtonStyle::Danger}
+                    on_click={move |_| button_state_danger.set(ButtonStyle::Danger)}
+                />
+                <Button
+                    text="Disabled"
+                    style={*button_state}
+                    disabled={true}
+                />
+                <span>
+                    {"Last clicked: "}
+                    {button_value.style_name()}
+                </span>
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Checkbox"}</span>
-                <Checkbox state={checkbox_state.clone()} label="Checkbox label" />
-                <span>{"Value: "}{checkbox_value.to_string()}</span>
-                <Checkbox state={checkbox_state} label="Disabled checkbox" disabled={true} />
+                <Checkbox
+                    state={checkbox_state.clone()}
+                    label="Checkbox label"
+                />
+                <span>
+                    {"Value: "}
+                    {checkbox_value.to_string()}
+                </span>
+                <Checkbox
+                    state={checkbox_state}
+                    label="Disabled checkbox"
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Switch"}</span>
-                <Switch state={switch_state.clone()} label="Switch label" />
-                <span>{"Value: "}{switch_value.to_string()}</span>
-                <Switch state={switch_state} label="Disabled switch" disabled={true} />
+                <Switch
+                    state={switch_state.clone()}
+                    label="Switch label"
+                />
+                <span>
+                    {"Value: "}
+                    {switch_value.to_string()}
+                </span>
+                <Switch
+                    state={switch_state}
+                    label="Disabled switch"
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Radio group"}</span>
@@ -156,8 +283,15 @@ pub fn Demo() -> Html {
                     <RadioButton>{"Option 3"}</RadioButton>
                     <RadioButton disabled={true}>{"Option 4"}</RadioButton>
                 </RadioGroup>
-                <span>{"Value: "}{radio_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
-                <RadioGroup state={radio_state} orientation={RadioGroupOrientation::Horizontal} disabled={true}>
+                <span>
+                    {"Value: "}
+                    {radio_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
+                <RadioGroup
+                    state={radio_state}
+                    orientation={RadioGroupOrientation::Horizontal}
+                    disabled={true}
+                >
                     <RadioButton>{"Option 1"}</RadioButton>
                     <RadioButton>{"Option 2"}</RadioButton>
                     <RadioButton>{"Option 3"}</RadioButton>
@@ -165,30 +299,90 @@ pub fn Demo() -> Html {
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Slider"}</span>
-                <Slider<u8> state={slider_int_state.clone()} min={1} max={9} step={2} label="Int slider label" />
-                <span>{"Value: "}{slider_int_value.to_string()}</span>
-                <Slider<f32> state={slider_float_state.clone()} min={-10.0} max={10.0} step={0.1} label="Float slider label" />
-                <span>{"Value: "}{slider_float_value.to_string()}</span>
-                <Slider<u8> state={slider_int_state} min={1} max={17} label="Disabled slider" disabled={true} />
+                <Slider<u8>
+                    state={slider_int_state.clone()}
+                    min={1}
+                    max={9}
+                    step={2}
+                    label="Int slider label"
+                />
+                <span>
+                    {"Value: "}
+                    {slider_int_value.to_string()}
+                </span>
+                <Slider<f32>
+                    state={slider_float_state.clone()}
+                    min={-10.0}
+                    max={10.0}
+                    step={0.1}
+                    label="Float slider label"
+                />
+                <span>
+                    {"Value: "}
+                    {slider_float_value.to_string()}
+                </span>
+                <Slider<u8>
+                    state={slider_int_state}
+                    min={1}
+                    max={17}
+                    label="Disabled slider"
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Icon"}</span>
-                <Icon name="xmark-solid" size={IconSize::Small} />
-                <Icon name="xmark-solid" size={IconSize::Medium} />
-                <Icon name="xmark-solid" size={IconSize::Large} />
-                <Icon name="xmark-solid" disabled={true} />
+                <Icon
+                    name="xmark-solid"
+                    size={IconSize::Small}
+                />
+                <Icon
+                    name="xmark-solid"
+                    size={IconSize::Medium}
+                />
+                <Icon
+                    name="xmark-solid"
+                    size={IconSize::Large}
+                />
+                <Icon
+                    name="xmark-solid"
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Icon button"}</span>
-                <IconButton name="xmark-solid" size={IconButtonSize::Small} on_click={move |_| icon_button_small_state.set(icon_button_value + 1)} />
-                <IconButton name="xmark-solid" size={IconButtonSize::Medium} on_click={move |_| icon_button_medium_state.set(icon_button_value + 1)} />
-                <IconButton name="xmark-solid" size={IconButtonSize::Large} on_click={move |_| icon_button_large_state.set(icon_button_value + 1)} />
-                <span>{"Icon button has been clicked "}{icon_button_value}{" times"}</span>
-                <IconButton name="xmark-solid" disabled={true} />
+                <IconButton
+                    name="xmark-solid"
+                    size={IconButtonSize::Small}
+                    on_click={move |_| icon_button_small_state.set(icon_button_value + 1)}
+                />
+                <IconButton
+                    name="xmark-solid"
+                    size={IconButtonSize::Medium}
+                    on_click={move |_| icon_button_medium_state.set(icon_button_value + 1)}
+                />
+                <IconButton
+                    name="xmark-solid"
+                    size={IconButtonSize::Large}
+                    on_click={move |_| icon_button_large_state.set(icon_button_value + 1)}
+                />
+                <span>
+                    {"Icon button has been clicked "}
+                    {icon_button_value}
+                    {" times"}
+                </span>
+                <IconButton
+                    name="xmark-solid"
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Select"}</span>
-                <Select state={select_state.clone()} label="Select label" required={true} error={(select_value == 3).then_some("This option isn't available for the disabled select box below")}>
+                <Select
+                    state={select_state.clone()}
+                    label="Select label"
+                    required={true}
+                    error={(select_value == 3).then_some("This option isn't available for the disabled select box below")}
+                >
                     <SelectOption>{"Option 1"}</SelectOption>
                     <SelectOption>{"Option 2"}</SelectOption>
                     <SelectOption>{"Option 3"}</SelectOption>
@@ -206,7 +400,11 @@ pub fn Demo() -> Html {
                     <SelectOption disabled={true}>{"Option 15 (disabled)"}</SelectOption>
                 </Select>
                 <span>{"Value: "}{select_value.to_string()}</span>
-                <Select state={select_state} label="Disabled select label" disabled={true}>
+                <Select
+                    state={select_state}
+                    label="Disabled select label"
+                    disabled={true}
+                >
                     <SelectOption>{"Option 1"}</SelectOption>
                     <SelectOption>{"Option 2"}</SelectOption>
                     <SelectOption>{"Option 3"}</SelectOption>
@@ -214,15 +412,28 @@ pub fn Demo() -> Html {
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Select with null"}</span>
-                <SelectWithNull state={select_with_null_state.clone()} label="Select with null label" null_label="Select an option..." required={true} error={select_with_null_value.is_none().then_some("Please select a value")}>
+                <SelectWithNull
+                    state={select_with_null_state.clone()}
+                    label="Select with null label"
+                    null_label="Select an option..."
+                    required={true}
+                    error={select_with_null_value.is_none().then_some("Please select a value")}
+                >
                     <SelectOption>{"Option 1"}</SelectOption>
                     <SelectOption>{"Option 2"}</SelectOption>
                     <SelectOption disabled={true}>{"Option 3 (disabled)"}</SelectOption>
                     <SelectOption disabled={true}>{"Option 4 (disabled)"}</SelectOption>
                     <SelectOption>{"Option 5"}</SelectOption>
                 </SelectWithNull>
-                <span>{"Value: "}{select_with_null_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
-                <SelectWithNull state={select_with_null_state} label="Disabled select with null label" disabled={true}>
+                <span>
+                    {"Value: "}
+                    {select_with_null_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
+                <SelectWithNull
+                    state={select_with_null_state}
+                    label="Disabled select with null label"
+                    disabled={true}
+                >
                     <SelectOption>{"Option 1"}</SelectOption>
                     <SelectOption>{"Option 2"}</SelectOption>
                     <SelectOption>{"Option 3"}</SelectOption>
@@ -230,7 +441,10 @@ pub fn Demo() -> Html {
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Dialog"}</span>
-                <Button text="Open small dialog" on_click={move |_| dialog_small_button_state.set(true)} />
+                <Button
+                    text="Open small dialog"
+                    on_click={move |_| dialog_small_button_state.set(true)}
+                />
                 <Dialog
                     state={dialog_small_state}
                     size={DialogSize::Small}
@@ -242,7 +456,10 @@ pub fn Demo() -> Html {
                 >
                     <p>{"A small dialog with left-aligned actions."}</p>
                 </Dialog>
-                <Button text="Open medium dialog" on_click={move |_| dialog_medium_button_state.set(true)} />
+                <Button
+                    text="Open medium dialog"
+                    on_click={move |_| dialog_medium_button_state.set(true)}
+                />
                 <Dialog
                     state={dialog_medium_state}
                     size={DialogSize::Medium}
@@ -278,7 +495,10 @@ pub fn Demo() -> Html {
                     <p>{"Scrolling"}</p>
                     <p>{"Behavior"}</p>
                 </Dialog>
-                <Button text="Open large dialog" on_click={move |_| dialog_large_button_state.set(true)} />
+                <Button
+                    text="Open large dialog"
+                    on_click={move |_| dialog_large_button_state.set(true)}
+                />
                 <Dialog
                     state={dialog_large_state}
                     size={DialogSize::Large}
@@ -289,7 +509,10 @@ pub fn Demo() -> Html {
                     actions_layout={DialogActionsLayout::Spaced}
                 >
                     <p>{"A large dialog with spaced actions."}</p>
-                    <Select state={dialog_select_state} label="Dialog select label">
+                    <Select
+                        state={dialog_select_state}
+                        label="Dialog select label"
+                    >
                         <SelectOption>{"Option 1"}</SelectOption>
                         <SelectOption>{"Option 2"}</SelectOption>
                         <SelectOption>{"Option 3"}</SelectOption>
@@ -297,7 +520,10 @@ pub fn Demo() -> Html {
                         <SelectOption>{"Option 5"}</SelectOption>
                     </Select>
                 </Dialog>
-                <Button text="Open max dialog" on_click={move |_| dialog_max_button_state.set(true)} />
+                <Button
+                    text="Open max dialog"
+                    on_click={move |_| dialog_max_button_state.set(true)}
+                />
                 <Dialog
                     state={dialog_max_state}
                     size={DialogSize::Max}
@@ -306,7 +532,10 @@ pub fn Demo() -> Html {
                 >
                     <p>{"A maximum size dialog with no actions."}</p>
                 </Dialog>
-                <Button text="Open auto dialog" on_click={move |_| dialog_auto_button_state.set(true)} />
+                <Button
+                    text="Open auto dialog"
+                    on_click={move |_| dialog_auto_button_state.set(true)}
+                />
                 <Dialog
                     state={dialog_auto_state}
                     size={DialogSize::Auto}
@@ -316,11 +545,17 @@ pub fn Demo() -> Html {
                 >
                     <p>{"An auto size dialog with only an OK action."}</p>
                 </Dialog>
-                <span>{"Close value: "}{(*dialog_close_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+                <span>
+                    {"Close value: "}
+                    {(*dialog_close_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Alert"}</span>
-                <Button text="Open 5 second alert" on_click={move |_| alert_finite_button_state.set(true)} />
+                <Button
+                    text="Open 5 second alert"
+                    on_click={move |_| alert_finite_button_state.set(true)}
+                />
                 <Alert
                     state={alert_finite_state}
                     title={"Finite alert".to_string()}
@@ -329,7 +564,10 @@ pub fn Demo() -> Html {
                 >
                     <p>{"This alert will only remain open for 5 seconds."}</p>
                 </Alert>
-                <Button text="Open infinite alert" on_click={move |_| alert_infinite_button_state.set(true)} />
+                <Button
+                    text="Open infinite alert"
+                    on_click={move |_| alert_infinite_button_state.set(true)}
+                />
                 <Alert
                     state={alert_infinite_state}
                     title="Infinite alert"
@@ -338,7 +576,10 @@ pub fn Demo() -> Html {
                 >
                     <p>{"This alert will remain open until the 'x' button is pressed."}</p>
                 </Alert>
-                <span>{"Close value: "}{(*alert_close_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+                <span>
+                    {"Close value: "}
+                    {(*alert_close_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Card"}</span>
@@ -353,7 +594,10 @@ pub fn Demo() -> Html {
                     <h3>{"Not an interactive card"}</h3>
                     <p>{"No hover animation or pointer cursor on this one."}</p>
                 </Card>
-                <span>{"Card click state: "}{(*card_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
+                <span>
+                    {"Card click state: "}
+                    {(*card_state).map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Progress bar"}</span>
@@ -364,13 +608,25 @@ pub fn Demo() -> Html {
                 <ProgressBar progress={0.8} />
                 <ProgressBar progress={0.95} />
                 <ProgressBar progress={1.0} />
-                <ProgressBar progress={0.5} disabled={true} />
+                <ProgressBar
+                    progress={0.5}
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Spinner"}</span>
-                <Spinner size={SpinnerSize::Small} center={false} />
-                <Spinner size={SpinnerSize::Medium} center={false} />
-                <Spinner size={SpinnerSize::Large} center={false} />
+                <Spinner
+                    size={SpinnerSize::Small}
+                    center={false}
+                />
+                <Spinner
+                    size={SpinnerSize::Medium}
+                    center={false}
+                />
+                <Spinner
+                    size={SpinnerSize::Large}
+                    center={false}
+                />
                 <Spinner size={SpinnerSize::Max} />
             </div>
             <div class="base-demo-item">
@@ -389,33 +645,66 @@ pub fn Demo() -> Html {
                     label="Disabled chips label"
                     disabled={true}
                 />
-                <span>{"Selected: "}{chips_value.join(", ")}</span>
+                <span>
+                    {"Selected: "}
+                    {chips_value.join(", ")}
+                </span>
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Tooltip"}</span>
-                <Tooltip text="Tooltip hover text">{"Hover here to view the tooltip text"}</Tooltip>
-                <Tooltip text="This should not show" disabled={true}>{"This tooltip is disabled, and should show nothing when hovered over"}</Tooltip>
+                <Tooltip text="Tooltip hover text">
+                    {"Hover here to view the tooltip text"}
+                </Tooltip>
+                <Tooltip
+                    text="This should not show"
+                    disabled={true}
+                >
+                    {"This tooltip is disabled, and should show nothing when hovered over"}
+                </Tooltip>
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Badge"}</span>
                 <div class="base-demo-item-row">
                     {"Primary badge"}
-                    <Badge value={3} style={BadgeStyle::Primary} />
+                    <Badge
+                        value={3}
+                        style={BadgeStyle::Primary}
+                    />
                 </div>
                 <div class="base-demo-item-row">
                     {"Secondary badge"}
-                    <Badge value={42} style={BadgeStyle::Secondary} />
+                    <Badge
+                        value={42}
+                        style={BadgeStyle::Secondary}
+                    />
                 </div>
                 <div class="base-demo-item-row">
                     {"Danger badge"}
-                    <Badge<f64> value={1.618} style={BadgeStyle::Danger} />
+                    <Badge<f64>
+                        value={1.618}
+                        style={BadgeStyle::Danger}
+                    />
                 </div>
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Date picker"}</span>
-                <DatePicker state={datepicker_state.clone()} label="Date picker label" min={date_min} max={date_max} required={true} error={date_error} />
-                <span>{"Selected date: "}{datepicker_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}</span>
-                <DatePicker state={datepicker_state} label="Disabled date picker label" disabled={true} />
+                <DatePicker
+                    state={datepicker_state.clone()}
+                    label="Date picker label"
+                    min={date_min}
+                    max={date_max}
+                    required={true}
+                    error={date_error}
+                />
+                <span>
+                    {"Selected date: "}
+                    {datepicker_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
+                <DatePicker
+                    state={datepicker_state}
+                    label="Disabled date picker label"
+                    disabled={true}
+                />
             </div>
         </div>
     }

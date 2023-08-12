@@ -49,6 +49,9 @@ pub struct InputProps {
     /// The maximum number of characters allowed.
     #[prop_or(524288)]
     pub max_length: usize,
+    /// The callback called when the enter key is pressed.
+    #[prop_or_default]
+    pub on_submit: Callback<()>,
     /// Whether the input is required to be filled out.
     #[prop_or(false)]
     pub required: bool,
@@ -69,6 +72,7 @@ pub fn Input(props: &InputProps) -> Html {
         label,
         placeholder,
         max_length,
+        on_submit,
         required,
         error,
         disabled,
@@ -82,6 +86,12 @@ pub fn Input(props: &InputProps) -> Html {
         let new_value = input_event_value(event);
         state.set(new_value);
     };
+    let onkeydown = move |event: KeyboardEvent| {
+        if event.key_code() == 13 {
+            // enter
+            on_submit.emit(());
+        }
+    };
 
     html! {
         <div class={classes!("base-input-container", disabled.then_some("base-input-container-disabled"))}>
@@ -94,6 +104,7 @@ pub fn Input(props: &InputProps) -> Html {
                 {value}
                 {id}
                 {oninput}
+                {onkeydown}
                 {placeholder}
                 {required}
                 {disabled}
