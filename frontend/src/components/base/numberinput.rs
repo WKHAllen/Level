@@ -1,5 +1,6 @@
 use super::util::*;
 use super::*;
+use std::ops::Deref;
 use yew::prelude::*;
 
 /// Shortens a number to a specified number of decimal places.
@@ -72,9 +73,11 @@ fn parse_number<N: Number>(value_str: &str, min: N, max: N) -> Option<(N, bool)>
 
 /// A wrapper around a number state.
 #[derive(Debug, Clone, PartialEq)]
-struct NumberState<N: Number> {
+pub struct NumberState<N: Number> {
     /// The inner state string.
     state: String,
+    /// The inner state value.
+    value: N,
     /// The minimum value.
     min: N,
     /// The maximum value.
@@ -85,22 +88,37 @@ struct NumberState<N: Number> {
 
 impl<N: Number> NumberState<N> {
     /// Creates a new number state.
-    pub fn new(value: N, min: N, max: N, decimals: u16) -> Self {
-        Self {
-            state: value.to_string(),
-            min,
-            max,
-            decimals,
-        }
+    pub fn new(value: N) -> Self {
+        Self::default().value(value)
     }
 
-    /// Gets the inner value.
-    pub fn get(&self) -> N {
-        parse_number(&self.state, self.min, self.max).unwrap().0
+    /// Sets the state value.
+    pub fn value(mut self, value: N) -> Self {
+        self.state = value.to_string();
+        self.value = value;
+        self
+    }
+
+    /// Sets the minimum value.
+    pub fn min(mut self, min: N) -> Self {
+        self.min = min;
+        self
+    }
+
+    /// Sets the maximum value.
+    pub fn max(mut self, max: N) -> Self {
+        self.max = max;
+        self
+    }
+
+    /// Sets the maximum number of digits after the decimal.
+    pub fn decimals(mut self, decimals: u16) -> Self {
+        self.decimals = decimals;
+        self
     }
 
     /// Sets the inner state.
-    pub fn set(&mut self, new_value_str: &str) {
+    fn set(&mut self, new_value_str: &str) {
         let new_value_transformed = transform_number(new_value_str, self.decimals);
         let maybe_new_value = parse_number(&new_value_transformed, self.min, self.max);
 
@@ -110,7 +128,17 @@ impl<N: Number> NumberState<N> {
             } else {
                 self.state = new_value.to_string();
             }
+
+            self.value = parse_number(&self.state, self.min, self.max).unwrap().0;
         }
+    }
+}
+
+impl<N: Number> Deref for NumberState<N> {
+    type Target = N;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value
     }
 }
 
@@ -128,6 +156,7 @@ impl<N: Number> Default for NumberState<N> {
     fn default() -> Self {
         Self {
             state: String::new(),
+            value: N::default(),
             min: N::NUMBER_MIN,
             max: N::NUMBER_MAX,
             decimals: u16::MAX,
@@ -135,26 +164,23 @@ impl<N: Number> Default for NumberState<N> {
     }
 }
 
+impl<N: Number> From<N> for NumberState<N> {
+    fn from(value: N) -> Self {
+        Self::default().value(value)
+    }
+}
+
 /// Input properties.
 #[derive(Properties, PartialEq, Clone)]
 pub struct NumberInputProps<N: Number> {
     /// The number input state.
-    pub state: UseStateHandle<N>,
+    pub state: UseStateHandle<NumberState<N>>,
     /// The number input label.
     #[prop_or_default]
     pub label: AttrValue,
     /// Number input placeholder text.
     #[prop_or_default]
     pub placeholder: AttrValue,
-    /// The minimum value.
-    #[prop_or(N::NUMBER_MIN)]
-    pub min: N,
-    /// The maximum value.
-    #[prop_or(N::NUMBER_MAX)]
-    pub max: N,
-    /// The maximum number of decimal places.
-    #[prop_or(u16::MAX)]
-    pub decimals: u16,
     /// Whether the input is required to be filled out.
     #[prop_or(false)]
     pub required: bool,
@@ -173,36 +199,22 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
         state,
         label,
         placeholder,
-        min,
-        max,
-        decimals,
         required,
         error,
         disabled,
     } = props.clone();
 
-    let state_update = use_state(|| Option::<(N, NumberState<N>)>::None);
-    let number_state = use_state(|| NumberState::new(*state, min, max, decimals));
-
-    if let Some((new_state, new_state_str)) = &*state_update {
-        state.set(new_state.to_owned());
-        number_state.set(new_state_str.to_owned());
-        state_update.set(None);
-    }
-
-    let value_str = (*number_state).to_string();
+    let value_str = (*state).to_string();
     let id_state = use_state(new_id);
     let id = (*id_state).clone();
+    let trigger = use_force_update();
 
     let oninput = move |event: InputEvent| {
         let new_value_str = input_event_value(event);
-        let mut new_number_state = (*number_state).clone();
-        new_number_state.set(&new_value_str);
-        let new_state = new_number_state.get();
-        let new_state_str = NumberState::<N>::default();
-
-        number_state.set(new_state_str);
-        state_update.set(Some((new_state, new_number_state)));
+        let mut new_state = (*state).clone();
+        new_state.set(&new_value_str);
+        state.set(new_state);
+        trigger.force_update(); // necessary in case the state has not changed
     };
 
     html! {

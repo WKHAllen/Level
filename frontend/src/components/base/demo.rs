@@ -14,10 +14,11 @@ pub fn Demo() -> Html {
     let textarea_value = (*textarea_state).clone();
     let textarea_state1 = use_state(String::new);
     let textarea_state2 = use_state(String::new);
-    let numberinput_int_state = use_state(|| 3u16);
-    let numberinput_int_value = *numberinput_int_state;
-    let numberinput_float_state = use_state(|| 1.618f64);
-    let numberinput_float_value = *numberinput_float_state;
+    let numberinput_int_state = use_state(|| NumberState::new(3u16).min(0).max(100));
+    let numberinput_int_value = **numberinput_int_state;
+    let numberinput_float_state =
+        use_state(|| NumberState::new(1.618f64).min(-5.0).max(5.0).decimals(5));
+    let numberinput_float_value = **numberinput_float_state;
     let button_state = use_state(|| ButtonStyle::Primary);
     let button_state_primary = button_state.clone();
     let button_state_secondary = button_state.clone();
@@ -90,8 +91,8 @@ pub fn Demo() -> Html {
     .into_iter()
     .map(|s| s.to_owned())
     .collect::<Vec<_>>();
-    let datepicker_state = use_state(|| None);
-    let datepicker_value = *datepicker_state;
+    let datepicker_state = use_state(DatePickerState::new);
+    let datepicker_value = **datepicker_state;
     let date_min = NaiveDate::from_ymd_opt(2023, 3, 21).unwrap();
     let date_max = NaiveDate::from_ymd_opt(2026, 3, 21).unwrap();
     let date_error = (*datepicker_state).as_ref().and_then(|date: &NaiveDate| {
@@ -183,8 +184,6 @@ pub fn Demo() -> Html {
                     state={numberinput_int_state.clone()}
                     label="Int number input label"
                     placeholder="Placeholder!"
-                    min={0}
-                    max={100}
                     required={true}
                     error={(numberinput_int_value == 3).then_some("How about something other than 3")}
                 />
@@ -196,9 +195,6 @@ pub fn Demo() -> Html {
                     state={numberinput_float_state}
                     label="Float number input label"
                     placeholder="Placeholder!"
-                    min={-5.0}
-                    max={5.0}
-                    decimals={5}
                     required={true}
                     error={(numberinput_float_value == 1.618).then_some("No phi, please")}
                 />

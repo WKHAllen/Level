@@ -1,6 +1,7 @@
 use super::util::*;
 use super::*;
 use chrono::{Datelike, Duration, Local, NaiveDate};
+use std::ops::Deref;
 use yew::prelude::*;
 use yew_hooks::use_click_away;
 
@@ -112,7 +113,7 @@ fn parse_date(year_str: &str, month_str: &str, day_str: &str) -> Result<NaiveDat
 }
 
 /// Validates that the provided date falls within the given range.
-fn date_within_range(date: &NaiveDate, min: &NaiveDate, max: &NaiveDate) -> bool {
+fn date_within_range(date: NaiveDate, min: NaiveDate, max: NaiveDate) -> bool {
     min <= date && date <= max
 }
 
@@ -121,12 +122,12 @@ fn check_state(
     year_str: &str,
     month_str: &str,
     day_str: &str,
-    min: &NaiveDate,
-    max: &NaiveDate,
+    min: NaiveDate,
+    max: NaiveDate,
 ) -> Result<NaiveDate, String> {
     let date = parse_date(year_str, month_str, day_str)?;
 
-    if date_within_range(&date, min, max) {
+    if date_within_range(date, min, max) {
         Ok(date)
     } else {
         Err(format!("Date must be between {min} and {max}"))
@@ -134,12 +135,12 @@ fn check_state(
 }
 
 /// Returns the name of the month.
-fn month_name(date: &NaiveDate) -> String {
+fn month_name(date: NaiveDate) -> String {
     MONTHS[date.month0() as usize].to_owned()
 }
 
 /// Determines the previous month.
-fn prev_month(date: &NaiveDate) -> NaiveDate {
+fn prev_month(date: NaiveDate) -> NaiveDate {
     if date.month() == 1 {
         date.with_year(date.year() - 1)
             .unwrap()
@@ -156,7 +157,7 @@ fn prev_month(date: &NaiveDate) -> NaiveDate {
 }
 
 /// Determines the next month.
-fn next_month(date: &NaiveDate) -> NaiveDate {
+fn next_month(date: NaiveDate) -> NaiveDate {
     if date.month() == 12 {
         date.with_year(date.year() + 1)
             .unwrap()
@@ -173,32 +174,32 @@ fn next_month(date: &NaiveDate) -> NaiveDate {
 }
 
 /// Determines whether the previous month on the calendar is viewable.
-fn prev_month_viewable(viewing_month: &NaiveDate, min: &NaiveDate) -> bool {
+fn prev_month_viewable(viewing_month: NaiveDate, min: NaiveDate) -> bool {
     min.with_day(1).unwrap() < viewing_month.with_day(1).unwrap()
 }
 
 /// Determines whether the next month on the calendar is viewable.
-fn next_month_viewable(viewing_month: &NaiveDate, max: &NaiveDate) -> bool {
+fn next_month_viewable(viewing_month: NaiveDate, max: NaiveDate) -> bool {
     viewing_month.with_day(1).unwrap() < max.with_day(1).unwrap()
 }
 
 /// Determines how many days need to be displayed before the start of the
 /// currently viewed month.
-fn days_before_month(viewing_month: &NaiveDate) -> u32 {
+fn days_before_month(viewing_month: NaiveDate) -> u32 {
     let first_of_month = viewing_month.with_day(1).unwrap();
     first_of_month.weekday().num_days_from_sunday()
 }
 
 /// Determines how many days need to be displayed within the currently viewed
 /// month.
-fn days_in_month(viewing_month: &NaiveDate) -> u32 {
+fn days_in_month(viewing_month: NaiveDate) -> u32 {
     let last_of_month = next_month(viewing_month) - Duration::days(1);
     last_of_month.day()
 }
 
 /// Determines how many days need to be displayed after the end of the
 /// currently viewed month.
-fn days_after_month(viewing_month: &NaiveDate) -> u32 {
+fn days_after_month(viewing_month: NaiveDate) -> u32 {
     let calendar_space = 42;
     let num_days_before_month = days_before_month(viewing_month);
     let num_days_in_month = days_in_month(viewing_month);
@@ -206,7 +207,7 @@ fn days_after_month(viewing_month: &NaiveDate) -> u32 {
 }
 
 /// Gets the calendar day of the currently viewed month with the specified day.
-fn calendar_day(viewing_month: &NaiveDate, day: u32) -> Option<NaiveDate> {
+fn calendar_day(viewing_month: NaiveDate, day: u32) -> Option<NaiveDate> {
     viewing_month.with_day(day)
 }
 
@@ -216,11 +217,108 @@ pub fn date_picker_today() -> NaiveDate {
     Local::now().naive_local().date()
 }
 
+/// A wrapper around a date picker state.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DatePickerState {
+    /// The inner state.
+    state: Option<NaiveDate>,
+    /// The year input.
+    year: String,
+    /// The month input.
+    month: String,
+    /// The day input.
+    day: String,
+}
+
+impl DatePickerState {
+    /// Creates a new date picker state with no date selected.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Creates a new date picker state with the given date selected.
+    #[allow(dead_code)]
+    pub fn new_with(state: NaiveDate) -> Self {
+        let mut this = Self::new();
+        this.state = Some(state);
+        this.year = year_to_string(state.year());
+        this.month = month_to_string(state.month());
+        this.day = day_to_string(state.day());
+        this
+    }
+
+    /// Creates a new date picker state with today selected.
+    #[allow(dead_code)]
+    pub fn new_today() -> Self {
+        Self::new_with(date_picker_today())
+    }
+
+    /// Updates the inner state, if necessary.
+    fn update(
+        &mut self,
+        year: Option<&str>,
+        month: Option<&str>,
+        day: Option<&str>,
+        min: NaiveDate,
+        max: NaiveDate,
+    ) {
+        self.state = check_state(
+            year.unwrap_or(&self.year),
+            month.unwrap_or(&self.month),
+            day.unwrap_or(&self.day),
+            min,
+            max,
+        )
+        .ok();
+
+        if let Some(year) = year {
+            self.year = year.to_owned();
+        }
+
+        if let Some(month) = month {
+            self.month = month.to_owned();
+        }
+
+        if let Some(day) = day {
+            self.day = day.to_owned();
+        }
+    }
+
+    /// Sets the inner state.
+    fn set(&mut self, date: NaiveDate) {
+        self.state = Some(date);
+        self.year = year_to_string(date.year());
+        self.month = month_to_string(date.month());
+        self.day = day_to_string(date.day());
+    }
+}
+
+impl Deref for DatePickerState {
+    type Target = Option<NaiveDate>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.state
+    }
+}
+
+impl Default for DatePickerState {
+    fn default() -> Self {
+        let today = date_picker_today();
+
+        Self {
+            state: None,
+            year: year_to_string(today.year()),
+            month: month_to_string(today.month()),
+            day: day_to_string(today.day()),
+        }
+    }
+}
+
 /// Date picker properties.
 #[derive(Properties, PartialEq, Clone)]
 pub struct DatePickerProps {
     /// The date picker state.
-    pub state: UseStateHandle<Option<NaiveDate>>,
+    pub state: UseStateHandle<DatePickerState>,
     /// The date picker label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -266,42 +364,22 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
     let day_node = use_node_ref();
     let calendar_open = use_state(|| false);
     let today = date_picker_today();
-    let year_state = use_state(|| year_to_string((*state).unwrap_or(today).year()));
-    let month_state = use_state(|| month_to_string((*state).unwrap_or(today).month()));
-    let day_state = use_state(|| day_to_string((*state).unwrap_or(today).day()));
-    let year_value = (*year_state).clone();
-    let month_value = (*month_state).clone();
-    let day_value = (*day_state).clone();
+    let year_value = state.year.clone();
+    let month_value = state.month.clone();
+    let day_value = state.day.clone();
     let viewing_calendar_month_state = use_state(|| date_picker_today().with_day(1).unwrap());
     let viewing_calendar_month_name = format!(
         "{} {}",
-        month_name(&viewing_calendar_month_state),
+        month_name(*viewing_calendar_month_state),
         (*viewing_calendar_month_state).year()
     );
-    let prev_month_disabled = !prev_month_viewable(&viewing_calendar_month_state, &min);
-    let next_month_disabled = !next_month_viewable(&viewing_calendar_month_state, &max);
-    let num_days_before_month = days_before_month(&viewing_calendar_month_state);
-    let num_days_in_month = days_in_month(&viewing_calendar_month_state);
-    let num_days_after_month = days_after_month(&viewing_calendar_month_state);
+    let prev_month_disabled = !prev_month_viewable(*viewing_calendar_month_state, min);
+    let next_month_disabled = !next_month_viewable(*viewing_calendar_month_state, max);
+    let num_days_before_month = days_before_month(*viewing_calendar_month_state);
+    let num_days_in_month = days_in_month(*viewing_calendar_month_state);
+    let num_days_after_month = days_after_month(*viewing_calendar_month_state);
 
-    let update_state = {
-        let state = state.clone();
-        let current_year = year_value.clone();
-        let current_month = month_value.clone();
-        let current_day = day_value.clone();
-        move |year: Option<&str>, month: Option<&str>, day: Option<&str>| match check_state(
-            year.unwrap_or(&current_year),
-            month.unwrap_or(&current_month),
-            day.unwrap_or(&current_day),
-            &min,
-            &max,
-        ) {
-            Ok(date) => state.set(Some(date)),
-            Err(_) => state.set(None),
-        }
-    };
-
-    let error_msg = check_state(&year_value, &month_value, &day_value, &min, &max)
+    let error_msg = check_state(&year_value, &month_value, &day_value, min, max)
         .err()
         .map(|err| err.into())
         .or(error);
@@ -326,42 +404,42 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
     };
 
     let year_on_input = {
+        let state = state.clone();
         let year_node = year_node.clone();
-        let year_state = year_state.clone();
-        let update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_year_value(&year_state, &new_typed_value);
+            let new_value = new_year_value(&state.year, &new_typed_value);
             set_inner_text(&year_node, &new_value);
             go_to_end(&year_node);
-            year_state.set(new_value.clone());
-            update_state(Some(&new_value), None, None);
+            let mut new_state = (*state).clone();
+            new_state.update(Some(&new_value), None, None, min, max);
+            state.set(new_state);
         }
     };
     let month_on_input = {
+        let state = state.clone();
         let month_node = month_node.clone();
-        let month_state = month_state.clone();
-        let update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_month_value(&month_state, &new_typed_value);
+            let new_value = new_month_value(&state.month, &new_typed_value);
             set_inner_text(&month_node, &new_value);
             go_to_end(&month_node);
-            month_state.set(new_value.clone());
-            update_state(None, Some(&new_value), None);
+            let mut new_state = (*state).clone();
+            new_state.update(None, Some(&new_value), None, min, max);
+            state.set(new_state);
         }
     };
     let day_on_input = {
+        let state = state.clone();
         let day_node = day_node.clone();
-        let day_state = day_state.clone();
-        let update_state = update_state.clone();
         move |event: InputEvent| {
             let new_typed_value = content_editable_event_value(event);
-            let new_value = new_day_value(&day_state, &new_typed_value);
+            let new_value = new_day_value(&state.day, &new_typed_value);
             set_inner_text(&day_node, &new_value);
             go_to_end(&day_node);
-            day_state.set(new_value.clone());
-            update_state(None, None, Some(&new_value));
+            let mut new_state = (*state).clone();
+            new_state.update(None, None, Some(&new_value), min, max);
+            state.set(new_state);
         }
     };
 
@@ -384,13 +462,13 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
     let on_prev_month_click = {
         let viewing_calendar_month_state = viewing_calendar_month_state.clone();
         move |_| {
-            viewing_calendar_month_state.set(prev_month(&viewing_calendar_month_state));
+            viewing_calendar_month_state.set(prev_month(*viewing_calendar_month_state));
         }
     };
     let on_next_month_click = {
         let viewing_calendar_month_state = viewing_calendar_month_state.clone();
         move |_| {
-            viewing_calendar_month_state.set(next_month(&viewing_calendar_month_state));
+            viewing_calendar_month_state.set(next_month(*viewing_calendar_month_state));
         }
     };
 
@@ -403,10 +481,10 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         .collect::<Html>();
     let calendar_days_current = (1..=num_days_in_month)
         .map(|i| {
-            let this_day = calendar_day(&viewing_calendar_month_state, i).unwrap();
-            let day_selected = *state == Some(this_day);
+            let this_day = calendar_day(*viewing_calendar_month_state, i).unwrap();
+            let day_selected = **state == Some(this_day);
             let day_today = this_day == today;
-            let day_disabled = !date_within_range(&this_day, &min, &max);
+            let day_disabled = !date_within_range(this_day, min, max);
 
             let day_on_click = {
                 let year_node = year_node.clone();
@@ -414,11 +492,10 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
                 let day_node = day_node.clone();
                 let state = state.clone();
                 let calendar_open = calendar_open.clone();
-                let year_state = year_state.clone();
-                let month_state = month_state.clone();
-                let day_state = day_state.clone();
                 move |_| {
-                    state.set(Some(this_day));
+                    let mut new_state = (*state).clone();
+                    new_state.set(this_day);
+                    state.set(new_state);
                     calendar_open.set(false);
                     let year_str = year_to_string(this_day.year());
                     let month_str = month_to_string(this_day.month());
@@ -426,9 +503,6 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
                     set_inner_text(&year_node, &year_str);
                     set_inner_text(&month_node, &month_str);
                     set_inner_text(&day_node, &day_str);
-                    year_state.set(year_str);
-                    month_state.set(month_str);
-                    day_state.set(day_str);
                 }
             };
 
