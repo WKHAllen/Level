@@ -21,26 +21,6 @@ const FALLBACK_FONTS: &[&str] = &[
     "sans-serif",
 ];
 
-/// The set of background colors for dark mode.
-const DARK_BACKGROUND_COLORS: &[Color; 6] = &[
-    Color::new(0.10196, 0.10980, 0.12157, 1.0),
-    Color::new(0.11765, 0.12549, 0.13725, 1.0),
-    Color::new(0.13333, 0.14118, 0.15294, 1.0),
-    Color::new(0.14902, 0.15686, 0.16863, 1.0),
-    Color::new(0.16471, 0.17255, 0.18431, 1.0),
-    Color::new(0.18039, 0.18824, 0.20000, 1.0),
-];
-
-/// The set of background colors for light mode.
-const LIGHT_BACKGROUND_COLORS: &[Color; 6] = &[
-    Color::new(1.0, 1.0, 1.0, 1.0),
-    Color::new(1.0, 1.0, 1.0, 1.0),
-    Color::new(1.0, 1.0, 1.0, 1.0),
-    Color::new(1.0, 1.0, 1.0, 1.0),
-    Color::new(1.0, 1.0, 1.0, 1.0),
-    Color::new(1.0, 1.0, 1.0, 1.0),
-];
-
 /// White text color for use in dark mode.
 const DARK_TEXT_COLOR: Color = Color::new(1.0, 1.0, 1.0, 1.0);
 
@@ -62,18 +42,6 @@ const LIGHT_SVG_FILTER: &str =
 /// A filter to apply to SVGs to make them appear off-black in light mode.
 const LIGHT_SVG_FILTER_DISABLED: &str =
     "invert(18%) sepia(5%) saturate(0%) hue-rotate(253deg) brightness(96%) contrast(92%)";
-
-/// Standard border color for dark mode.
-const DARK_BORDER_COLOR: Color = Color::new(0.29020, 0.29804, 0.30980, 1.0);
-
-/// Standard border color for a focused element in dark mode.
-const DARK_FOCUS_BORDER_COLOR: Color = Color::new(0.41569, 0.42353, 0.43529, 1.0);
-
-/// Standard border color for light mode.
-const LIGHT_BORDER_COLOR: Color = Color::new(0.69020, 0.69804, 0.70980, 1.0);
-
-/// Standard border color for a focused element in light mode.
-const LIGHT_FOCUS_BORDER_COLOR: Color = Color::new(0.56471, 0.57255, 0.58431, 1.0);
 
 /// The default color for error text.
 const DEFAULT_ERROR_COLOR: Color = Color::new(0.81176, 0.0, 0.0, 1.0);
@@ -270,25 +238,11 @@ fn apply_theme(theme: &Theme) {
     fonts.extend(FALLBACK_FONTS);
     set_css_var("--base-fonts", &fonts.join(", "));
 
-    let background_colors = match theme.color_mode {
-        ColorMode::Dark => DARK_BACKGROUND_COLORS,
-        ColorMode::Light => LIGHT_BACKGROUND_COLORS,
+    let color_mode_percentage = match theme.color_mode {
+        ColorMode::Dark => "0%",
+        ColorMode::Light => "100%",
     };
-    background_colors
-        .iter()
-        .enumerate()
-        .for_each(|(index, background_color)| {
-            set_css_var(
-                &format!("--base-background-color-{}", index + 1),
-                &background_color.to_hex_string(),
-            );
-        });
-
-    let text_color = match theme.color_mode {
-        ColorMode::Dark => DARK_TEXT_COLOR,
-        ColorMode::Light => LIGHT_TEXT_COLOR,
-    };
-    set_css_var("--base-text-color", &text_color.to_hex_string());
+    set_css_var("--base-color-mode-percentage", color_mode_percentage);
 
     let svg_filter = match theme.color_mode {
         ColorMode::Dark => DARK_SVG_FILTER,
@@ -301,21 +255,6 @@ fn apply_theme(theme: &Theme) {
         ColorMode::Light => LIGHT_SVG_FILTER_DISABLED,
     };
     set_css_var("--base-primary-svg-filter-disabled", svg_filter_disabled);
-
-    let border_color = match theme.color_mode {
-        ColorMode::Dark => DARK_BORDER_COLOR,
-        ColorMode::Light => LIGHT_BORDER_COLOR,
-    };
-    set_css_var("--base-border-color", &border_color.to_hex_string());
-
-    let focus_border_color = match theme.color_mode {
-        ColorMode::Dark => DARK_FOCUS_BORDER_COLOR,
-        ColorMode::Light => LIGHT_FOCUS_BORDER_COLOR,
-    };
-    set_css_var(
-        "--base-focus-border-color",
-        &focus_border_color.to_hex_string(),
-    );
 
     set_css_var("--base-primary-color", &theme.primary_color.to_hex_string());
 
@@ -334,12 +273,6 @@ fn apply_theme(theme: &Theme) {
     set_css_var(
         "--base-secondary-text-color",
         &secondary_text_color.to_hex_string(),
-    );
-
-    let transparent_text_color = text_color;
-    set_css_var(
-        "--base-transparent-text-color",
-        &transparent_text_color.to_hex_string(),
     );
 
     set_css_var("--base-danger-color", &theme.danger_color.to_hex_string());

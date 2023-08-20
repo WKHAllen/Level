@@ -3,172 +3,219 @@
   /*    MISC    */
   /*            */
 
-  --base-color-mode: oklab;
+  --base-color-mix: oklab;
+
+  --base-color-mode-percentage: 0%;
 
   --base-fonts: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 
-  --base-background-color-1: #1a1c1f;
-  --base-background-color-2: #1e2023;
-  --base-background-color-3: #222427;
-  --base-background-color-4: #26282b;
-  --base-background-color-5: #2a2c2f;
-  --base-background-color-6: #2e3033;
+  --base-background-color-1-dark: #1a1c1f;
+  --base-background-color-2-dark: #1e2023;
+  --base-background-color-3-dark: #222427;
+  --base-background-color-4-dark: #26282b;
+  --base-background-color-5-dark: #2a2c2f;
+  --base-background-color-6-dark: #2e3033;
 
-  --base-text-color: #ffffff;
+  --base-background-color-1-light: #ffffff;
+  --base-background-color-2-light: #ffffff;
+  --base-background-color-3-light: #ffffff;
+  --base-background-color-4-light: #ffffff;
+  --base-background-color-5-light: #ffffff;
+  --base-background-color-6-light: #ffffff;
+
+  --base-background-color-1: color-mix(
+    in var(--base-color-mix),
+    var(--base-background-color-1-dark),
+    var(--base-background-color-1-light) var(--base-color-mode-percentage)
+  );
+  --base-background-color-2: color-mix(
+    in var(--base-color-mix),
+    var(--base-background-color-2-dark),
+    var(--base-background-color-2-light) var(--base-color-mode-percentage)
+  );
+  --base-background-color-3: color-mix(
+    in var(--base-color-mix),
+    var(--base-background-color-3-dark),
+    var(--base-background-color-3-light) var(--base-color-mode-percentage)
+  );
+  --base-background-color-4: color-mix(
+    in var(--base-color-mix),
+    var(--base-background-color-4-dark),
+    var(--base-background-color-4-light) var(--base-color-mode-percentage)
+  );
+  --base-background-color-5: color-mix(
+    in var(--base-color-mix),
+    var(--base-background-color-5-dark),
+    var(--base-background-color-5-light) var(--base-color-mode-percentage)
+  );
+  --base-background-color-6: color-mix(
+    in var(--base-color-mix),
+    var(--base-background-color-6-dark),
+    var(--base-background-color-6-light) var(--base-color-mode-percentage)
+  );
+
+  --base-text-color-dark: #ffffff;
+  --base-text-color-light: #000000;
+  --base-text-color: color-mix(
+    in var(--base-color-mix),
+    var(--base-text-color-dark),
+    var(--base-text-color-light) var(--base-color-mode-percentage)
+  );
 
   --base-selection-color: hsla(220, 100%, 50%, 0.4);
   --base-error-color: #cf0000;
   --base-mid-color: #7f7f7f;
 
-  --base-primary-color: #2851ff; /* #006f00 */ /* 6928ff */
+  --base-primary-color: #2851ff; /* #006f00 */ /* #6928ff */
   --base-primary-color-hover: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-primary-color) 95%,
     black
   );
   --base-primary-color-active: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-primary-color) 92%,
     black
   );
   --base-primary-color-disabled: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-primary-color) 70%,
     var(--base-mid-color)
   );
   --base-primary-text-color: #ffffff;
   --base-primary-text-color-disabled: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-primary-text-color) 50%,
     var(--base-mid-color)
   );
   --base-primary-text-label-color-1: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-primary-text-color) 30%,
     var(--base-mid-color)
   );
   --base-primary-text-label-color-2: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-primary-text-color) 40%,
     var(--base-mid-color)
   );
   --base-primary-text-label-color-3: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-primary-text-color) 50%,
     var(--base-mid-color)
   );
+
   --base-primary-svg-filter: invert(100%) sepia(100%) saturate(0%)
-    hue-rotate(177deg) brightness(102%) contrast(101%); /* https://codepen.io/sosuke/pen/Pjoqqp */
+    hue-rotate(177deg) brightness(102%) contrast(101%);
   --base-primary-svg-filter-disabled: invert(81%) sepia(0%) saturate(0%)
     hue-rotate(170deg) brightness(89%) contrast(92%);
 
   --base-secondary-color: #5a5c5f;
   --base-secondary-color-hover: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-secondary-color) 95%,
     black
   );
   --base-secondary-color-active: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-secondary-color) 92%,
     black
   );
   --base-secondary-color-disabled: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-secondary-color) 50%,
     var(--base-mid-color)
   );
   --base-secondary-text-color: #ffffff;
   --base-secondary-text-color-disabled: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-secondary-text-color) 50%,
     var(--base-mid-color)
   );
   --base-secondary-text-label-color-1: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-secondary-text-color) 30%,
     var(--base-mid-color)
   );
   --base-secondary-text-label-color-2: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-secondary-text-color) 40%,
     var(--base-mid-color)
   );
   --base-secondary-text-label-color-3: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-secondary-text-color) 50%,
     var(--base-mid-color)
   );
 
   --base-transparent-color: #00000000;
   --base-transparent-color-hover: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-transparent-color) 95%,
     black
   );
   --base-transparent-color-active: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-transparent-color) 92%,
     black
   );
   --base-transparent-color-disabled: var(--base-transparent-color);
   --base-transparent-text-color: var(--base-text-color);
   --base-transparent-text-color-disabled: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-transparent-text-color) 50%,
     var(--base-mid-color)
   );
   --base-transparent-text-label-color-1: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-transparent-text-color) 30%,
     var(--base-mid-color)
   );
   --base-transparent-text-label-color-2: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-transparent-text-color) 40%,
     var(--base-mid-color)
   );
   --base-transparent-text-label-color-3: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-transparent-text-color) 50%,
     var(--base-mid-color)
   );
 
   --base-danger-color: #af0000;
   --base-danger-color-hover: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-danger-color) 95%,
     black
   );
   --base-danger-color-active: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-danger-color) 92%,
     black
   );
   --base-danger-color-disabled: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-danger-color) 50%,
     var(--base-mid-color)
   );
   --base-danger-text-color: #ffffff;
   --base-danger-text-color-disabled: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-danger-text-color) 50%,
     var(--base-mid-color)
   );
   --base-danger-text-label-color-1: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-danger-text-color) 30%,
     var(--base-mid-color)
   );
   --base-danger-text-label-color-2: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-danger-text-color) 40%,
     var(--base-mid-color)
   );
   --base-danger-text-label-color-3: color-mix(
-    in var(--base-color-mode),
+    in var(--base-color-mix),
     var(--base-danger-text-color) 50%,
     var(--base-mid-color)
   );
@@ -177,6 +224,23 @@
   --base-padding-medium: 8px;
   --base-padding-large: 16px;
   --base-form-padding: var(--base-padding-medium) 0;
+
+  --base-border-color-dark: #4a4c4f;
+  --base-focus-border-color-dark: #6a6c6f;
+
+  --base-border-color-light: #b0b2b5;
+  --base-focus-border-color-light: #909295;
+
+  --base-border-color: color-mix(
+    in var(--base-color-mix),
+    var(--base-border-color-dark),
+    var(--base-border-color-light) var(--base-color-mode-percentage)
+  );
+  --base-focus-border-color: color-mix(
+    in var(--base-color-mix),
+    var(--base-focus-border-color-dark),
+    var(--base-focus-border-color-light) var(--base-color-mode-percentage)
+  );
 
   --base-border-color: #4a4c4f;
   --base-standard-border: 1px solid var(--base-border-color);
@@ -919,9 +983,6 @@ body {
   width: var(--base-checkbox-icon-size);
   height: var(--base-checkbox-icon-size);
   filter: var(--base-checkbox-icon-filter);
-  background-image: var(--base-checkmark-icon);
-  background-repeat: no-repeat;
-  background-position: center;
   visibility: hidden;
 }
 
