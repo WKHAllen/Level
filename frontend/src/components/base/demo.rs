@@ -1,10 +1,72 @@
 use super::*;
+use crate::hooks::*;
+use crate::util::*;
 use chrono::{Datelike, NaiveDate};
 use yew::prelude::*;
 
 /// A demo of the base components.
 #[function_component]
 pub fn Demo() -> Html {
+    console_log!("Demo re-rendered!");
+
+    let (_theme, dispatch) = use_theme();
+
+    let theme_color_mode_state = use_state(|| false);
+    let theme_primary_color_red = use_state(|| 40);
+    let theme_primary_color_green = use_state(|| 81);
+    let theme_primary_color_blue = use_state(|| 255);
+    let theme_font_state = use_state(String::new);
+
+    {
+        let dispatch = dispatch.clone();
+        let theme_color_mode_state = theme_color_mode_state.clone();
+        use_effect_with_deps(
+            move |light_mode| {
+                dispatch.reduce_mut(|theme| {
+                    theme.set_color_mode(if **light_mode {
+                        ColorMode::Light
+                    } else {
+                        ColorMode::Dark
+                    });
+                });
+            },
+            theme_color_mode_state,
+        );
+    }
+    {
+        let dispatch = dispatch.clone();
+        let theme_primary_color_red = theme_primary_color_red.clone();
+        let theme_primary_color_green = theme_primary_color_green.clone();
+        let theme_primary_color_blue = theme_primary_color_blue.clone();
+        use_effect_with_deps(
+            move |(red, green, blue)| {
+                dispatch.reduce_mut(|theme| {
+                    theme.set_primary_color((**red, **green, **blue));
+                });
+            },
+            (
+                theme_primary_color_red,
+                theme_primary_color_green,
+                theme_primary_color_blue,
+            ),
+        );
+    }
+    {
+        let theme_font_state = theme_font_state.clone();
+        use_effect_with_deps(
+            move |font| {
+                dispatch.reduce_mut(|theme| {
+                    if !font.is_empty() {
+                        theme.set_fonts(&[&**font]);
+                    } else {
+                        theme.set_fonts(&[]);
+                    }
+                });
+            },
+            theme_font_state,
+        );
+    }
+
     let input_state = use_state(|| "Input value".to_owned());
     let input_value = (*input_state).clone();
     let input_value1 = input_value.clone();
@@ -101,6 +163,29 @@ pub fn Demo() -> Html {
 
     html! {
         <div class="base-demo">
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Theme"}</span>
+                <Switch
+                    state={theme_color_mode_state}
+                    label="Color mode"
+                />
+                <Slider<u8>
+                    state={theme_primary_color_red}
+                    label="Primary color red"
+                />
+                <Slider<u8>
+                    state={theme_primary_color_green}
+                    label="Primary color green"
+                />
+                <Slider<u8>
+                    state={theme_primary_color_blue}
+                    label="Primary color blue"
+                />
+                <Input
+                    state={theme_font_state}
+                    label="Font"
+                />
+            </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Error"}</span>
                 <Error

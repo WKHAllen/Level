@@ -146,8 +146,8 @@ impl Theme {
     }
 
     /// Sets the list of fonts.
-    pub fn set_fonts(&mut self, fonts: &[impl AsRef<str>]) {
-        self.fonts = fonts.iter().map(|s| s.as_ref().to_owned()).collect();
+    pub fn set_fonts(&mut self, fonts: &[&str]) {
+        self.fonts = fonts.iter().map(|&s| s.to_owned()).collect();
     }
 
     /// Adds a new font to the the font list.
@@ -198,7 +198,7 @@ impl Theme {
     }
 
     /// Sets the list of fonts.
-    pub fn fonts(mut self, fonts: &[impl AsRef<str>]) -> Self {
+    pub fn fonts(mut self, fonts: &[&str]) -> Self {
         self.set_fonts(fonts);
         self
     }

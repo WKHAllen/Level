@@ -62,6 +62,11 @@
     var(--base-text-color-dark),
     var(--base-text-color-light) var(--base-color-mode-percentage)
   );
+  --base-text-color-disabled: color-mix(
+    in var(--base-color-mix),
+    var(--base-text-color) 50%,
+    var(--base-mid-color)
+  );
 
   --base-selection-color: hsla(220, 100%, 50%, 0.4);
   --base-error-color: #cf0000;
@@ -263,8 +268,8 @@
   /*             */
 
   --base-input-background-color: var(--base-background-color-1);
-  --base-input-text-color: var(--base-primary-text-color);
-  --base-input-text-color-disabled: var(--base-primary-text-color-disabled);
+  --base-input-text-color: var(--base-text-color);
+  --base-input-text-color-disabled: var(--base-text-color-disabled);
   --base-input-border-radius: var(--base-border-radius-medium);
 
   /*                */
