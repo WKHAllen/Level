@@ -3,6 +3,7 @@
 mod components;
 mod hooks;
 mod state;
+mod util;
 
 use components::app::Root;
 

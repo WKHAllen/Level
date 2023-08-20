@@ -1,5 +1,5 @@
-use super::util::*;
 use super::*;
+use crate::util::*;
 use yew::prelude::*;
 use yew_hooks::use_click_away;
 

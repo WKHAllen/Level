@@ -20,7 +20,6 @@ mod spinner;
 mod switch;
 mod textarea;
 mod tooltip;
-mod util;
 
 pub use alert::*;
 pub use badge::*;

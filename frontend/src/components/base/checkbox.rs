@@ -1,4 +1,4 @@
-use super::util::*;
+use crate::util::*;
 use yew::prelude::*;
 
 /// Checkbox properties.

@@ -1,5 +1,5 @@
-use super::util::*;
 use super::*;
+use crate::util::*;
 use yew::prelude::*;
 
 /// Textarea resize options.

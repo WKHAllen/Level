@@ -5,8 +5,21 @@ use std::fmt::{Debug, Display};
 use std::ops::{Add, Div, Mul, Sub};
 use std::str::FromStr;
 use wasm_bindgen::{JsCast, UnwrapThrowExt};
-use web_sys::{Event, HtmlElement, HtmlInputElement, HtmlTextAreaElement, InputEvent, MouseEvent};
+use web_sys::{
+    Document, Event, HtmlElement, HtmlInputElement, HtmlTextAreaElement, InputEvent, MouseEvent,
+    Window,
+};
 use yew::prelude::*;
+
+/// Gets the window object.
+pub fn window() -> Window {
+    web_sys::window().expect("window does not exist")
+}
+
+/// Gets the document object.
+pub fn document() -> Document {
+    window().document().expect("document does not exist")
+}
 
 /// Gets the value of an input element from an event.
 pub fn input_event_value(e: InputEvent) -> String {
@@ -50,7 +63,7 @@ pub fn focus_element(node: &NodeRef) {
 /// Selects the content of an element in the DOM.
 pub fn select_element_content(node: &NodeRef) {
     if let Some(node) = node.get() {
-        let window = web_sys::window().unwrap();
+        let window = window();
 
         let range = web_sys::Range::new().unwrap();
         range.select_node_contents(&node).unwrap();
@@ -64,7 +77,7 @@ pub fn select_element_content(node: &NodeRef) {
 /// Sets the cursor position to the end within an element in the DOM.
 pub fn go_to_end(node: &NodeRef) {
     if let Some(node) = node.get() {
-        let window = web_sys::window().unwrap();
+        let window = window();
 
         let selection = window.get_selection().unwrap().unwrap();
         selection.set_position_with_offset(Some(&node), 1).unwrap();
@@ -73,7 +86,7 @@ pub fn go_to_end(node: &NodeRef) {
 
 /// Clears all selections.
 pub fn clear_selections() {
-    let window = web_sys::window().unwrap();
+    let window = window();
 
     let selection = window.get_selection().unwrap().unwrap();
     selection.remove_all_ranges().unwrap();
