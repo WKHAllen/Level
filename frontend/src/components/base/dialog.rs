@@ -55,6 +55,9 @@ impl DialogActionsLayout {
 pub struct DialogProps {
     /// The dialog open state.
     pub state: UseStateHandle<bool>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<bool>,
     /// The dialog size.
     #[prop_or_default]
     pub size: DialogSize,
@@ -83,6 +86,7 @@ pub struct DialogProps {
 pub fn Dialog(props: &DialogProps) -> Html {
     let DialogProps {
         state,
+        on_change,
         size,
         title,
         ok_label,
@@ -91,6 +95,8 @@ pub fn Dialog(props: &DialogProps) -> Html {
         actions_layout,
         children,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
     let size_class = format!("base-dialog-{}", size.size_name());
     let actions_layout_class = format!("base-dialog-actions-{}", actions_layout.layout_name());

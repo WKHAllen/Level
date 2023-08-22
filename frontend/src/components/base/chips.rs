@@ -90,6 +90,9 @@ fn get_possible_options(
 pub struct ChipsProps {
     /// The state of the currently selected chips.
     pub state: UseStateHandle<Vec<String>>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<Vec<String>>,
     /// The list of chip options.
     pub options: Vec<String>,
     /// The maximum number of options to display in the dropdown.
@@ -117,6 +120,7 @@ pub struct ChipsProps {
 pub fn Chips(props: &ChipsProps) -> Html {
     let ChipsProps {
         state,
+        on_change,
         options,
         option_limit,
         label,
@@ -125,6 +129,11 @@ pub fn Chips(props: &ChipsProps) -> Html {
         error,
         disabled,
     } = props.clone();
+
+    use_effect_with_deps(
+        move |new_state| on_change.emit((**new_state).clone()),
+        state.clone(),
+    );
 
     let next_chip_state = use_state(String::new);
     let next_chip = (*next_chip_state).clone();

@@ -175,6 +175,9 @@ impl<N: Number> From<N> for NumberState<N> {
 pub struct NumberInputProps<N: Number> {
     /// The number input state.
     pub state: UseStateHandle<NumberState<N>>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<N>,
     /// The number input label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -197,12 +200,15 @@ pub struct NumberInputProps<N: Number> {
 pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
     let NumberInputProps {
         state,
+        on_change,
         label,
         placeholder,
         required,
         error,
         disabled,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(***new_state), state.clone());
 
     let value_str = (*state).to_string();
     let id_state = use_state(new_id);

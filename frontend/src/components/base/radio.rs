@@ -49,6 +49,9 @@ impl RadioGroupOrientation {
 pub struct RadioGroupProps {
     /// The radio group state.
     pub state: UseStateHandle<Option<usize>>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<Option<usize>>,
     /// The orientation of the radio group.
     #[prop_or_default]
     pub orientation: RadioGroupOrientation,
@@ -67,11 +70,14 @@ pub struct RadioGroupProps {
 pub fn RadioGroup(props: &RadioGroupProps) -> Html {
     let RadioGroupProps {
         state,
+        on_change,
         orientation,
         required,
         disabled,
         children,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
     let name_state = use_state(new_id);
     let name = (*name_state).clone();

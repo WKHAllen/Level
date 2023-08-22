@@ -34,6 +34,9 @@ impl TextAreaResize {
 pub struct TextAreaProps {
     /// The textarea state.
     pub state: UseStateHandle<String>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<String>,
     /// The textarea label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -62,6 +65,7 @@ pub struct TextAreaProps {
 pub fn TextArea(props: &TextAreaProps) -> Html {
     let TextAreaProps {
         state,
+        on_change,
         label,
         placeholder,
         max_length,
@@ -70,6 +74,11 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
         error,
         disabled,
     } = props.clone();
+
+    use_effect_with_deps(
+        move |new_state| on_change.emit((**new_state).clone()),
+        state.clone(),
+    );
 
     let value = (*state).clone();
     let id_state = use_state(new_id);

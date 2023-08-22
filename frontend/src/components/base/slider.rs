@@ -7,6 +7,9 @@ use yew::prelude::*;
 pub struct SliderProps<N: Number> {
     /// The slider state.
     pub state: UseStateHandle<N>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<N>,
     /// The slider label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -29,12 +32,15 @@ pub struct SliderProps<N: Number> {
 pub fn Slider<N: Number + 'static>(props: &SliderProps<N>) -> Html {
     let SliderProps {
         state,
+        on_change,
         label,
         min,
         max,
         step,
         disabled,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
     let id_state = use_state(new_id);
     let id = (*id_state).clone();

@@ -6,6 +6,9 @@ use yew::prelude::*;
 pub struct SwitchProps {
     /// The switch state.
     pub state: UseStateHandle<bool>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<bool>,
     /// The switch label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -19,9 +22,12 @@ pub struct SwitchProps {
 pub fn Switch(props: &SwitchProps) -> Html {
     let SwitchProps {
         state,
+        on_change,
         label,
         disabled,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
     let checked = *state;
     let onclick = move |event: MouseEvent| {

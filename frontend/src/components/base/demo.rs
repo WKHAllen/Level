@@ -17,55 +17,41 @@ pub fn Demo() -> Html {
     let theme_primary_color_blue = use_state(|| 255);
     let theme_font_state = use_state(String::new);
 
-    {
-        let dispatch = dispatch.clone();
-        let theme_color_mode_state = theme_color_mode_state.clone();
-        use_effect_with_deps(
-            move |light_mode| {
-                dispatch.reduce_mut(|theme| {
-                    theme.set_color_mode(if **light_mode {
-                        ColorMode::Light
-                    } else {
-                        ColorMode::Dark
-                    });
-                });
-            },
-            theme_color_mode_state,
-        );
-    }
-    {
-        let dispatch = dispatch.clone();
-        let theme_primary_color_red = theme_primary_color_red.clone();
-        let theme_primary_color_green = theme_primary_color_green.clone();
-        let theme_primary_color_blue = theme_primary_color_blue.clone();
-        use_effect_with_deps(
-            move |(red, green, blue)| {
-                dispatch.reduce_mut(|theme| {
-                    theme.set_primary_color((**red, **green, **blue));
-                });
-            },
-            (
-                theme_primary_color_red,
-                theme_primary_color_green,
-                theme_primary_color_blue,
-            ),
-        );
-    }
-    {
-        let theme_font_state = theme_font_state.clone();
-        use_effect_with_deps(
-            move |font| {
-                dispatch.reduce_mut(|theme| {
-                    if !font.is_empty() {
-                        theme.set_fonts(&[&**font]);
-                    } else {
-                        theme.set_fonts(&[]);
-                    }
-                });
-            },
-            theme_font_state,
-        );
-    }
+    let on_color_mode_change = dispatch.reduce_mut_callback_with(|theme, light_mode| {
+        theme.set_color_mode(if light_mode {
+            ColorMode::Light
+        } else {
+            ColorMode::Dark
+        });
+    });
+    let on_primary_color_red_change = dispatch.reduce_mut_callback_with(|theme, red| {
+        theme.set_primary_color((
+            (red as f64) / 255f64,
+            theme.primary_color.g,
+            theme.primary_color.b,
+        ));
+    });
+    let on_primary_color_green_change = dispatch.reduce_mut_callback_with(|theme, green| {
+        theme.set_primary_color((
+            theme.primary_color.r,
+            (green as f64) / 255f64,
+            theme.primary_color.b,
+        ));
+    });
+    let on_primary_color_blue_change = dispatch.reduce_mut_callback_with(|theme, blue| {
+        theme.set_primary_color((
+            theme.primary_color.r,
+            theme.primary_color.g,
+            (blue as f64) / 255f64,
+        ));
+    });
+    let on_font_change = dispatch.reduce_mut_callback_with(|theme, font: String| {
+        if !font.is_empty() {
+            theme.set_fonts(&[&font]);
+        } else {
+            theme.set_fonts(&[]);
+        }
+    });
 
     let input_state = use_state(|| "Input value".to_owned());
     let input_value = (*input_state).clone();
@@ -167,22 +153,27 @@ pub fn Demo() -> Html {
                 <span class="base-demo-item-label">{"Theme"}</span>
                 <Switch
                     state={theme_color_mode_state}
+                    on_change={on_color_mode_change}
                     label="Color mode"
                 />
                 <Slider<u8>
                     state={theme_primary_color_red}
+                    on_change={on_primary_color_red_change}
                     label="Primary color red"
                 />
                 <Slider<u8>
                     state={theme_primary_color_green}
+                    on_change={on_primary_color_green_change}
                     label="Primary color green"
                 />
                 <Slider<u8>
                     state={theme_primary_color_blue}
+                    on_change={on_primary_color_blue_change}
                     label="Primary color blue"
                 />
                 <Input
                     state={theme_font_state}
+                    on_change={on_font_change}
                     label="Font"
                 />
             </div>

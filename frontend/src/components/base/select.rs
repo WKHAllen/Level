@@ -30,6 +30,9 @@ pub fn SelectOption(props: &SelectOptionProps) -> Html {
 pub struct SelectProps {
     /// The selection state.
     pub state: UseStateHandle<usize>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<usize>,
     /// The selection label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -51,12 +54,15 @@ pub struct SelectProps {
 pub fn Select(props: &SelectProps) -> Html {
     let SelectProps {
         state,
+        on_change,
         label,
         required,
         error,
         disabled,
         children,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
     let id_state = use_state(new_id);
     let id = (*id_state).clone();
@@ -149,6 +155,9 @@ pub fn Select(props: &SelectProps) -> Html {
 pub struct SelectWithNullProps {
     /// The selection state.
     pub state: UseStateHandle<Option<usize>>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<Option<usize>>,
     /// The selection label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -173,6 +182,7 @@ pub struct SelectWithNullProps {
 pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
     let SelectWithNullProps {
         state,
+        on_change,
         label,
         null_label,
         required,
@@ -180,6 +190,8 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
         disabled,
         children,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
     let id_state = use_state(new_id);
     let id = (*id_state).clone();

@@ -319,6 +319,9 @@ impl Default for DatePickerState {
 pub struct DatePickerProps {
     /// The date picker state.
     pub state: UseStateHandle<DatePickerState>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<Option<NaiveDate>>,
     /// The date picker label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -345,6 +348,7 @@ pub struct DatePickerProps {
 pub fn DatePicker(props: &DatePickerProps) -> Html {
     let DatePickerProps {
         state,
+        on_change,
         label,
         min,
         max,
@@ -352,6 +356,8 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         error,
         disabled,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(***new_state), state.clone());
 
     let year_id_state = use_state(new_id);
     let year_id = (*year_id_state).clone();

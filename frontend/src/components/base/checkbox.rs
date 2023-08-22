@@ -6,6 +6,9 @@ use yew::prelude::*;
 pub struct CheckboxProps {
     /// The checkbox state.
     pub state: UseStateHandle<bool>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<bool>,
     /// The checkbox label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -19,9 +22,12 @@ pub struct CheckboxProps {
 pub fn Checkbox(props: &CheckboxProps) -> Html {
     let CheckboxProps {
         state,
+        on_change,
         label,
         disabled,
     } = props.clone();
+
+    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
     let checked = *state;
     let onclick = move |event: MouseEvent| {

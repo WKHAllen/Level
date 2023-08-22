@@ -37,6 +37,9 @@ impl InputType {
 pub struct InputProps {
     /// The input state.
     pub state: UseStateHandle<String>,
+    /// The callback called when the state changes.
+    #[prop_or_default]
+    pub on_change: Callback<String>,
     /// The input type.
     #[prop_or_default]
     pub input_type: InputType,
@@ -68,6 +71,7 @@ pub struct InputProps {
 pub fn Input(props: &InputProps) -> Html {
     let InputProps {
         state,
+        on_change,
         input_type,
         label,
         placeholder,
@@ -77,6 +81,11 @@ pub fn Input(props: &InputProps) -> Html {
         error,
         disabled,
     } = props.clone();
+
+    use_effect_with_deps(
+        move |new_state| on_change.emit((**new_state).clone()),
+        state.clone(),
+    );
 
     let value = (*state).clone();
     let id_state = use_state(new_id);
