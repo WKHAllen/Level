@@ -42,9 +42,13 @@ fn option_match(option: &str, value: &str) -> Option<usize> {
 }
 
 /// Limits the number of options.
-fn limit_options<T: Clone>(options: &[T], limit: usize) -> Vec<T> {
-    let limit_index = if options.len() > limit {
-        limit
+fn limit_options<T: Clone>(options: &[T], display_limit: Option<usize>) -> Vec<T> {
+    let limit_index = if let Some(display_limit) = display_limit {
+        if options.len() > display_limit {
+            display_limit
+        } else {
+            options.len()
+        }
     } else {
         options.len()
     };
@@ -59,15 +63,22 @@ fn get_possible_options(
     all_options: &[String],
     selected_options: &[String],
     next_option: &str,
-    limit: usize,
+    display_limit: Option<usize>,
+    max_selections: Option<usize>,
 ) -> Vec<String> {
+    if let Some(max_selections) = max_selections {
+        if selected_options.len() >= max_selections {
+            return Vec::new();
+        }
+    }
+
     let unselected_options = all_options
         .iter()
         .filter_map(|option| (!selected_options.contains(option)).then_some(option.to_owned()))
         .collect::<Vec<_>>();
 
     if next_option.is_empty() {
-        return limit_options(&unselected_options, limit);
+        return limit_options(&unselected_options, display_limit);
     }
 
     let mut matches = unselected_options
@@ -77,7 +88,7 @@ fn get_possible_options(
 
     matches.sort_by(|(_, score1), (_, score2)| score1.cmp(score2));
 
-    let limited_matches = limit_options(&matches, limit);
+    let limited_matches = limit_options(&matches, display_limit);
 
     limited_matches
         .into_iter()
@@ -96,8 +107,11 @@ pub struct ChipsProps {
     /// The list of chip options.
     pub options: Vec<String>,
     /// The maximum number of options to display in the dropdown.
-    #[prop_or(10)]
-    pub option_limit: usize,
+    #[prop_or_default]
+    pub option_display_limit: Option<usize>,
+    /// The maximum number of options that can be selected.
+    #[prop_or_default]
+    pub max_selections: Option<usize>,
     /// The chips input label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -122,7 +136,8 @@ pub fn Chips(props: &ChipsProps) -> Html {
         state,
         on_change,
         options,
-        option_limit,
+        option_display_limit,
+        max_selections,
         label,
         placeholder,
         max_length,
@@ -140,7 +155,13 @@ pub fn Chips(props: &ChipsProps) -> Html {
     let id_state = use_state(new_id);
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
-    let possible_options = get_possible_options(&options, &state, &next_chip_state, option_limit);
+    let possible_options = get_possible_options(
+        &options,
+        &state,
+        &next_chip_state,
+        option_display_limit,
+        max_selections,
+    );
     let oninput = {
         let next_chip_state = next_chip_state.clone();
         move |event: InputEvent| {

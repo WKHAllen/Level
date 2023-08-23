@@ -706,7 +706,8 @@ pub fn Demo() -> Html {
                 <Chips
                     state={chips_state.clone()}
                     options={chip_options.clone()}
-                    option_limit={5}
+                    option_display_limit={5}
+                    max_selections={6}
                     label="Chips label"
                     placeholder="Placeholder!"
                     error={chips_value.is_empty().then_some("Please select at least one language")}

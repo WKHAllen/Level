@@ -2090,3 +2090,10 @@ body {
   color: var(--base-date-picker-day-text-color-disabled);
   cursor: default;
 }
+
+.base-date-picker-calendar-day-disabled
+  .base-date-picker-calendar-day-button:hover {
+  color: var(--base-date-picker-day-text-color-disabled);
+  background-color: initial;
+  cursor: default;
+}
