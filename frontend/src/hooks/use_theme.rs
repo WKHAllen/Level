@@ -234,8 +234,12 @@ fn set_css_var(name: &str, value: &str) {
 
 /// Applies a styling theme.
 fn apply_theme(theme: &Theme) {
-    let mut fonts = theme.fonts.iter().map(|s| s.as_ref()).collect::<Vec<_>>();
-    fonts.extend(FALLBACK_FONTS);
+    let mut fonts = theme
+        .fonts
+        .iter()
+        .map(|s| format!("\"{}\"", s))
+        .collect::<Vec<_>>();
+    fonts.extend(FALLBACK_FONTS.iter().map(|&s| s.to_owned()));
     set_css_var("--base-fonts", &fonts.join(", "));
 
     let color_mode_percentage = match theme.color_mode {

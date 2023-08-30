@@ -17,12 +17,12 @@
   --base-background-color-5-dark: #2a2c2f;
   --base-background-color-6-dark: #2e3033;
 
-  --base-background-color-1-light: #ffffff;
-  --base-background-color-2-light: #ffffff;
-  --base-background-color-3-light: #ffffff;
-  --base-background-color-4-light: #ffffff;
-  --base-background-color-5-light: #ffffff;
-  --base-background-color-6-light: #ffffff;
+  --base-background-color-1-light: #fafcff;
+  --base-background-color-2-light: #f6f8fb;
+  --base-background-color-3-light: #f2f4f7;
+  --base-background-color-4-light: #eef0f3;
+  --base-background-color-5-light: #eaecef;
+  --base-background-color-6-light: #e6e8eb;
 
   --base-background-color-1: color-mix(
     in var(--base-color-mix),
@@ -62,10 +62,12 @@
     var(--base-text-color-dark),
     var(--base-text-color-light) var(--base-color-mode-percentage)
   );
+  --base-text-color-disabled-dark: #bfbfbf;
+  --base-text-color-disabled-light: #6f6f6f;
   --base-text-color-disabled: color-mix(
     in var(--base-color-mix),
-    var(--base-text-color) 50%,
-    var(--base-mid-color)
+    var(--base-text-color-disabled-dark),
+    var(--base-text-color-disabled-light) var(--base-color-mode-percentage)
   );
 
   --base-selection-color: hsla(220, 100%, 50%, 0.4);
@@ -348,8 +350,8 @@
   --base-checkbox-background-color-unchecked: var(
     --base-input-background-color
   );
-  --base-checkbox-label-color: var(--base-primary-text-color);
-  --base-checkbox-label-color-disabled: var(--base-primary-text-color-disabled);
+  --base-checkbox-label-color: var(--base-text-color);
+  --base-checkbox-label-color-disabled: var(--base-text-color-disabled);
   --base-checkbox-size: 18px;
   --base-checkbox-label-offset-left: calc(var(--base-checkbox-size) + 10px);
   --base-checkbox-border-radius: var(--base-border-radius-medium);
@@ -377,13 +379,13 @@
       var(--base-switch-inner-padding)
   );
   --base-switch-label-offset-left: calc(var(--base-switch-width) + 10px);
-  --base-switch-label-color: var(--base-primary-text-color);
+  --base-switch-label-color: var(--base-text-color);
   --base-switch-background-color-checked: var(--base-primary-color);
   --base-switch-background-color-checked-disabled: var(
     --base-primary-color-disabled
   );
   --base-switch-background-color-unchecked: var(--base-input-background-color);
-  --base-switch-label-color-disabled: var(--base-primary-text-color-disabled);
+  --base-switch-label-color-disabled: var(--base-text-color-disabled);
 
   /*             */
   /*    RADIO    */
@@ -400,7 +402,7 @@
     --base-primary-text-color-disabled
   );
   --base-radio-background-color-unchecked: var(--base-input-background-color);
-  --base-radio-label-color-disabled: var(--base-primary-text-color-disabled);
+  --base-radio-label-color-disabled: var(--base-text-color-disabled);
 
   /*              */
   /*    SLIDER    */
@@ -424,9 +426,9 @@
   --base-slider-track-filled-border: 1px solid var(--base-primary-color);
   --base-slider-track-filled-border-disabled: 1px solid
     var(--base-primary-color-disabled);
-  --base-slider-thumb-color: var(--base-primary-text-color);
-  --base-slider-thumb-color-disabled: var(--base-primary-text-color-disabled);
-  --base-slider-label-color-disabled: var(--base-primary-text-color-disabled);
+  --base-slider-thumb-color: var(--base-text-color);
+  --base-slider-thumb-color-disabled: var(--base-text-color-disabled);
+  --base-slider-label-color-disabled: var(--base-text-color-disabled);
 
   /*            */
   /*    ICON    */
@@ -467,18 +469,16 @@
   /*              */
 
   --base-select-button-background-color: var(--base-background-color-1);
-  --base-select-button-text-color: var(--base-primary-text-color);
-  --base-select-button-text-color-disabled: var(
-    --base-primary-text-color-disabled
-  );
+  --base-select-button-text-color: var(--base-text-color);
+  --base-select-button-text-color-disabled: var(--base-text-color-disabled);
   --base-select-button-border-radius: var(--base-border-radius-medium);
-  --base-select-label-color-disabled: var(--base-primary-text-color-disabled);
+  --base-select-label-color-disabled: var(--base-text-color-disabled);
   --base-select-popup-background-color: var(--base-background-color-3);
   --base-select-popup-background-color-hover: var(--base-background-color-5);
   --base-select-popup-background-color-active: var(--base-background-color-6);
   --base-select-popup-border-radius: var(--base-border-radius-medium);
   --base-select-popup-max-height: 300px;
-  --base-select-option-color-disabled: var(--base-primary-text-color-disabled);
+  --base-select-option-color-disabled: var(--base-text-color-disabled);
 
   /*              */
   /*    DIALOG    */
@@ -546,10 +546,8 @@
   --base-chips-chip-padding: 2px 8px;
   --base-chips-chip-inner-padding: 4px;
   --base-chips-chip-background-color: var(--base-background-color-5);
-  --base-chips-chip-text-color: var(--base-primary-text-color);
-  --base-chips-chip-text-color-disabled: var(
-    --base-primary-text-color-disabled
-  );
+  --base-chips-chip-text-color: var(--base-text-color);
+  --base-chips-chip-text-color-disabled: var(--base-text-color-disabled);
   --base-chips-chip-label-size: 0.8em;
   --base-chips-popup-background-color: var(
     --base-select-popup-background-color
@@ -568,7 +566,7 @@
   /*               */
 
   --base-tooltip-background-color: #4f4f4fef;
-  --base-tooltip-text-color: var(--base-primary-text-color);
+  --base-tooltip-text-color: #ffffff;
   --base-tooltip-font-size: 0.8em;
   --base-tooltip-border-radius: var(--base-border-radius-small);
 
@@ -591,10 +589,8 @@
   /*                   */
 
   --base-date-picker-container-padding: var(--base-padding-medium);
-  --base-date-picker-text-color: var(--base-primary-text-color);
-  --base-date-picker-text-color-disabled: var(
-    --base-primary-text-color-disabled
-  );
+  --base-date-picker-text-color: var(--base-text-color);
+  --base-date-picker-text-color-disabled: var(--base-text-color-disabled);
   --base-date-picker-input-font-size: 0.9em;
   --base-date-picker-popup-background-color: var(
     --base-select-popup-background-color
@@ -607,10 +603,8 @@
   --base-date-picker-calendar-font-size: 0.8em;
   --base-date-picker-calendar-days-of-week-padding: var(--base-padding-small);
   --base-date-picker-day-size: 30px;
-  --base-date-picker-day-text-color: var(--base-primary-text-color);
-  --base-date-picker-day-text-color-disabled: var(
-    --base-primary-text-color-disabled
-  );
+  --base-date-picker-day-text-color: var(--base-text-color);
+  --base-date-picker-day-text-color-disabled: var(--base-text-color-disabled);
   --base-date-picker-day-background-color-hover: var(
     --base-select-popup-background-color-hover
   );
@@ -618,6 +612,7 @@
     --base-select-popup-background-color-active
   );
   --base-date-picker-day-background-color-selected: var(--base-primary-color);
+  --base-date-picker-day-text-selected: var(--base-primary-text-color);
 }
 
 /*              */
@@ -773,12 +768,12 @@ body {
 }
 
 .base-input-label {
-  color: var(--base-primary-text-color);
+  color: var(--base-text-color);
   font-size: var(--base-standard-label-size);
 }
 
 .base-input-container-disabled .base-input-label {
-  color: var(--base-primary-text-color-disabled);
+  color: var(--base-text-color-disabled);
 }
 
 /*                */
@@ -832,12 +827,12 @@ body {
 }
 
 .base-textarea-label {
-  color: var(--base-primary-text-color);
+  color: var(--base-text-color);
   font-size: var(--base-standard-label-size);
 }
 
 .base-textarea-container-disabled .base-textarea-label {
-  color: var(--base-primary-text-color-disabled);
+  color: var(--base-text-color-disabled);
 }
 
 /*              */
@@ -1766,12 +1761,12 @@ body {
 }
 
 .base-chips-label {
-  color: var(--base-primary-text-color);
+  color: var(--base-text-color);
   font-size: var(--base-standard-label-size);
 }
 
 .base-chips-container-disabled .base-chips-label {
-  color: var(--base-primary-text-color-disabled);
+  color: var(--base-text-color-disabled);
 }
 
 .base-chips-chip-list {
@@ -2083,6 +2078,7 @@ body {
 
 .base-date-picker-calendar-day-selected .base-date-picker-calendar-day-button {
   border: none;
+  color: var(--base-date-picker-day-text-selected);
   background-color: var(--base-date-picker-day-background-color-selected);
 }
 
