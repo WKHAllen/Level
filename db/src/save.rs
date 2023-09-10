@@ -127,7 +127,7 @@ impl Display for SaveMetadata {
         let created_at = format!("created_at={}", self.created_at.timestamp());
         let last_opened_at = format!("last_opened_at={}", self.last_opened_at.timestamp());
 
-        let metadata_str = vec![name, description, created_at, last_opened_at].join("\n");
+        let metadata_str = [name, description, created_at, last_opened_at].join("\n");
 
         f.write_str(&metadata_str)
     }
