@@ -1,5 +1,5 @@
 use super::*;
-use crate::util::*;
+use crate::hooks::use_id;
 use yew::prelude::*;
 use yew_hooks::use_click_away;
 
@@ -64,7 +64,7 @@ pub fn Select(props: &SelectProps) -> Html {
 
     use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
-    let id_state = use_state(new_id);
+    let id_state = use_id();
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
 
@@ -193,7 +193,7 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
 
     use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
-    let id_state = use_state(new_id);
+    let id_state = use_id();
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
 

@@ -1,4 +1,5 @@
 use super::*;
+use crate::hooks::use_id;
 use crate::util::*;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use std::ops::Deref;
@@ -359,13 +360,13 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
 
     use_effect_with_deps(move |new_state| on_change.emit(***new_state), state.clone());
 
-    let year_id_state = use_state(new_id);
+    let year_id_state = use_id();
     let year_id = (*year_id_state).clone();
     let year_node = use_node_ref();
-    let month_id_state = use_state(new_id);
+    let month_id_state = use_id();
     let month_id = (*month_id_state).clone();
     let month_node = use_node_ref();
-    let day_id_state = use_state(new_id);
+    let day_id_state = use_id();
     let day_id = (*day_id_state).clone();
     let day_node = use_node_ref();
     let calendar_open = use_state(|| false);

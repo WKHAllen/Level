@@ -1,4 +1,5 @@
 use super::*;
+use crate::hooks::use_id;
 use crate::util::*;
 use std::ops::Deref;
 use yew::prelude::*;
@@ -211,7 +212,7 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
     use_effect_with_deps(move |new_state| on_change.emit(***new_state), state.clone());
 
     let value_str = (*state).to_string();
-    let id_state = use_state(new_id);
+    let id_state = use_id();
     let id = (*id_state).clone();
     let trigger = use_force_update();
 

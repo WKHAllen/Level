@@ -1,3 +1,4 @@
+use crate::hooks::use_id;
 use crate::util::*;
 use yew::prelude::*;
 
@@ -79,7 +80,7 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
 
     use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
-    let name_state = use_state(new_id);
+    let name_state = use_id();
     let name = (*name_state).clone();
     let id_states = use_state(|| {
         vec![false; children.len()]

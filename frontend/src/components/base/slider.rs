@@ -1,4 +1,5 @@
 use super::*;
+use crate::hooks::use_id;
 use crate::util::*;
 use yew::prelude::*;
 
@@ -42,7 +43,7 @@ pub fn Slider<N: Number + 'static>(props: &SliderProps<N>) -> Html {
 
     use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
 
-    let id_state = use_state(new_id);
+    let id_state = use_id();
     let id = (*id_state).clone();
     let value = *state;
     let progress = (value.as_f64() - min.as_f64()) / (max.as_f64() - min.as_f64());

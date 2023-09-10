@@ -1,4 +1,5 @@
 use super::*;
+use crate::hooks::use_id;
 use crate::util::*;
 use yew::prelude::*;
 
@@ -88,7 +89,7 @@ pub fn Input(props: &InputProps) -> Html {
     );
 
     let value = (*state).clone();
-    let id_state = use_state(new_id);
+    let id_state = use_id();
     let id = (*id_state).clone();
     let html_input_type = input_type.html_input_type();
     let oninput = move |event: InputEvent| {

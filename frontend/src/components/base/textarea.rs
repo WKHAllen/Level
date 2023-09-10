@@ -1,4 +1,5 @@
 use super::*;
+use crate::hooks::use_id;
 use crate::util::*;
 use yew::prelude::*;
 
@@ -81,7 +82,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
     );
 
     let value = (*state).clone();
-    let id_state = use_state(new_id);
+    let id_state = use_id();
     let id = (*id_state).clone();
     let resize_class = format!("base-textarea-resize-{}", resize.resize_option_name());
     let oninput = move |event: InputEvent| {

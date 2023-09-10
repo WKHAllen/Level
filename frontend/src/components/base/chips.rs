@@ -1,4 +1,5 @@
 use super::*;
+use crate::hooks::use_id;
 use crate::util::*;
 use yew::prelude::*;
 use yew_hooks::use_click_away;
@@ -152,7 +153,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
 
     let next_chip_state = use_state(String::new);
     let next_chip = (*next_chip_state).clone();
-    let id_state = use_state(new_id);
+    let id_state = use_id();
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
     let possible_options = get_possible_options(
