@@ -28,7 +28,7 @@ pub fn RadioButton(props: &RadioButtonProps) -> Html {
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub enum RadioGroupOrientation {
-    /// Horizontallly oriented.
+    /// Horizontally oriented.
     Horizontal,
     /// Vertically oriented.
     #[default]

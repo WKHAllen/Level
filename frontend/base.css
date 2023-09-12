@@ -613,6 +613,12 @@
   );
   --base-date-picker-day-background-color-selected: var(--base-primary-color);
   --base-date-picker-day-text-selected: var(--base-primary-text-color);
+
+  /*               */
+  /*    STEPPER    */
+  /*               */
+
+  --base-stepper-gap: var(--base-padding-large);
 }
 
 /*              */
@@ -2092,4 +2098,24 @@ body {
   color: var(--base-date-picker-day-text-color-disabled);
   background-color: initial;
   cursor: default;
+}
+
+/*               */
+/*    STEPPER    */
+/*               */
+
+.base-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-stepper-gap);
+}
+
+.base-stepper-title {
+  text-align: center;
+}
+
+.base-stepper-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }

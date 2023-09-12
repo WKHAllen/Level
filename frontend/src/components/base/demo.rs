@@ -146,6 +146,15 @@ pub fn Demo() -> Html {
     let date_error = (*datepicker_state).as_ref().and_then(|date: &NaiveDate| {
         (date.month() == 2).then_some("Please pick a month other than February".to_owned())
     });
+    let stepper_state = use_state(StepperState::default);
+    let stepper_first_name_state = use_state(String::new);
+    let stepper_first_name_value = (*stepper_first_name_state).clone();
+    let stepper_last_name_state = use_state(String::new);
+    let stepper_last_name_value = (*stepper_last_name_state).clone();
+    let stepper_email_state = use_state(String::new);
+    let stepper_email_value = (*stepper_email_state).clone();
+    let stepper_password_state = use_state(String::new);
+    let stepper_password_value = (*stepper_password_state).clone();
 
     html! {
         <div class="base-demo">
@@ -778,6 +787,53 @@ pub fn Demo() -> Html {
                     label="Disabled date picker label"
                     disabled={true}
                 />
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Stepper"}</span>
+                <Stepper
+                    state={stepper_state.clone()}
+                    title="Stepper title"
+                >
+                    <Step valid={!stepper_first_name_value.is_empty() && !stepper_last_name_value.is_empty()}>
+                        <h4>{"Name"}</h4>
+                        <p>{"Please enter your first and last name below."}</p>
+                        <Input
+                            state={stepper_first_name_state}
+                            label="First name"
+                            error={stepper_first_name_value.is_empty().then_some("Please enter your first name")}
+                        />
+                        <Input
+                            state={stepper_last_name_state}
+                            label="Last name"
+                            error={stepper_last_name_value.is_empty().then_some("Please enter your last name")}
+                        />
+                    </Step>
+                    <Step valid={!stepper_email_value.is_empty() && !stepper_password_value.is_empty()}>
+                        <h4>{"Login"}</h4>
+                        <p>{"Please enter your email address and password below."}</p>
+                        <Input
+                            state={stepper_email_state}
+                            label="Email address"
+                            input_type={InputType::Email}
+                            error={stepper_email_value.is_empty().then_some("Please enter your email address")}
+                        />
+                        <Input
+                            state={stepper_password_state}
+                            label="Password"
+                            input_type={InputType::Password}
+                            error={stepper_password_value.is_empty().then_some("Please enter your password")}
+                        />
+                    </Step>
+                    <Step>
+                        <h4>{"Review"}</h4>
+                        <p>{"Please review your info below."}</p>
+                        <p>{"First name: "}{stepper_first_name_value}</p>
+                        <p>{"Last name: "}{stepper_last_name_value}</p>
+                        <p>{"Email address: "}{stepper_email_value}</p>
+                        <p>{"Password: "}{String::from("*").repeat(stepper_password_value.len())}</p>
+                    </Step>
+                </Stepper>
+                <span>{format!("Stepper state: {:?}", (*stepper_state))}</span>
             </div>
         </div>
     }
