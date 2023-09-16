@@ -619,6 +619,21 @@
   /*               */
 
   --base-stepper-gap: var(--base-padding-large);
+
+  /*            */
+  /*    MENU    */
+  /*            */
+
+  --base-menu-popup-background-color: var(--base-background-color-3);
+  --base-menu-popup-background-color-hover: var(--base-background-color-5);
+  --base-menu-popup-background-color-active: var(--base-background-color-6);
+  --base-menu-popup-border-radius: var(--base-border-radius-medium);
+  --base-menu-popup-max-width: 250px;
+  --base-menu-popup-max-height: 500px;
+  --base-menu-item-text-color: var(--base-text-color);
+  --base-menu-item-text-color-disabled: var(--base-text-color-disabled);
+  --base-menu-item-height: 24px;
+  --base-menu-separator-color: #7f7f7f;
 }
 
 /*              */
@@ -2118,4 +2133,102 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+/*            */
+/*    MENU    */
+/*            */
+
+.base-menu {
+  position: relative;
+  width: 100%;
+}
+
+.base-menu-inner {
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  max-width: var(--base-menu-popup-max-width);
+  max-height: 0;
+  z-index: 1;
+  transition: max-height 0.5s ease, visibility 0.5s, opacity 0.2s linear 0.125s;
+  background-color: var(--base-menu-popup-background-color);
+  border-radius: var(--base-menu-popup-border-radius);
+  box-shadow: var(--base-standard-box-shadow);
+  padding: 4px 0;
+}
+
+.base-menu-open > .base-menu-inner {
+  visibility: visible;
+  opacity: 1;
+  max-height: var(--base-menu-popup-max-height);
+  transition: max-height 0.5s ease, visibility 0s, opacity 0.2s linear;
+}
+
+.base-menu-item {
+  height: var(--base-menu-item-height);
+  color: var(--base-text-color);
+  padding: 2px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.1s linear;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.base-menu-item-disabled {
+  color: var(--base-text-color-disabled);
+  cursor: default;
+}
+
+.base-menu-open .base-menu-item-action:hover,
+.base-menu-open .base-menu-item-submenu:hover {
+  background-color: var(--base-menu-popup-background-color-hover);
+}
+
+.base-menu-open .base-menu-item-action:active,
+.base-menu-open .base-menu-item-submenu:active {
+  background-color: var(--base-menu-popup-background-color-active);
+}
+
+.base-menu-open .base-menu-item-disabled:hover,
+.base-menu-open .base-menu-item-disabled:active {
+  background-color: inherit;
+}
+
+.base-menu-item-separator {
+  height: 1px;
+  padding: 0;
+  margin: 4px;
+  background-color: var(--base-menu-separator-color);
+  cursor: default;
+}
+
+.base-menu-item-icon {
+  flex-grow: 0;
+}
+
+.base-menu-item-text {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.base-menu-item-arrow {
+  flex-grow: 0;
+}
+
+.base-menu-item-inner-menu-container {
+  align-self: flex-start;
+  width: 0;
+  height: 0;
+  position: relative;
+}
+
+.base-menu-item-inner-menu {
+  position: absolute;
+  top: -6px;
 }

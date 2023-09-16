@@ -39,6 +39,7 @@ pub struct AlertProps {
     #[prop_or_default]
     pub on_close: Callback<bool>,
     /// Elements within the alert.
+    #[prop_or_default]
     pub children: Children,
 }
 

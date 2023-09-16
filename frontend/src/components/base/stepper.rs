@@ -8,6 +8,7 @@ pub struct StepProps {
     #[prop_or(true)]
     pub valid: bool,
     /// Child elements.
+    #[prop_or_default]
     pub children: Children,
 }
 
@@ -93,8 +94,9 @@ pub struct StepperProps {
     pub on_complete: Callback<()>,
     /// A title to display above the stepper.
     #[prop_or_default]
-    pub title: String,
+    pub title: AttrValue,
     /// Child elements.
+    #[prop_or_default]
     pub children: ChildrenWithProps<Step>,
 }
 

@@ -155,6 +155,16 @@ pub fn Demo() -> Html {
     let stepper_email_value = (*stepper_email_state).clone();
     let stepper_password_state = use_state(String::new);
     let stepper_password_value = (*stepper_password_state).clone();
+    let menu_state = use_state(|| false);
+    let menu_state_button = menu_state.clone();
+    let menu_action = use_state(|| "None");
+    let menu_action1 = menu_action.clone();
+    let menu_action2 = menu_action.clone();
+    let menu_action3 = menu_action.clone();
+    let menu_action4 = menu_action.clone();
+    let menu_action5 = menu_action.clone();
+    let menu_action6 = menu_action.clone();
+    let menu_action7 = menu_action.clone();
 
     html! {
         <div class="base-demo">
@@ -834,6 +844,70 @@ pub fn Demo() -> Html {
                     </Step>
                 </Stepper>
                 <span>{format!("Stepper state: {:?}", (*stepper_state))}</span>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Menu"}</span>
+                <Button text="Open menu" on_click={move |_| menu_state_button.set(true)} />
+                <Menu state={menu_state}>
+                    <MenuAction
+                        text="Action with text"
+                        on_click={move |_| menu_action1.set("Action 1")}
+                    />
+                    <MenuAction
+                        text="Action with calendar icon"
+                        icon="calendar-days-solid"
+                        on_click={move |_| menu_action2.set("Action 2")}
+                    />
+                    <MenuAction
+                        text="Disabled action"
+                        disabled={true}
+                        on_click={move |_| menu_action3.set("Action 3 (this should never be clickable)")}
+                    />
+                    <MenuSeparator />
+                    <MenuSubmenu
+                        text="Submenu"
+                    >
+                        <MenuAction
+                            text="Submenu item"
+                            on_click={move |_| menu_action4.set("Action 4")}
+                        />
+                        <MenuAction
+                            text="Another submenu item"
+                            on_click={move |_| menu_action5.set("Action 5")}
+                        />
+                        <MenuSeparator />
+                        <MenuAction
+                            text="Disabled submenu item"
+                            disabled={true}
+                            on_click={move |_| menu_action6.set("Action 6 (this should never be clickable)")}
+                        />
+                    </MenuSubmenu>
+                    <MenuSubmenu
+                        text="Submenu with check icon"
+                        icon="check-solid"
+                    >
+                        <MenuSubmenu
+                            text="Submenu within a submenu"
+                            icon="check-solid"
+                        >
+                            <MenuSubmenu
+                                text="AKA menu-ception"
+                                icon="check-solid"
+                            >
+                                <MenuAction
+                                    text="Enough"
+                                    icon="check-solid"
+                                    on_click={move |_| menu_action7.set("Action 7")}
+                                />
+                            </MenuSubmenu>
+                        </MenuSubmenu>
+                    </MenuSubmenu>
+                    <MenuSubmenu
+                        text="Disabled submenu"
+                        disabled={true}
+                    ></MenuSubmenu>
+                </Menu>
+                <span>{"Last action clicked: "}{*menu_action}</span>
             </div>
         </div>
     }

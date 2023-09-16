@@ -78,6 +78,7 @@ pub struct DialogProps {
     #[prop_or_default]
     pub actions_layout: DialogActionsLayout,
     /// Elements within the dialog.
+    #[prop_or_default]
     pub children: Children,
 }
 

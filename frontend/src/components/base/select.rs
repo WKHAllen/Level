@@ -10,6 +10,7 @@ pub struct SelectOptionProps {
     #[prop_or(false)]
     pub disabled: bool,
     /// Child elements.
+    #[prop_or_default]
     pub children: Children,
 }
 
@@ -46,6 +47,7 @@ pub struct SelectProps {
     #[prop_or(false)]
     pub disabled: bool,
     /// Child elements.
+    #[prop_or_default]
     pub children: ChildrenWithProps<SelectOption>,
 }
 
@@ -174,6 +176,7 @@ pub struct SelectWithNullProps {
     #[prop_or(false)]
     pub disabled: bool,
     /// Child elements.
+    #[prop_or_default]
     pub children: ChildrenWithProps<SelectOption>,
 }
 

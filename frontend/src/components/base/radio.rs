@@ -9,6 +9,7 @@ pub struct RadioButtonProps {
     #[prop_or(false)]
     pub disabled: bool,
     /// Child elements.
+    #[prop_or_default]
     pub children: Children,
 }
 
@@ -63,6 +64,7 @@ pub struct RadioGroupProps {
     #[prop_or(false)]
     pub disabled: bool,
     /// Child elements.
+    #[prop_or_default]
     pub children: ChildrenWithProps<RadioButton>,
 }
 

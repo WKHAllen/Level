@@ -9,6 +9,7 @@ pub struct TooltipProps {
     #[prop_or(false)]
     pub disabled: bool,
     /// Child elements.
+    #[prop_or_default]
     pub children: Children,
     /// Class to apply to the tooltip container.
     #[prop_or_default]

@@ -10,6 +10,7 @@ pub struct CardProps {
     #[prop_or_default]
     pub on_click: Callback<()>,
     /// Elements within the card.
+    #[prop_or_default]
     pub children: Children,
 }
 
