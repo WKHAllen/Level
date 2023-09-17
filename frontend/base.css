@@ -634,6 +634,17 @@
   --base-menu-item-text-color-disabled: var(--base-text-color-disabled);
   --base-menu-item-height: 24px;
   --base-menu-separator-color: #7f7f7f;
+
+  /*            */
+  /*    TABS    */
+  /*            */
+
+  --base-tabs-tab-padding: 8px 12px;
+  --base-tabs-border-size: 1px;
+  --base-tabs-border-color: var(--base-border-color);
+  --base-tabs-selection-indicator-height: 3px;
+  --base-tabs-selected-color: var(--base-primary-color);
+  --base-tabs-unselected-color: #00000000;
 }
 
 /*              */
@@ -2231,4 +2242,89 @@ body {
 .base-menu-item-inner-menu {
   position: absolute;
   top: -6px;
+}
+
+/*            */
+/*    TABS    */
+/*            */
+
+.base-tab-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.base-tab-group-tabs {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  border-bottom: var(--base-tabs-border-size) solid
+    var(--base-tabs-border-color);
+}
+
+.base-tab-group-tabs-left {
+  justify-content: flex-start;
+}
+
+.base-tab-group-tabs-right {
+  justify-content: flex-end;
+}
+
+.base-tab-group-tabs-center {
+  justify-content: center;
+}
+
+.base-tab-group-tabs-stretch {
+  justify-content: stretch;
+}
+
+.base-tab-group-tabs-stretch > .base-tab-group-tab {
+  flex-grow: 1;
+}
+
+.base-tab-group-tab {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--base-tabs-selection-indicator-height);
+  background-color: var(--base-transparent-color);
+  color: var(--base-text-color);
+  cursor: pointer;
+  transition: background-color 0.1s linear;
+}
+
+.base-tab-group-tab:hover {
+  background-color: var(--base-transparent-color-hover);
+}
+
+.base-tab-group-tab:active {
+  background-color: var(--base-transparent-color-active);
+}
+
+.base-tab-group-tab-label {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--base-tabs-tab-padding);
+  font-size: var(--base-standard-label-size);
+}
+
+.base-tab-group-tab-indicator {
+  height: var(--base-tabs-selection-indicator-height);
+}
+
+.base-tab-group-tab-indicator-selected {
+  background-color: var(--base-tabs-selected-color);
+  transform: translateY(1px);
+}
+
+.base-tab-group-tab-indicator-unselected {
+  background-color: var(--base-tabs-unselected-color);
+}
+
+.base-tab-group-tab.base-tab-group-tab-disabled {
+  color: var(--base-text-color-disabled);
+  background-color: var(--base-transparent-color);
+  cursor: default;
 }

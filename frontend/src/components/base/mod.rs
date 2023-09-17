@@ -20,6 +20,7 @@ mod slider;
 mod spinner;
 mod stepper;
 mod switch;
+mod tabs;
 mod textarea;
 mod tooltip;
 
@@ -45,5 +46,6 @@ pub use slider::*;
 pub use spinner::*;
 pub use stepper::*;
 pub use switch::*;
+pub use tabs::*;
 pub use textarea::*;
 pub use tooltip::*;

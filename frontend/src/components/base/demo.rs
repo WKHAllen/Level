@@ -165,6 +165,8 @@ pub fn Demo() -> Html {
     let menu_action5 = menu_action.clone();
     let menu_action6 = menu_action.clone();
     let menu_action7 = menu_action.clone();
+    let tabs_state = use_state(|| 0);
+    let tabs_value = *tabs_state;
 
     html! {
         <div class="base-demo">
@@ -908,6 +910,28 @@ pub fn Demo() -> Html {
                     ></MenuSubmenu>
                 </Menu>
                 <span>{"Last action clicked: "}{*menu_action}</span>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Tabs"}</span>
+                <TabGroup state={tabs_state}>
+                    <Tab label="First">
+                        <h3>{"Tab #1 header"}</h3>
+                        <p>{"Content within the first tab."}</p>
+                    </Tab>
+                    <Tab label="Second">
+                        <h3>{"Tab #2 header"}</h3>
+                        <p>{"Content within the second tab."}</p>
+                    </Tab>
+                    <Tab label="Third">
+                        <h3>{"Tab #3 header"}</h3>
+                        <p>{"Content within the third tab."}</p>
+                    </Tab>
+                    <Tab label="Fourth" disabled={true}>
+                        <h3>{"Tab #4 header (DISABLED)"}</h3>
+                        <p>{"This should never be shown, as the tab is disabled."}</p>
+                    </Tab>
+                </TabGroup>
+                <span>{"Selected tab: "}{tabs_value}</span>
             </div>
         </div>
     }
