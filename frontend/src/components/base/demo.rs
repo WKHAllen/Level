@@ -167,6 +167,13 @@ pub fn Demo() -> Html {
     let menu_action7 = menu_action.clone();
     let tabs_state = use_state(|| 0);
     let tabs_value = *tabs_state;
+    let file_select_state = use_state(|| None);
+    let file_select_state1 = file_select_state.clone();
+    let file_select_state2 = file_select_state.clone();
+    let file_select_state3 = file_select_state.clone();
+    let file_select_state4 = file_select_state.clone();
+    let file_select_value = (*file_select_state).clone();
+    let file_select_exts = vec!["png".to_owned(), "jpg".to_owned(), "jpeg".to_owned()];
 
     html! {
         <div class="base-demo">
@@ -932,6 +939,39 @@ pub fn Demo() -> Html {
                     </Tab>
                 </TabGroup>
                 <span>{"Selected tab: "}{tabs_value}</span>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"File select"}</span>
+                <FileSelect
+                    state={file_select_state}
+                    text="Select a file"
+                />
+                <FileSelect
+                    state={file_select_state1}
+                    text="Secondary style with start path and title"
+                    style={FileSelectStyle::Secondary}
+                    start_path="C:\\Users"
+                    dialog_title="File selection dialog title"
+                />
+                <FileSelect
+                    state={file_select_state2}
+                    text="Transparent style with directory select"
+                    style={FileSelectStyle::Transparent}
+                    directory={true}
+                />
+                <FileSelect
+                    state={file_select_state3}
+                    text="Danger style with multiple select and limited extensions"
+                    style={FileSelectStyle::Danger}
+                    multiple={true}
+                    extensions={file_select_exts}
+                />
+                <FileSelect
+                    state={file_select_state4}
+                    text="Disabled file select"
+                    disabled={true}
+                />
+                <span>{"File selected: "}{file_select_value.map(|x| x.display().to_string()).unwrap_or("None".to_owned())}</span>
             </div>
         </div>
     }

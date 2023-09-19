@@ -2,9 +2,10 @@ use anyhow::Result;
 use backend_macros::backend_commands;
 use commands::BackendCommands;
 use db::Save;
+use std::error::Error as StdError;
 use std::fmt::Display;
+use std::future::Future;
 use std::sync::Arc;
-use std::{error::Error as StdError, future::Future};
 use tauri::WindowEvent;
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
