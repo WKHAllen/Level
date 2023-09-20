@@ -1,5 +1,6 @@
 use js_sys::{Function, Promise, Reflect};
 use serde::Serialize;
+use serde_json::Value;
 use std::path::PathBuf;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
@@ -46,7 +47,7 @@ pub struct FileSelectConfig {
     /// allowed.
     extensions: Option<Vec<String>>,
     /// The callback called when the user selects a file.
-    on_select: Option<Rc<dyn Fn(Option<PathBuf>)>>,
+    on_select: Option<Rc<dyn Fn(Vec<PathBuf>)>>,
 }
 
 impl FileSelectConfig {
@@ -89,7 +90,7 @@ impl FileSelectConfig {
     /// Sets the callback function for when the user selects a file.
     pub fn on_select<F>(mut self, f: F) -> Self
     where
-        F: Fn(Option<PathBuf>) + 'static,
+        F: Fn(Vec<PathBuf>) + 'static,
     {
         self.on_select = Some(Rc::new(f));
         self
@@ -137,25 +138,27 @@ impl UseFileSelect {
         let callback = self.config.on_select.as_ref().map(Rc::clone);
 
         spawn_local(async move {
-            let response_value = response_future.await.unwrap();
+            let response_jsvalue = response_future.await.unwrap();
+            let response_value: Value = serde_wasm_bindgen::from_value(response_jsvalue).unwrap();
 
-            let response_str = if let Some(response_str) = response_value.as_string() {
-                Some(response_str)
-            } else if response_value.is_null() {
-                None
-            } else {
-                Result::<(), _>::Err(format!(
-                    "expected file select response to be `string` or `null`, instead got: `{:?}`",
-                    response_value
+            let response = match response_value {
+                Value::Null => Ok(vec![]),
+                Value::String(path) => Ok(vec![PathBuf::from(path)]),
+                Value::Array(paths) => paths.iter().map(|path| match path {
+                    Value::String(path) => Ok(PathBuf::from(path)),
+                    other => Err(format!(
+                        "expected file select response to be `null`, `string`, or `string[]`, instead got: `{:?}`",
+                        other
+                    ))
+                }).collect(),
+                other => Err(format!(
+                    "expected file select response to be `null`, `string`, or `string[]`, instead got: `{:?}`",
+                    other
                 ))
-                .unwrap();
-                unreachable!();
-            };
-
-            let response_path = response_str.map(PathBuf::from);
+            }.unwrap();
 
             if let Some(callback) = callback {
-                (*callback)(response_path);
+                (*callback)(response);
             }
         });
     }

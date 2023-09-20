@@ -242,7 +242,6 @@ pub fn Menu(props: &MenuProps) -> Html {
                 let child_props = Rc::clone(&submenu.props);
                 let mut new_props = (*submenu.props).clone();
                 new_props.on_action = Callback::from(move |_| {
-                    crate::util::console_log!("on_action event triggered");
                     state.set(false);
                     child_props.on_action.emit(());
                     on_action.emit(());

@@ -167,7 +167,7 @@ pub fn Demo() -> Html {
     let menu_action7 = menu_action.clone();
     let tabs_state = use_state(|| 0);
     let tabs_value = *tabs_state;
-    let file_select_state = use_state(|| None);
+    let file_select_state = use_state(Vec::new);
     let file_select_state1 = file_select_state.clone();
     let file_select_state2 = file_select_state.clone();
     let file_select_state3 = file_select_state.clone();
@@ -971,7 +971,7 @@ pub fn Demo() -> Html {
                     text="Disabled file select"
                     disabled={true}
                 />
-                <span>{"File selected: "}{file_select_value.map(|x| x.display().to_string()).unwrap_or("None".to_owned())}</span>
+                <span>{"File selected: "}{file_select_value.iter().map(|x| x.display().to_string()).collect::<Vec<_>>().join(", ")}</span>
             </div>
         </div>
     }

@@ -10,10 +10,10 @@ pub type FileSelectStyle = ButtonStyle;
 #[derive(Properties, PartialEq, Clone)]
 pub struct FileSelectProps {
     /// The file selection state.
-    pub state: UseStateHandle<Option<PathBuf>>,
+    pub state: UseStateHandle<Vec<PathBuf>>,
     /// The callback called when the state changes.
     #[prop_or_default]
-    pub on_change: Callback<Option<PathBuf>>,
+    pub on_change: Callback<Vec<PathBuf>>,
     /// The text on the file selection button.
     pub text: AttrValue,
     /// The button style.
@@ -68,9 +68,9 @@ pub fn FileSelect(props: &FileSelectProps) -> Html {
             .directory(directory)
             .multiple(multiple)
             .extensions(extensions)
-            .on_select(move |path| {
-                if path.is_some() && !disabled {
-                    state.set(path);
+            .on_select(move |paths| {
+                if !paths.is_empty() && !disabled {
+                    state.set(paths);
                 }
             }),
     );
