@@ -1,5 +1,5 @@
 use super::*;
-use crate::hooks::use_id;
+use crate::hooks::*;
 use crate::util::*;
 use yew::prelude::*;
 use yew_hooks::use_click_away;
@@ -270,12 +270,15 @@ pub fn Chips(props: &ChipsProps) -> Html {
         })
         .collect::<Html>();
 
+    let popup_node = use_node_ref();
+    use_popup(popup_node.clone());
+
     let conditional_chip_options = if possible_options.is_empty() {
         html! {}
     } else {
         html! {
             <div class="base-chips-options-dropdown">
-                <div class="base-chips-options-popup">
+                <div ref={popup_node} class="base-chips-options-popup">
                     {chip_options}
                 </div>
             </div>

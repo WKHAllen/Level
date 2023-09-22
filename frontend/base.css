@@ -1431,10 +1431,10 @@ body {
   width: 100%;
   visibility: hidden;
   opacity: 0;
-  max-height: 0;
-  overflow: auto;
+  max-height: var(--base-select-popup-max-height);
+  overflow-y: auto;
   z-index: 1;
-  transition: max-height 0.5s ease, visibility 0.5s, opacity 0.2s linear 0.125s;
+  transition: visibility 0.5s, opacity 0.2s linear 0.125s;
   background-color: var(--base-select-popup-background-color);
   border-radius: var(--base-select-popup-border-radius);
   box-shadow: var(--base-standard-box-shadow);
@@ -1444,9 +1444,7 @@ body {
 .base-select-container-open .base-select-popup {
   visibility: visible;
   opacity: 1;
-  max-height: var(--base-select-popup-max-height);
-  overflow-y: auto;
-  transition: max-height 0.5s ease, visibility 0s, opacity 0.2s linear;
+  transition: visibility 0s, opacity 0.2s linear;
 }
 
 .base-select-option {
@@ -1844,10 +1842,10 @@ body {
   width: 100%;
   visibility: hidden;
   opacity: 0;
-  max-height: 0;
-  overflow: auto;
+  max-height: var(--base-chips-popup-max-height);
+  overflow-y: auto;
   z-index: 1;
-  transition: max-height 0.5s ease, visibility 0.5s, opacity 0.2s linear 0.125s;
+  transition: visibility 0.5s, opacity 0.2s linear 0.125s;
   background-color: var(--base-chips-popup-background-color);
   border-radius: var(--base-chips-popup-border-radius);
   box-shadow: var(--base-standard-box-shadow);
@@ -1857,9 +1855,7 @@ body {
 .base-chips-container-open .base-chips-options-popup {
   visibility: visible;
   opacity: 1;
-  max-height: var(--base-chips-popup-max-height);
-  overflow-y: auto;
-  transition: max-height 0.5s ease, visibility 0s, opacity 0.2s linear;
+  transition: visibility 0s, opacity 0.2s linear;
 }
 
 .base-chips-option {
@@ -1881,11 +1877,11 @@ body {
 /*    TOOLTIP    */
 /*               */
 
-.base-tooltip-container {
+.base-tooltip {
   position: relative;
 }
 
-.base-tooltip {
+.base-tooltip-popup {
   position: absolute;
   top: 100%;
   left: 0;
@@ -1907,12 +1903,12 @@ body {
   box-shadow: var(--base-standard-box-shadow);
 }
 
-.base-tooltip-container:hover .base-tooltip {
+.base-tooltip:hover .base-tooltip-popup {
   visibility: visible;
   opacity: 1;
 }
 
-.base-tooltip-container.base-tooltip-container-disabled:hover .base-tooltip {
+.base-tooltip.base-tooltip-disabled:hover .base-tooltip-popup {
   visibility: hidden;
   opacity: 0;
 }
@@ -2027,9 +2023,8 @@ body {
   position: absolute;
   visibility: hidden;
   opacity: 0;
-  max-height: 0;
   z-index: 1;
-  transition: max-height 0.5s ease, visibility 0.5s, opacity 0.2s linear 0.125s;
+  transition: visibility 0.5s, opacity 0.2s linear 0.125s;
   background-color: var(--base-date-picker-popup-background-color);
   border-radius: var(--base-date-picker-popup-border-radius);
   box-shadow: var(--base-standard-box-shadow);
@@ -2038,8 +2033,7 @@ body {
 .base-date-picker-popup-container-open .base-date-picker-popup {
   visibility: visible;
   opacity: 1;
-  max-height: 100%;
-  transition: max-height 0.5s ease, visibility 0s, opacity 0.2s linear;
+  transition: visibility 0s, opacity 0.2s linear;
 }
 
 .base-date-picker-calendar {
@@ -2155,25 +2149,24 @@ body {
   width: 100%;
 }
 
-.base-menu-inner {
+.base-menu-popup {
   position: absolute;
   visibility: hidden;
   opacity: 0;
   max-width: var(--base-menu-popup-max-width);
-  max-height: 0;
+  max-height: var(--base-menu-popup-max-height);
   z-index: 1;
-  transition: max-height 0.5s ease, visibility 0.5s, opacity 0.2s linear 0.125s;
+  transition: visibility 0.5s, opacity 0.2s linear 0.125s;
   background-color: var(--base-menu-popup-background-color);
   border-radius: var(--base-menu-popup-border-radius);
   box-shadow: var(--base-standard-box-shadow);
   padding: 4px 0;
 }
 
-.base-menu-open > .base-menu-inner {
+.base-menu-open > .base-menu-popup {
   visibility: visible;
   opacity: 1;
-  max-height: var(--base-menu-popup-max-height);
-  transition: max-height 0.5s ease, visibility 0s, opacity 0.2s linear;
+  transition: visibility 0s, opacity 0.2s linear;
 }
 
 .base-menu-item {

@@ -1,5 +1,5 @@
 use super::*;
-use crate::hooks::use_id;
+use crate::hooks::*;
 use yew::prelude::*;
 use yew_hooks::use_click_away;
 
@@ -123,6 +123,9 @@ pub fn Select(props: &SelectProps) -> Html {
         })
         .collect::<Html>();
 
+    let popup_node = use_node_ref();
+    use_popup(popup_node.clone());
+
     html! {
         <div class={classes!("base-select-container", disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
             <label for={id.clone()} class="base-select-label">
@@ -142,7 +145,7 @@ pub fn Select(props: &SelectProps) -> Html {
                     <Icon name="angle-down-solid" {disabled} class="base-select-button-icon" />
                 </button>
                 <div class="base-select-dropdown">
-                    <div class="base-select-popup">
+                    <div ref={popup_node} class="base-select-popup">
                         {new_children}
                     </div>
                 </div>
@@ -267,6 +270,9 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
         }
     };
 
+    let popup_node = use_node_ref();
+    use_popup(popup_node.clone());
+
     html! {
         <div class={classes!("base-select-container", disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
             <label for={id.clone()} class="base-select-label">
@@ -286,7 +292,7 @@ pub fn SelectWithNull(props: &SelectWithNullProps) -> Html {
                     <Icon name="angle-down-solid" {disabled} class="base-select-button-icon" />
                 </button>
                 <div class="base-select-dropdown">
-                    <div class="base-select-popup">
+                    <div ref={popup_node} class="base-select-popup">
                         <div onclick={on_null_click} class="base-select-option">
                             <SelectOption>{null_label}</SelectOption>
                         </div>

@@ -1,3 +1,4 @@
+use crate::hooks::*;
 use yew::prelude::*;
 
 /// Tooltip properties.
@@ -26,10 +27,13 @@ pub fn Tooltip(props: &TooltipProps) -> Html {
         class,
     } = props.clone();
 
+    let popup_node = use_node_ref();
+    use_popup(popup_node.clone());
+
     html! {
-        <div class={classes!("base-tooltip-container", disabled.then_some("base-tooltip-container-disabled"), class)}>
+        <div class={classes!("base-tooltip", disabled.then_some("base-tooltip-disabled"), class)}>
             {children}
-            <div class="base-tooltip">
+            <div ref={popup_node} class="base-tooltip-popup">
                 <div class="base-tooltip-text">{text}</div>
             </div>
         </div>

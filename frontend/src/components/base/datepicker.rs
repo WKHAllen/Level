@@ -1,5 +1,5 @@
 use super::*;
-use crate::hooks::use_id;
+use crate::hooks::*;
 use crate::util::*;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use std::ops::Deref;
@@ -465,6 +465,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
             calendar_open.set(false);
         }
     });
+    use_popup(popup_node.clone());
 
     let on_prev_month_click = {
         let viewing_calendar_month_state = viewing_calendar_month_state.clone();

@@ -1,4 +1,5 @@
 use super::*;
+use crate::hooks::*;
 use derive_more::From;
 use std::rc::Rc;
 use yew::html::ChildrenRenderer;
@@ -253,9 +254,12 @@ pub fn Menu(props: &MenuProps) -> Html {
         })
         .collect::<Html>();
 
+    let popup_node = use_node_ref();
+    use_popup(popup_node.clone());
+
     html! {
         <div class={classes!("base-menu", state.then_some("base-menu-open"))} ref={menu_node}>
-            <div class="base-menu-inner">
+            <div ref={popup_node} class="base-menu-popup">
                 {new_children}
             </div>
         </div>
