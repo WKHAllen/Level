@@ -20,6 +20,18 @@ pub(crate) const SAVE_EXT: &str = "level";
 /// The file extension used to identify temporary save files.
 pub(crate) const TMP_SAVE_EXT: &str = "tmp";
 
+/// Creates the saves directory if it does not already exist.
+pub(crate) async fn init_saves_dir() -> io::Result<()> {
+    let root_path = project_root::get_project_root().unwrap();
+    let saves_dir = root_path.join(SAVES_DIR);
+
+    if !saves_dir.exists() {
+        fs::create_dir(&saves_dir).await?;
+    }
+
+    Ok(())
+}
+
 /// Gets the path to the saves directory.
 pub(crate) fn get_saves_path() -> String {
     let root_path = project_root::get_project_root().unwrap();
@@ -147,6 +159,8 @@ pub struct Save {
 impl Save {
     /// Creates a new save file.
     pub async fn create(name: &str, description: &str, password: &str) -> Result<Self> {
+        init_saves_dir().await?;
+
         Self::verify_does_not_exist(name)?;
 
         let key = password_to_key(password);
@@ -168,6 +182,8 @@ impl Save {
 
     /// Opens and decrypts a save file.
     pub async fn open(name: &str, password: &str) -> Result<Self> {
+        init_saves_dir().await?;
+
         let key = password_to_key(password);
 
         let save_path = get_save_path(name);
@@ -354,6 +370,8 @@ impl Save {
 
     /// Lists metadata on all saves.
     pub async fn list() -> Result<Vec<SaveMetadata>> {
+        init_saves_dir().await?;
+
         let saves_path = get_saves_path();
         let mut files = fs::read_dir(&saves_path).await?;
 

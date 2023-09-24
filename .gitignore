@@ -1,9 +1,7 @@
 /target
 /Cargo.lock
-/saves/*
-!/saves/.gitkeep
-/temp/*
-!/temp/.gitkeep
+/saves
+/temp
 
 .env
 todo.txt

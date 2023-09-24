@@ -4,6 +4,7 @@ use sqlx::sqlite::{SqliteConnectOptions, SqliteConnection, SqliteLockingMode};
 use sqlx::{ConnectOptions, Connection};
 use std::error::Error;
 use std::future::Future;
+use std::io;
 use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
@@ -15,6 +16,18 @@ pub(crate) const TEMP_DB_DIR: &str = "temp";
 
 /// The file extension used to identify database files.
 pub(crate) const DB_EXT: &str = "db";
+
+/// Creates the temporary database directory if it does not already exist.
+pub(crate) async fn init_temp_db_dir() -> io::Result<()> {
+    let root_path = project_root::get_project_root().unwrap();
+    let temp_db_dir = root_path.join(TEMP_DB_DIR);
+
+    if !temp_db_dir.exists() {
+        fs::create_dir(&temp_db_dir).await?;
+    }
+
+    Ok(())
+}
 
 /// Gets the path to a database file.
 pub(crate) fn get_db_path(name: &str) -> String {
@@ -48,13 +61,15 @@ pub struct DB {
 
 impl DB {
     /// Checks if a database file exists.
-    pub async fn exists(name: &str) -> bool {
+    pub fn exists(name: &str) -> bool {
         let db_path = get_db_path(name);
         Path::new(&db_path).exists()
     }
 
     /// Opens a database file and starts a connection.
     pub async fn open(name: &str) -> Result<Self> {
+        init_temp_db_dir().await?;
+
         let db_path = get_db_path(name);
         let conn = SqliteConnectOptions::new()
             .filename(&db_path)
@@ -70,6 +85,8 @@ impl DB {
 
     /// Creates a new database file and starts a connection.
     pub async fn create(name: &str) -> Result<Self> {
+        init_temp_db_dir().await?;
+
         {
             let db_path = get_db_path(name);
             File::create(&db_path).await?;
@@ -88,6 +105,8 @@ impl DB {
         T: Future<Output = Result<(), E>>,
         E: Error + Send + Sync + 'static,
     {
+        init_temp_db_dir().await?;
+
         {
             let db_path = get_db_path(name);
             let file = OpenOptions::new()
@@ -105,7 +124,7 @@ impl DB {
 
     /// Opens a database file, creating it if it doesn't exist.
     pub async fn open_or_create(name: &str) -> Result<Self> {
-        if Self::exists(name).await {
+        if Self::exists(name) {
             Self::open(name).await
         } else {
             Self::create(name).await

@@ -29,8 +29,18 @@ async fn init_table(conn: &mut SqliteConnection, table: &str) -> Result<()> {
 /// Initialize the test database on build.
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mut test_db_path = project_root::get_project_root()?;
-    test_db_path.push("temp/test_db.db");
+    let root = project_root::get_project_root()?;
+    let saves_path = root.join("saves");
+    let temp_path = root.join("temp");
+    let test_db_path = temp_path.join("test_db.db");
+
+    if !saves_path.exists() {
+        fs::create_dir(&saves_path).await?;
+    }
+
+    if !temp_path.exists() {
+        fs::create_dir(&temp_path).await?;
+    }
 
     if test_db_path.exists() {
         fs::remove_file(&test_db_path).await?;
