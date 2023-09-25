@@ -50,7 +50,7 @@ pub fn derive_frontend_commands(item: TokenStream) -> TokenStream {
                 let args = #struct_name {
                     #input_names
                 };
-                let res = tauri_command(#method_name_str, &args).await;
+                let res = ::frontend_common::tauri_command(#method_name_str, &args).await;
                 res
             }
         });

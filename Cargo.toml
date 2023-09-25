@@ -1,12 +1,13 @@
 [workspace]
 members = [
-    "frontend",
     "backend",
-    "commands",
-    "macros",
-    "frontend_macros",
+    "backend_common",
     "backend_macros",
-    "db",
+    "commands",
     "crypto",
-    "backend_common"
+    "db",
+    "frontend",
+    "frontend_common",
+    "frontend_macros",
+    "macros",
 ]

@@ -3,15 +3,13 @@ name = "frontend"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 async-trait = "0.1"
 chrono = "0.4"
 commands = { path = "../commands" }
 csscolorparser = "0.6"
 derive_more = "0.99.17"
-frontend_macros = { path = "../frontend_macros" }
+frontend_common = { path = "../frontend_common" }
 getrandom = { version = "0.2", default-features = false, features = ["custom"] }
 gloo-timers = "0.3"
 js-sys = { version = "0.3" }
