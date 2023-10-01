@@ -1,8 +1,6 @@
 use crate::hooks::*;
-use crate::state::State;
 use commands::FrontendCommands;
 use yew::prelude::*;
-use yewdux::prelude::*;
 
 /// Greeting properties.
 #[derive(Properties, PartialEq, Clone)]
@@ -15,20 +13,20 @@ pub struct GreetingProps {
 /// A personal greeting.
 #[function_component]
 pub fn Greeting(props: &GreetingProps) -> Html {
-    let (state1, _) = use_store::<State>();
-    let state2 = state1.clone();
+    let (backend1, _) = use_backend();
+    let backend2 = backend1.clone();
 
     let name = props.name.clone();
 
     use_async(
         async move {
-            state1.say_hi().await;
+            backend1.say_hi().await;
             Result::<_, ()>::Ok(())
         },
         true,
     );
     let greeting = use_async(
-        async move { Result::<_, ()>::Ok(state2.greet(name).await) },
+        async move { Result::<_, ()>::Ok(backend2.greet(name).await) },
         true,
     );
 

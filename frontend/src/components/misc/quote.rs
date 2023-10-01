@@ -1,16 +1,14 @@
 use crate::hooks::*;
-use crate::state::State;
 use commands::FrontendCommands;
 use yew::prelude::*;
-use yewdux::prelude::*;
 
 /// A random quote from the database, and a button to fetch a new one.
 #[function_component]
 pub fn Quote() -> Html {
-    let (state, _) = use_store::<State>();
+    let (backend, _) = use_backend();
 
     let quote = use_async(
-        async move { Result::<_, ()>::Ok(state.get_random_quote().await) },
+        async move { Result::<_, ()>::Ok(backend.get_random_quote().await) },
         true,
     );
 

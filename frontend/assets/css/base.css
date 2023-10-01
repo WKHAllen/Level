@@ -662,6 +662,7 @@ body {
   overflow-wrap: break-word;
   word-break: break-word;
   scroll-behavior: smooth;
+  margin: 0;
 }
 
 ::-webkit-scrollbar {
