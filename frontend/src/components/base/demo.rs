@@ -2,7 +2,29 @@ use super::*;
 use crate::hooks::*;
 use crate::util::*;
 use chrono::{Datelike, NaiveDate};
+use std::fmt::Display;
 use yew::prelude::*;
+
+#[derive(Debug, Clone, Copy, PartialEq, SelectOptions)]
+enum DemoSelectEnum {
+    One,
+    Two,
+    Three,
+    Four,
+    Five,
+}
+
+impl Display for DemoSelectEnum {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::One => "First",
+            Self::Two => "Second",
+            Self::Three => "Third",
+            Self::Four => "Fourth",
+            Self::Five => "Fifth",
+        })
+    }
+}
 
 /// A demo of the base components.
 #[function_component]
@@ -92,6 +114,10 @@ pub fn Demo() -> Html {
     let select_value = *select_state;
     let select_with_null_state = use_state(|| None);
     let select_with_null_value = *select_with_null_state;
+    let select_enum_state = use_state(|| DemoSelectEnum::One);
+    let select_enum_value = *select_enum_state;
+    let select_with_null_enum_state = use_state(|| None);
+    let select_with_null_enum_value = *select_with_null_enum_state;
     let dialog_close_state = use_state(|| None);
     let dialog_small_state = use_state(|| false);
     let dialog_small_button_state = dialog_small_state.clone();
@@ -511,10 +537,10 @@ pub fn Demo() -> Html {
                 </Select>
             </div>
             <div class="base-demo-item">
-                <span class="base-demo-item-label">{"Select with null"}</span>
-                <SelectWithNull
+                <span class="base-demo-item-label">{"Select nullable"}</span>
+                <SelectNullable
                     state={select_with_null_state.clone()}
-                    label="Select with null label"
+                    label="Select nullable label"
                     null_label="Select an option..."
                     required={true}
                     error={select_with_null_value.is_none().then_some("Please select a value")}
@@ -524,20 +550,54 @@ pub fn Demo() -> Html {
                     <SelectOption disabled={true}>{"Option 3 (disabled)"}</SelectOption>
                     <SelectOption disabled={true}>{"Option 4 (disabled)"}</SelectOption>
                     <SelectOption>{"Option 5"}</SelectOption>
-                </SelectWithNull>
+                </SelectNullable>
                 <span>
                     {"Value: "}
                     {select_with_null_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
                 </span>
-                <SelectWithNull
+                <SelectNullable
                     state={select_with_null_state}
-                    label="Disabled select with null label"
+                    label="Disabled select nullable label"
                     disabled={true}
                 >
                     <SelectOption>{"Option 1"}</SelectOption>
                     <SelectOption>{"Option 2"}</SelectOption>
                     <SelectOption>{"Option 3"}</SelectOption>
-                </SelectWithNull>
+                </SelectNullable>
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Select enum"}</span>
+                <SelectEnum<DemoSelectEnum>
+                    state={select_enum_state.clone()}
+                    label="Select enum label"
+                    required={true}
+                    error={(select_enum_value == DemoSelectEnum::Three).then_some("Please pick something other than three")}
+                />
+                <span>{"Value: "}{select_enum_value.to_string()}</span>
+                <SelectEnum<DemoSelectEnum>
+                    state={select_enum_state}
+                    label="Disabled select enum label"
+                    disabled={true}
+                />
+            </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Select nullable enum"}</span>
+                <SelectNullableEnum<DemoSelectEnum>
+                    state={select_with_null_enum_state.clone()}
+                    label="Select nullable enum label"
+                    null_label="Select an option..."
+                    required={true}
+                    error={select_with_null_enum_value.is_none().then_some("Please select a value")}
+                />
+                <span>
+                    {"Value: "}
+                    {select_with_null_enum_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
+                <SelectNullableEnum<DemoSelectEnum>
+                    state={select_with_null_enum_state}
+                    label="Disabled select nullable enum label"
+                    disabled={true}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Dialog"}</span>
