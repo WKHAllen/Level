@@ -9,9 +9,12 @@ use std::sync::Arc;
 use tauri::WindowEvent;
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
 
-#[derive(Debug, Clone)]
+/// An error involving the application state.
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum StateError {
+    /// A save operation was attempted, but no save was open.
     NoSaveOpen,
+    /// An attempt was made to open a save, but one was already open.
     SaveAlreadyOpen,
 }
 

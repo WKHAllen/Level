@@ -13,12 +13,12 @@ use yew::prelude::*;
 
 /// Gets the window object.
 pub fn window() -> Window {
-    web_sys::window().expect("window does not exist")
+    web_sys::window().expect_throw("window does not exist")
 }
 
 /// Gets the document object.
 pub fn document() -> Document {
-    window().document().expect("document does not exist")
+    window().document().expect_throw("document does not exist")
 }
 
 /// Gets the value of an input element from an event.

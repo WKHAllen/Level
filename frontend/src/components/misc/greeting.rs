@@ -1,5 +1,6 @@
 use crate::hooks::*;
 use commands::FrontendCommands;
+use std::convert::Infallible;
 use yew::prelude::*;
 
 /// Greeting properties.
@@ -21,12 +22,12 @@ pub fn Greeting(props: &GreetingProps) -> Html {
     use_async(
         async move {
             backend1.say_hi().await;
-            Result::<_, ()>::Ok(())
+            Result::<_, Infallible>::Ok(())
         },
         true,
     );
     let greeting = use_async(
-        async move { Result::<_, ()>::Ok(backend2.greet(name).await) },
+        async move { Result::<_, Infallible>::Ok(backend2.greet(name).await) },
         true,
     );
 

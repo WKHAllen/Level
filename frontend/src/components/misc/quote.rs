@@ -1,5 +1,6 @@
 use crate::hooks::*;
 use commands::FrontendCommands;
+use std::convert::Infallible;
 use yew::prelude::*;
 
 /// A random quote from the database, and a button to fetch a new one.
@@ -8,7 +9,7 @@ pub fn Quote() -> Html {
     let (backend, _) = use_backend();
 
     let quote = use_async(
-        async move { Result::<_, ()>::Ok(backend.get_random_quote().await) },
+        async move { Result::<_, Infallible>::Ok(backend.get_random_quote().await) },
         true,
     );
 
