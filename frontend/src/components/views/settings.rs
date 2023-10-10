@@ -4,6 +4,8 @@ use yew::prelude::*;
 #[function_component]
 pub fn Settings() -> Html {
     html! {
-        <p>{"Settings placeholder"}</p>
+        <div class="view settings">
+            <p>{"Settings placeholder"}</p>
+        </div>
     }
 }

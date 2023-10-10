@@ -10,7 +10,7 @@ pub fn Home() -> Html {
     let on_click = move |_| view.set(View::Open);
 
     html! {
-        <div class="home">
+        <div class="view home">
             <div class="home-title">
                 <h1>{"level"}</h1>
                 <span>{"A secure app for tracking personal finances."}</span>

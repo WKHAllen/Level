@@ -645,6 +645,12 @@
   --base-tabs-selection-indicator-height: 3px;
   --base-tabs-selected-color: var(--base-primary-color);
   --base-tabs-unselected-color: #00000000;
+
+  /*             */
+  /*    FRAME    */
+  /*             */
+
+  --base-frame-padding: var(--base-padding-medium);
 }
 
 /*              */
@@ -2321,4 +2327,38 @@ body {
   color: var(--base-text-color-disabled);
   background-color: var(--base-transparent-color);
   cursor: default;
+}
+
+/*             */
+/*    FRAME    */
+/*             */
+
+.base-frame {
+  padding: var(--base-frame-padding);
+  border: var(--base-standard-border);
+  border-radius: var(--base-border-radius-medium);
+}
+
+.base-frame-background-1 {
+  background-color: var(--base-background-color-1);
+}
+
+.base-frame-background-2 {
+  background-color: var(--base-background-color-2);
+}
+
+.base-frame-background-3 {
+  background-color: var(--base-background-color-3);
+}
+
+.base-frame-background-4 {
+  background-color: var(--base-background-color-4);
+}
+
+.base-frame-background-5 {
+  background-color: var(--base-background-color-5);
+}
+
+.base-frame-background-6 {
+  background-color: var(--base-background-color-6);
 }

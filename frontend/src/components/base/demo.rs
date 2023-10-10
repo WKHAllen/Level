@@ -1033,6 +1033,27 @@ pub fn Demo() -> Html {
                 />
                 <span>{"File selected: "}{file_select_value.iter().map(|x| x.display().to_string()).collect::<Vec<_>>().join(", ")}</span>
             </div>
+            <div class="base-demo-item">
+                <span class="base-demo-item-label">{"Frame"}</span>
+                <Frame background={FrameBackground::BG1}>
+                    <span>{"Sample frame text."}</span>
+                </Frame>
+                <Frame background={FrameBackground::BG2}>
+                    <span>{"Sample frame text."}</span>
+                </Frame>
+                <Frame background={FrameBackground::BG3}>
+                    <span>{"Sample frame text."}</span>
+                </Frame>
+                <Frame background={FrameBackground::BG4}>
+                    <span>{"Sample frame text."}</span>
+                </Frame>
+                <Frame background={FrameBackground::BG5}>
+                    <span>{"Sample frame text."}</span>
+                </Frame>
+                <Frame background={FrameBackground::BG6}>
+                    <span>{"Sample frame text."}</span>
+                </Frame>
+            </div>
         </div>
     }
 }

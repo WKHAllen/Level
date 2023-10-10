@@ -4,6 +4,8 @@ use yew::prelude::*;
 #[function_component]
 pub fn ReportTemplate() -> Html {
     html! {
-        <p>{"Report template placeholder"}</p>
+        <div class="view report-template">
+            <p>{"Report template placeholder"}</p>
+        </div>
     }
 }

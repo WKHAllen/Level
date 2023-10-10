@@ -13,4 +13,7 @@ pub trait Commands {
 
     /// Retrieves a random quote from the database.
     async fn get_random_quote(&self) -> String;
+
+    /// Checks whether the app is in demo mode.
+    async fn demo_mode(&self) -> bool;
 }

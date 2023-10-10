@@ -1,4 +1,4 @@
-.PHONY: all build run test clean
+.PHONY: all build run demo test lint clean
 
 all: build
 
@@ -7,6 +7,9 @@ build:
 
 run:
 	cd backend && cargo tauri dev
+
+demo:
+	cd backend && cargo tauri dev -- -- --demo
 
 test:
 	cargo test -- --nocapture

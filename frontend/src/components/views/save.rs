@@ -4,6 +4,8 @@ use yew::prelude::*;
 #[function_component]
 pub fn Save() -> Html {
     html! {
-        <p>{"Save placeholder"}</p>
+        <div class="view save">
+            <p>{"Save placeholder"}</p>
+        </div>
     }
 }

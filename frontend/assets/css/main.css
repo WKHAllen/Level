@@ -10,17 +10,21 @@
 
 .main {
   flex-grow: 1;
+  display: flex;
 }
 
 .footer {
   flex-grow: 0;
 }
 
+.view {
+  flex-grow: 1;
+}
+
 .home {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
 }
 
 .home-title {
@@ -35,4 +39,8 @@
 .home-title > * {
   margin: 0;
   text-align: center;
+}
+
+.open {
+  padding: 2rem;
 }

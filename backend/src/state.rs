@@ -2,6 +2,7 @@ use anyhow::Result;
 use backend_common::backend_commands;
 use commands::BackendCommands;
 use db::Save;
+use std::env;
 use std::error::Error as StdError;
 use std::fmt::Display;
 use std::future::Future;
@@ -154,5 +155,9 @@ impl BackendCommands for State {
 
     async fn get_random_quote(&self) -> String {
         "Quotes demo removed".to_owned()
+    }
+
+    async fn demo_mode(&self) -> bool {
+        env::args().any(|arg| arg == "--demo")
     }
 }

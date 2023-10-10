@@ -16,6 +16,7 @@ pub fn backend_commands(_: TokenStream, item: TokenStream) -> TokenStream {
     for method_str in BACKENDCOMMANDS_METHODS {
         let method_tokens = method_str.parse::<TokenStream>().unwrap();
         let method = parse_macro_input!(method_tokens as Signature);
+        let method_async = method.asyncness.is_some();
         let method_name = &method.ident;
         let method_name_str = method_name.to_string();
         let struct_name = quote::format_ident!("__command__{}", method_name);
@@ -43,11 +44,17 @@ pub fn backend_commands(_: TokenStream, item: TokenStream) -> TokenStream {
             }
         });
 
+        let method_call = if method_async {
+            quote! { state.#method_name(#input_names).await }
+        } else {
+            quote! { state.#method_name(#input_names) }
+        };
+
         method_matches.push(quote! {
             #method_name_str => {
                 let deserialized_args = ::serde_json::from_str(&args).unwrap();
                 let #struct_name { #input_names } = deserialized_args;
-                let res = state.#method_name(#input_names).await;
+                let res = #method_call;
                 Ok(::serde_json::to_string(&res).unwrap())
             },
         });

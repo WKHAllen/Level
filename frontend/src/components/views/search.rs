@@ -4,6 +4,8 @@ use yew::prelude::*;
 #[function_component]
 pub fn Search() -> Html {
     html! {
-        <p>{"Search placeholder"}</p>
+        <div class="view search">
+            <p>{"Search placeholder"}</p>
+        </div>
     }
 }
