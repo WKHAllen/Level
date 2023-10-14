@@ -66,7 +66,7 @@ pub fn Select(props: &SelectProps) -> Html {
         children,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let id_state = use_id();
     let id = (*id_state).clone();
@@ -199,7 +199,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         children,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let id_state = use_id();
     let id = (*id_state).clone();
@@ -341,7 +341,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         disabled,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let id_state = use_id();
     let id = (*id_state).clone();
@@ -459,7 +459,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         disabled,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let id_state = use_id();
     let id = (*id_state).clone();

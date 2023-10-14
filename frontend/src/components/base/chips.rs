@@ -146,10 +146,9 @@ pub fn Chips(props: &ChipsProps) -> Html {
         disabled,
     } = props.clone();
 
-    use_effect_with_deps(
-        move |new_state| on_change.emit((**new_state).clone()),
-        state.clone(),
-    );
+    use_effect_with(state.clone(), move |new_state| {
+        on_change.emit((**new_state).clone())
+    });
 
     let next_chip_state = use_state(String::new);
     let next_chip = (*next_chip_state).clone();

@@ -80,7 +80,7 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
         children,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let name_state = use_id();
     let name = (*name_state).clone();

@@ -27,7 +27,7 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
         disabled,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let checked = *state;
     let onclick = move |event: MouseEvent| {

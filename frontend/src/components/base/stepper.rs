@@ -111,16 +111,13 @@ pub fn Stepper(props: &StepperProps) -> Html {
         children,
     } = props.clone();
 
-    use_effect_with_deps(
-        move |new_state| {
-            on_change.emit(**new_state);
+    use_effect_with(state.clone(), move |new_state| {
+        on_change.emit(**new_state);
 
-            if new_state.complete() {
-                on_complete.emit(());
-            }
-        },
-        state.clone(),
-    );
+        if new_state.complete() {
+            on_complete.emit(());
+        }
+    });
 
     let (current_step, prev_button, next_button) = match *state {
         StepperState::InProgress(step) => {

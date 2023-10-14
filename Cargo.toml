@@ -12,3 +12,4 @@ members = [
     "frontend_macros",
     "macros",
 ]
+resolver = "2"

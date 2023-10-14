@@ -76,10 +76,9 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
         disabled,
     } = props.clone();
 
-    use_effect_with_deps(
-        move |new_state| on_change.emit((**new_state).clone()),
-        state.clone(),
-    );
+    use_effect_with(state.clone(), move |new_state| {
+        on_change.emit((**new_state).clone())
+    });
 
     let value = (*state).clone();
     let id_state = use_id();

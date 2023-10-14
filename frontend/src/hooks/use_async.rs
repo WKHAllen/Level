@@ -152,14 +152,11 @@ where
     let inner = use_state(|| UseAsyncState::<T, E>::Init);
     let future_ref = use_mut_latest(Some(future));
 
-    use_effect_with_deps(
-        move |value| {
-            if let Some(callback) = on_update {
-                (callback)(value);
-            }
-        },
-        inner.clone(),
-    );
+    use_effect_with(inner.clone(), move |value| {
+        if let Some(callback) = on_update {
+            (callback)(value);
+        }
+    });
 
     let run = {
         let inner = inner.clone();

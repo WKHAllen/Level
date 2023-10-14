@@ -97,7 +97,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
         children,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let size_class = format!("base-dialog-{}", size.size_name());
     let actions_layout_class = format!("base-dialog-actions-{}", actions_layout.layout_name());

@@ -56,10 +56,9 @@ pub fn FileSelect(props: &FileSelectProps) -> Html {
         disabled,
     } = props.clone();
 
-    use_effect_with_deps(
-        move |new_state| on_change.emit((**new_state).clone()),
-        state.clone(),
-    );
+    use_effect_with(state.clone(), move |new_state| {
+        on_change.emit((**new_state).clone())
+    });
 
     let file_select = use_file_select(
         FileSelectConfig::new()

@@ -41,7 +41,7 @@ pub fn Slider<N: Number + 'static>(props: &SliderProps<N>) -> Html {
         disabled,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let id_state = use_id();
     let id = (*id_state).clone();

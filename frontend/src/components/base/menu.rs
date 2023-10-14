@@ -211,7 +211,7 @@ pub fn Menu(props: &MenuProps) -> Html {
         children,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(**new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
 
     let menu_node = use_node_ref();
     use_click_away(menu_node.clone(), {

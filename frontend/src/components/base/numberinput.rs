@@ -209,7 +209,7 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
         disabled,
     } = props.clone();
 
-    use_effect_with_deps(move |new_state| on_change.emit(***new_state), state.clone());
+    use_effect_with(state.clone(), move |new_state| on_change.emit(***new_state));
 
     let value_str = (*state).to_string();
     let id_state = use_id();
