@@ -24,7 +24,7 @@ pub use crate::category::*;
 pub use crate::db::DB;
 pub use crate::reminder::*;
 pub use crate::report_template::*;
-pub use crate::save::{Save, SaveMetadata};
+pub use crate::save::Save;
 pub use crate::subcategory::*;
 pub use crate::tag::*;
 pub use crate::timeframe::*;

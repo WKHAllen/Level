@@ -1,7 +1,20 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+img {
+  user-select: none;
+}
+
 .app {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .header {
@@ -43,4 +56,115 @@
 
 .open {
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.open-saves {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px;
+}
+
+.open-save-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 5em;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.open-save-name {
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.loading {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-overlay {
+  visibility: hidden;
+  opacity: 0;
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #00000060;
+  transition: visibility 0.25s linear, opacity 0.25s linear;
+}
+
+.loading-overlay.loading-overlay-open {
+  visibility: visible;
+  opacity: 1;
+}
+
+.save-icon {
+  display: flex;
+  position: relative;
+}
+
+.save-icon-file {
+  filter: invert(87%) sepia(1%) saturate(0%) hue-rotate(211deg) brightness(89%)
+    contrast(90%);
+}
+
+.save-icon-lock {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -30%);
+}
+
+.hoverable {
+  cursor: pointer;
+  transition: background-color 0.1s linear;
+}
+
+.hoverable:hover {
+  background-color: #7f7f7f2f;
+}
+
+.hoverable:active {
+  background-color: #7f7f7f3f;
+}
+
+.clamp-1 {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+.clamp-2 {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+.clamp-3 {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
 }

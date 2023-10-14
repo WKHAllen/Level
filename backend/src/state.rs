@@ -1,6 +1,7 @@
 use anyhow::Result;
 use backend_common::backend_commands;
 use commands::BackendCommands;
+use common::*;
 use db::Save;
 use std::env;
 use std::error::Error as StdError;
@@ -159,5 +160,22 @@ impl BackendCommands for State {
 
     async fn demo_mode(&self) -> bool {
         env::args().any(|arg| arg == "--demo")
+    }
+
+    async fn list_save_files(&self) -> Vec<SaveMetadata> {
+        // TODO: handle errors correctly
+        Save::list().await.expect("list_saves threw an error")
+    }
+
+    async fn open_save_file(
+        &self,
+        save_name: String,
+        save_password: String,
+    ) -> Result<(), OpenSaveError> {
+        // TODO: handle errors correctly
+        self.open_save(&save_name, &save_password)
+            .await
+            .expect("open_save threw an error");
+        Ok(())
     }
 }

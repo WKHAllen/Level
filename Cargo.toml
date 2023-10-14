@@ -4,6 +4,7 @@ members = [
     "backend_common",
     "backend_macros",
     "commands",
+    "common",
     "crypto",
     "db",
     "frontend",

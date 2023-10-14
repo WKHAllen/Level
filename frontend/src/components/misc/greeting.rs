@@ -19,17 +19,13 @@ pub fn Greeting(props: &GreetingProps) -> Html {
 
     let name = props.name.clone();
 
-    use_async(
-        async move {
-            backend1.say_hi().await;
-            Result::<_, Infallible>::Ok(())
-        },
-        true,
-    );
-    let greeting = use_async(
-        async move { Result::<_, Infallible>::Ok(backend2.greet(name).await) },
-        true,
-    );
+    use_async(UseAsync::new(async move {
+        backend1.say_hi().await;
+        Result::<_, Infallible>::Ok(())
+    }));
+    let greeting = use_async(UseAsync::new(async move {
+        Result::<_, Infallible>::Ok(backend2.greet(name).await)
+    }));
 
     match &*greeting {
         UseAsyncState::Init | UseAsyncState::Loading(_) => {

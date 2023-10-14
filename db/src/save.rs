@@ -3,9 +3,9 @@ use crate::db::{get_db_path, DB};
 use anyhow::Result;
 use backend_common::*;
 use chrono::{NaiveDateTime, Utc};
+use common::SaveMetadata;
 use crypto::{decrypt_file, encrypt_file, password_to_key, try_decrypt_file, AES_KEY_SIZE};
 use std::collections::HashMap;
-use std::fmt::Display;
 use std::io;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
@@ -58,36 +58,34 @@ pub(crate) fn get_tmp_save_path(name: &str) -> String {
     format!("{}.{}", get_save_path(name), TMP_SAVE_EXT)
 }
 
-async fn read_save_metadata(save_file: &mut File) -> Result<String> {
+/// Reads the metadata section of a save file.
+async fn read_save_metadata(save_file: &mut File) -> io::Result<String> {
     match read_section(save_file).await? {
-        Some(data) => String::from_utf8(data).map_err(|e| e.into()),
+        Some(data) => {
+            String::from_utf8(data).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        }
         None => Ok("".to_owned()),
     }
 }
 
-/// Skips the metadata section of a file.
+/// Skips the metadata section of a save file.
 async fn skip_metadata(save_file: &mut File) -> Result<()> {
     read_section(save_file).await?;
 
     Ok(())
 }
 
-/// Metadata associated with a database save file.
-#[derive(Debug)]
-pub struct SaveMetadata {
-    /// The name of the save.
-    pub name: String,
-    /// A description of the save.
-    pub description: String,
-    /// When the save was created.
-    pub created_at: NaiveDateTime,
-    /// When the save was last opened.
-    pub last_opened_at: NaiveDateTime,
+/// A metadata parsing trait.
+trait Metadata {
+    /// Parse the metadata properties, using default values when necessary.
+    fn read(save_name: &str, metadata: &str) -> Self;
+
+    /// Output the metadata properties in save file format.
+    fn write(&self) -> String;
 }
 
-impl SaveMetadata {
-    /// Parse the metadata properties, using default values when necessary.
-    pub fn parse(metadata: &str, save_name: &str) -> Self {
+impl Metadata for SaveMetadata {
+    fn read(save_name: &str, metadata: &str) -> Self {
         let metadata_pairs = metadata
             .split('\n')
             .filter_map(|line| {
@@ -130,18 +128,14 @@ impl SaveMetadata {
             last_opened_at,
         }
     }
-}
 
-impl Display for SaveMetadata {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn write(&self) -> String {
         let name = format!("name={}", self.name);
         let description = format!("description={}", self.description);
         let created_at = format!("created_at={}", self.created_at.timestamp());
         let last_opened_at = format!("last_opened_at={}", self.last_opened_at.timestamp());
 
-        let metadata_str = [name, description, created_at, last_opened_at].join("\n");
-
-        f.write_str(&metadata_str)
+        [name, description, created_at, last_opened_at].join("\n")
     }
 }
 
@@ -189,7 +183,7 @@ impl Save {
         let save_path = get_save_path(name);
         let mut save_file = File::open(&save_path).await?;
         let metadata_str = read_save_metadata(&mut save_file).await?;
-        let mut metadata = SaveMetadata::parse(&metadata_str, name);
+        let mut metadata = SaveMetadata::read(name, &metadata_str);
 
         let maybe_db = DB::create_with(name, move |mut db_file| async move {
             decrypt_file(&mut save_file, &mut db_file, &key).await
@@ -217,7 +211,7 @@ impl Save {
 
         {
             let mut tmp_save_file = File::create(&tmp_save_path).await?;
-            let metadata_str = self.metadata.to_string();
+            let metadata_str = self.metadata.write();
             write_section(&mut tmp_save_file, metadata_str.as_bytes()).await?;
 
             let key = self.key;
@@ -241,7 +235,7 @@ impl Save {
 
         {
             let mut tmp_save_file = File::create(&tmp_save_path).await?;
-            let metadata_str = self.metadata.to_string();
+            let metadata_str = self.metadata.write();
             write_section(&mut tmp_save_file, metadata_str.as_bytes()).await?;
 
             let key = self.key;
@@ -264,11 +258,11 @@ impl Save {
     }
 
     /// Gets the metadata of the save file without needing to decrypt the file.
-    pub async fn metadata(name: &str) -> Result<SaveMetadata> {
+    pub async fn metadata(name: &str) -> io::Result<SaveMetadata> {
         let save_path = get_save_path(name);
         let mut save_file = File::open(&save_path).await?;
         let metadata_str = read_save_metadata(&mut save_file).await?;
-        let metadata = SaveMetadata::parse(&metadata_str, name);
+        let metadata = SaveMetadata::read(name, &metadata_str);
 
         Ok(metadata)
     }
@@ -283,7 +277,7 @@ impl Save {
             skip_metadata(&mut save_file).await?;
 
             let mut tmp_save_file = File::create(&tmp_save_path).await?;
-            let metadata_str = metadata.to_string();
+            let metadata_str = metadata.write();
             write_section(&mut tmp_save_file, metadata_str.as_bytes()).await?;
             copy_file_in_chunks(&mut save_file, &mut tmp_save_file).await?;
         }
@@ -369,7 +363,7 @@ impl Save {
     }
 
     /// Lists metadata on all saves.
-    pub async fn list() -> Result<Vec<SaveMetadata>> {
+    pub async fn list() -> io::Result<Vec<SaveMetadata>> {
         init_saves_dir().await?;
 
         let saves_path = get_saves_path();

@@ -10,6 +10,7 @@ doctest = false
 anyhow = "1.0"
 backend_common = { path = "../backend_common" }
 chrono = "0.4"
+common = { path = "../common" }
 crypto = { path = "../crypto" }
 project-root = "0.2.2"
 rand = "0.8.5"

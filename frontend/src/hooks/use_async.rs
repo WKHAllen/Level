@@ -86,16 +86,80 @@ where
     }
 }
 
-/// This hook returns state and a `run` callback for an async future.
-#[hook]
-pub fn use_async<F, T, E>(future: F, run_on_init: bool) -> UseAsyncHandle<T, E>
+/// Type alias for a callback to execute when a `use_async` state changes.
+type UseAsyncUpdateCallback<T, E> = Option<Box<dyn FnOnce(&UseAsyncState<T, E>)>>;
+
+/// Configuration options for the `use_async` hook.
+pub struct UseAsync<F, T, E>
 where
     F: Future<Output = Result<T, E>> + 'static,
-    T: Clone + 'static,
-    E: Clone + 'static,
+    T: Clone + PartialEq + 'static,
+    E: Clone + PartialEq + 'static,
 {
+    /// The `use_async` future.
+    future: F,
+    /// Whether to run the future immediately.
+    run_on_init: bool,
+    /// An optional callback to execute when the state changes.
+    on_update: UseAsyncUpdateCallback<T, E>,
+}
+
+impl<F, T, E> UseAsync<F, T, E>
+where
+    F: Future<Output = Result<T, E>> + 'static,
+    T: Clone + PartialEq + 'static,
+    E: Clone + PartialEq + 'static,
+{
+    /// Creates a new `use_async` configuration with the given future.
+    pub fn new(future: F) -> Self {
+        Self {
+            future,
+            run_on_init: true,
+            on_update: None,
+        }
+    }
+
+    /// Sets whether to run the future immediately.
+    pub fn run_on_init(mut self, run_on_init: bool) -> Self {
+        self.run_on_init = run_on_init;
+        self
+    }
+
+    /// Sets the state change callback.
+    pub fn on_update<C>(mut self, callback: C) -> Self
+    where
+        C: FnOnce(&UseAsyncState<T, E>) + 'static,
+    {
+        self.on_update = Some(Box::new(callback));
+        self
+    }
+}
+
+/// This hook returns state and a `run` callback for an async future.
+#[hook]
+pub fn use_async<F, T, E>(config: UseAsync<F, T, E>) -> UseAsyncHandle<T, E>
+where
+    F: Future<Output = Result<T, E>> + 'static,
+    T: Clone + PartialEq + 'static,
+    E: Clone + PartialEq + 'static,
+{
+    let UseAsync {
+        future,
+        run_on_init,
+        on_update,
+    } = config;
+
     let inner = use_state(|| UseAsyncState::<T, E>::Init);
     let future_ref = use_mut_latest(Some(future));
+
+    use_effect_with_deps(
+        move |value| {
+            if let Some(callback) = on_update {
+                (callback)(value);
+            }
+        },
+        inner.clone(),
+    );
 
     let run = {
         let inner = inner.clone();

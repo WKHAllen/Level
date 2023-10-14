@@ -1,4 +1,5 @@
 use crate::components::base::*;
+use crate::components::misc::*;
 use crate::hooks::*;
 use yew::prelude::*;
 use yew_hooks::prelude::*;
@@ -21,7 +22,11 @@ pub fn App() -> Html {
     });
 
     match demo {
-        UseDemoHandle::Unresolved => html! { <Spinner /> },
+        UseDemoHandle::Unresolved => html! {
+            <div class="app">
+                <Loading />
+            </div>
+        },
         UseDemoHandle::Resolved(true) => html! { <Demo /> },
         UseDemoHandle::Resolved(false) => html! {
             <div class="app">

@@ -12,6 +12,7 @@ anyhow = "1.0"
 async-trait = "0.1"
 backend_common = { path = "../backend_common" }
 commands = { path = "../commands" }
+common = { path = "../common" }
 db = { path = "../db" }
 rand = "0.8.5"
 serde_json = "1.0"

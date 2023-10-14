@@ -8,10 +8,9 @@ use yew::prelude::*;
 pub fn Quote() -> Html {
     let (backend, _) = use_backend();
 
-    let quote = use_async(
-        async move { Result::<_, Infallible>::Ok(backend.get_random_quote().await) },
-        true,
-    );
+    let quote = use_async(UseAsync::new(async move {
+        Result::<_, Infallible>::Ok(backend.get_random_quote().await)
+    }));
 
     let onclick = {
         let quote = quote.clone();
