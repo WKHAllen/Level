@@ -146,18 +146,6 @@ impl Default for State {
 
 #[backend_commands]
 impl BackendCommands for State {
-    async fn say_hi(&self) {
-        println!("Hi!");
-    }
-
-    async fn greet(&self, name: String) -> String {
-        format!("Hello, {name}!")
-    }
-
-    async fn get_random_quote(&self) -> String {
-        "Quotes demo removed".to_owned()
-    }
-
     async fn demo_mode(&self) -> bool {
         env::args().any(|arg| arg == "--demo")
     }
