@@ -1,4 +1,7 @@
+//! Common interfaces for the level backend.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use std::io;
 use tokio::fs::File;

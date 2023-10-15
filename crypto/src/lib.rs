@@ -1,4 +1,7 @@
+//! Common cryptographic interfaces for level.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use aes_gcm::aead::{Aead, KeyInit};
 use aes_gcm::{Aes256Gcm, Nonce};

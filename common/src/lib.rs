@@ -1,4 +1,7 @@
+//! Common interfaces for all parts of the application.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};

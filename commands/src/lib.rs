@@ -1,9 +1,13 @@
+//! Backend/frontend communication interfaces.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use common::*;
 use macros::command_trait;
 
-/// Global application commands, designed to facilitate communication between the frontend and backend.
+/// Global application commands, designed to facilitate communication between
+/// the frontend and backend.
 #[command_trait]
 pub trait Commands {
     /// Checks whether the app is in demo mode.

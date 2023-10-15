@@ -1,4 +1,7 @@
+//! Macros for all parts of the application.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use proc_macro::TokenStream;
 use quote::{format_ident, quote, ToTokens};
@@ -12,18 +15,21 @@ pub fn command_trait(_: TokenStream, item: TokenStream) -> TokenStream {
     let ident = &input.ident;
     let vis = &input.vis;
     let items = input.items;
+    let attrs = input.attrs;
     let backend_ident = format_ident!("Backend{}", ident.to_string());
     let frontend_ident = format_ident!("Frontend{}", ident.to_string());
 
     quote! {
         #[::macros::note_trait_methods]
         #[::async_trait::async_trait]
+        #(#attrs)*
         #vis trait #backend_ident {
             #(#items)*
         }
 
         #[::macros::note_trait_methods]
         #[::async_trait::async_trait(?Send)]
+        #(#attrs)*
         #vis trait #frontend_ident {
             #(#items)*
         }
@@ -47,10 +53,12 @@ pub fn note_trait_methods(_: TokenStream, item: TokenStream) -> TokenStream {
             _ => None,
         })
         .collect::<Vec<_>>();
+    let doc = format!("Methods on the `{}` trait", ident);
 
     quote! {
         #input
 
+        #[doc = #doc]
         #vis const #note_ident: &[&'static str] = &[#(#methods),*];
     }
     .into()

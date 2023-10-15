@@ -1,4 +1,7 @@
+//! Common interfaces for the level frontend.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use js_sys::{Function, Promise, Reflect};
 use serde::{de::DeserializeOwned, Serialize};

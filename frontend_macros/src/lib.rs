@@ -1,4 +1,7 @@
+//! Macros for the level frontend.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use commands::FRONTENDCOMMANDS_METHODS;
 use proc_macro::TokenStream;
@@ -69,6 +72,7 @@ pub fn derive_frontend_commands(item: TokenStream) -> TokenStream {
     .into()
 }
 
+/// Derive selection options behavior on an enum.
 #[proc_macro_derive(SelectOptions)]
 pub fn derive_select_options(item: TokenStream) -> TokenStream {
     let input = parse_macro_input!(item as ItemEnum);

@@ -1,4 +1,7 @@
+//! Macros for the level backend.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 use commands::BACKENDCOMMANDS_METHODS;
 use proc_macro::TokenStream;
@@ -66,6 +69,7 @@ pub fn backend_commands(_: TokenStream, item: TokenStream) -> TokenStream {
 
         #(#method_arg_structs)*
 
+        /// The command function that parses all commands from the frontend.
         #[::tauri::command(async)]
         pub async fn command(name: String, args: String, state: ::tauri::State<'_, State>) -> Result<String, String> {
             match name.as_str() {

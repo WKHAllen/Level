@@ -1,4 +1,7 @@
+//! The level frontend.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 mod backend;
 mod components;

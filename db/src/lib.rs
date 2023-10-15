@@ -1,4 +1,7 @@
+//! Database interaction interfaces for level.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 
 mod account;
 mod account_transaction;

@@ -1,4 +1,7 @@
+//! The level backend.
+
 #![forbid(unsafe_code)]
+#![deny(missing_docs)]
 #![cfg_attr(
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
