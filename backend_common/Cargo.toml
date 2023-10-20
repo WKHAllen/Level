@@ -4,5 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+aes-gcm = "0.10.1"
 backend_macros = { path = "../backend_macros" }
+common = { path = "../common" }
+sqlx = { version = "0.6", features = ["runtime-tokio-rustls", "sqlite", "macros", "chrono"] }
+thiserror = "1.0"
 tokio = { version = "1.25", features = ["full"] }

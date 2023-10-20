@@ -46,6 +46,7 @@ pub struct UseAsyncHandle<T, E> {
     run: Rc<dyn Fn()>,
 }
 
+#[allow(dead_code)]
 impl<T, E> UseAsyncHandle<T, E> {
     /// Start to resolve the async future to a final value.
     pub fn run(&self) {
@@ -53,7 +54,6 @@ impl<T, E> UseAsyncHandle<T, E> {
     }
 
     /// Update `data` directly.
-    #[allow(unused)]
     pub fn update(&self, data: T) {
         self.inner.set(UseAsyncState::Success(data))
     }
@@ -104,6 +104,7 @@ where
     on_update: UseAsyncUpdateCallback<T, E>,
 }
 
+#[allow(dead_code)]
 impl<F, T, E> UseAsync<F, T, E>
 where
     F: Future<Output = Result<T, E>> + 'static,

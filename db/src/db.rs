@@ -1,5 +1,4 @@
 use crate::{convert_file_name, TABLES};
-use anyhow::Result;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteConnection, SqliteLockingMode};
 use sqlx::{ConnectOptions, Connection};
 use std::error::Error;
@@ -10,6 +9,8 @@ use std::ops::{Deref, DerefMut};
 use std::path::Path;
 use std::str::FromStr;
 use tokio::fs::{self, File, OpenOptions};
+
+pub use backend_common::{DBError, DBResult};
 
 /// The directory in which temporary database files are stored.
 pub(crate) const TEMP_DB_DIR: &str = "temp";
@@ -67,7 +68,7 @@ impl DB {
     }
 
     /// Opens a database file and starts a connection.
-    pub async fn open(name: &str) -> Result<Self> {
+    pub async fn open(name: &str) -> DBResult<Self> {
         init_temp_db_dir().await?;
 
         let db_path = get_db_path(name);
@@ -84,7 +85,7 @@ impl DB {
     }
 
     /// Creates a new database file and starts a connection.
-    pub async fn create(name: &str) -> Result<Self> {
+    pub async fn create(name: &str) -> DBResult<Self> {
         init_temp_db_dir().await?;
 
         {
@@ -99,7 +100,7 @@ impl DB {
     }
 
     /// Creates a new database file, giving access to the raw file via a closure for reading and writing before starting the connection.
-    pub async fn create_with<F, T, E>(name: &str, f: F) -> Result<Self>
+    pub async fn create_with<F, T, E>(name: &str, f: F) -> DBResult<Self, E>
     where
         F: FnOnce(File) -> T,
         T: Future<Output = Result<(), E>>,
@@ -116,14 +117,24 @@ impl DB {
                 .open(db_path)
                 .await?;
 
-            f(file).await?;
+            if let Err(err) = f(file).await {
+                return Err(DBError::Other(err));
+            }
         }
 
-        Self::open(name).await
+        match Self::open(name).await {
+            Ok(value) => Ok(value),
+            Err(err) => Err(match err {
+                DBError::IoError(err) => DBError::IoError(err),
+                DBError::SqlError(err) => DBError::SqlError(err),
+                DBError::Utf8Error(err) => DBError::Utf8Error(err),
+                DBError::Other(_) => unreachable!(),
+            }),
+        }
     }
 
     /// Opens a database file, creating it if it doesn't exist.
-    pub async fn open_or_create(name: &str) -> Result<Self> {
+    pub async fn open_or_create(name: &str) -> DBResult<Self> {
         if Self::exists(name) {
             Self::open(name).await
         } else {
@@ -132,7 +143,7 @@ impl DB {
     }
 
     /// Initialize a database table.
-    async fn init_table(&mut self, table: &str) -> Result<()> {
+    async fn init_table(&mut self, table: &str) -> DBResult<()> {
         let sql_path = get_sql_init_path(table);
         let sql_bytes = fs::read(sql_path).await?;
         let sql_str = String::from_utf8(sql_bytes)?;
@@ -143,7 +154,7 @@ impl DB {
     }
 
     /// Initializes all database tables.
-    async fn init_tables(&mut self) -> Result<()> {
+    async fn init_tables(&mut self) -> DBResult<()> {
         for table in TABLES {
             self.init_table(table).await?;
         }
@@ -152,7 +163,7 @@ impl DB {
     }
 
     /// Pauses the connection temporarily, giving access to the raw file via a closure for reading and writing before continuing.
-    pub async fn pause_with<F, T, E>(&mut self, f: F) -> Result<()>
+    pub async fn pause_with<F, T, E>(&mut self, f: F) -> DBResult<(), E>
     where
         F: FnOnce(File) -> T,
         T: Future<Output = Result<(), E>>,
@@ -175,7 +186,9 @@ impl DB {
                 .open(&db_path)
                 .await?;
 
-            f(file).await?;
+            if let Err(err) = f(file).await {
+                return Err(DBError::Other(err));
+            }
         }
 
         let conn = SqliteConnectOptions::new()
@@ -191,7 +204,7 @@ impl DB {
     }
 
     /// Deletes the existing database file.
-    pub async fn delete(self) -> Result<()> {
+    pub async fn delete(self) -> DBResult<()> {
         self.conn.close().await?;
 
         let db_path = get_db_path(&self.name);
@@ -201,7 +214,7 @@ impl DB {
     }
 
     /// Deletes the existing database file, giving access to the raw file via a closure for reading and writing before deleting the file.
-    pub async fn delete_with<F, T, E>(self, f: F) -> Result<()>
+    pub async fn delete_with<F, T, E>(self, f: F) -> DBResult<(), E>
     where
         F: FnOnce(File) -> T,
         T: Future<Output = Result<(), E>>,
@@ -218,7 +231,9 @@ impl DB {
                 .open(&db_path)
                 .await?;
 
-            f(file).await?;
+            if let Err(err) = f(file).await {
+                return Err(DBError::Other(err));
+            }
         }
 
         fs::remove_file(&db_path).await?;

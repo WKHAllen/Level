@@ -1,35 +1,12 @@
-use anyhow::Result;
-use backend_common::backend_commands;
+use backend_common::*;
 use commands::BackendCommands;
 use common::*;
 use db::Save;
 use std::env;
-use std::error::Error as StdError;
-use std::fmt::Display;
 use std::future::Future;
 use std::sync::Arc;
 use tauri::WindowEvent;
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
-
-/// An error involving the application state.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum StateError {
-    /// A save operation was attempted, but no save was open.
-    NoSaveOpen,
-    /// An attempt was made to open a save, but one was already open.
-    SaveAlreadyOpen,
-}
-
-impl Display for StateError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match *self {
-            Self::NoSaveOpen => "no save is open",
-            Self::SaveAlreadyOpen => "a save is already open",
-        })
-    }
-}
-
-impl StdError for StateError {}
 
 /// The backend application state.
 pub struct State {
@@ -46,7 +23,7 @@ impl State {
     }
 
     /// Handle a tauri window event.
-    pub async fn handle_event(&self, event: &WindowEvent) -> Result<()> {
+    pub async fn handle_event(&self, event: &WindowEvent) -> StateResult<()> {
         if let WindowEvent::CloseRequested { .. } = event {
             if self.is_save_open().await {
                 self.close_save().await?;
@@ -72,7 +49,7 @@ impl State {
         save_name: &str,
         save_description: &str,
         save_password: &str,
-    ) -> Result<()> {
+    ) -> StateResult<()> {
         let mut save_option = self.save.lock().await;
 
         if save_option.is_some() {
@@ -86,7 +63,7 @@ impl State {
     }
 
     /// Opens a save file.
-    pub async fn open_save(&self, save_name: &str, save_password: &str) -> Result<()> {
+    pub async fn open_save(&self, save_name: &str, save_password: &str) -> StateResult<()> {
         let mut save_option = self.save.lock().await;
 
         if save_option.is_some() {
@@ -100,7 +77,7 @@ impl State {
     }
 
     /// Closes the open save file.
-    pub async fn close_save(&self) -> Result<()> {
+    pub async fn close_save(&self) -> StateResult<()> {
         let mut save_option = self.save.lock().await;
 
         match save_option.take() {
@@ -114,7 +91,7 @@ impl State {
     }
 
     /// Returns a handle to the inner save instance.
-    pub async fn save_handle(&self) -> Result<MappedMutexGuard<Save>> {
+    pub async fn save_handle(&self) -> StateResult<MappedMutexGuard<Save>> {
         let save_option = self.save.lock().await;
 
         match &*save_option {
@@ -126,7 +103,7 @@ impl State {
     }
 
     /// Grants exclusive access to the save instance via a closure.
-    pub async fn with_save<F, T, R>(&self, f: F) -> Result<R>
+    pub async fn with_save<F, T, R>(&self, f: F) -> StateResult<R>
     where
         F: FnOnce(&mut Save) -> T,
         T: Future<Output = R>,
@@ -150,20 +127,11 @@ impl BackendCommands for State {
         env::args().any(|arg| arg == "--demo")
     }
 
-    async fn list_save_files(&self) -> Vec<SaveMetadata> {
-        // TODO: handle errors correctly
-        Save::list().await.expect("list_saves threw an error")
+    async fn list_save_files(&self) -> CommandResult<Vec<SaveMetadata>> {
+        Ok(Save::list().await?)
     }
 
-    async fn open_save_file(
-        &self,
-        save_name: String,
-        save_password: String,
-    ) -> Result<(), OpenSaveError> {
-        // TODO: handle errors correctly
-        self.open_save(&save_name, &save_password)
-            .await
-            .expect("open_save threw an error");
-        Ok(())
+    async fn open_save_file(&self, save_name: String, save_password: String) -> CommandResult<()> {
+        Ok(self.open_save(&save_name, &save_password).await?)
     }
 }

@@ -24,10 +24,10 @@ pub use crate::account_transaction_tag::*;
 pub use crate::account_type::*;
 pub use crate::budget::*;
 pub use crate::category::*;
-pub use crate::db::DB;
+pub use crate::db::{DBError, DBResult, DB};
 pub use crate::reminder::*;
 pub use crate::report_template::*;
-pub use crate::save::Save;
+pub use crate::save::{Save, SaveError, SaveResult};
 pub use crate::subcategory::*;
 pub use crate::tag::*;
 pub use crate::timeframe::*;
@@ -67,8 +67,8 @@ pub(crate) use tests::*;
 
 #[cfg(test)]
 mod tests {
+    use super::db::DBResult;
     use super::*;
-    use anyhow::Result;
     use std::ops::{Deref, DerefMut};
 
     /// A test database.
@@ -79,7 +79,7 @@ mod tests {
 
     impl TestDB {
         /// Creates a new test database.
-        pub async fn new() -> Result<Self> {
+        pub async fn new() -> DBResult<Self> {
             let db_id = new_id();
             let db_name = format!("test_{db_id}");
             let db = DB::create(&db_name).await?;
@@ -88,7 +88,7 @@ mod tests {
         }
 
         /// Deletes the test database.
-        pub async fn delete(self) -> Result<()> {
+        pub async fn delete(self) -> DBResult<()> {
             self.inner.delete().await
         }
     }

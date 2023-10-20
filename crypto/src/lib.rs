@@ -16,61 +16,8 @@ pub const AES_KEY_SIZE: usize = 32;
 /// The number of bytes to use for an AES nonce.
 pub const AES_NONCE_SIZE: usize = 12;
 
-/// A generic crypto error.
-#[derive(Debug)]
-pub enum CryptoError<E = String>
-where
-    E: Into<Box<dyn std::error::Error + Send + Sync>>,
-{
-    /// An error in an AES operation.
-    AesError(aes_gcm::Error),
-    /// An error in an IO operation.
-    IOError(std::io::Error),
-    /// Some other error.
-    Error(E),
-}
-
-impl<E> std::fmt::Display for CryptoError<E>
-where
-    E: Into<Box<dyn std::error::Error + Send + Sync>> + ToString,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::AesError(e) => f.write_str(&e.to_string()),
-            Self::IOError(e) => f.write_str(&e.to_string()),
-            Self::Error(e) => f.write_str(&e.to_string()),
-        }
-    }
-}
-
-impl std::error::Error for CryptoError {}
-
-impl From<aes_gcm::Error> for CryptoError {
-    fn from(value: aes_gcm::Error) -> Self {
-        Self::AesError(value)
-    }
-}
-
-impl From<std::io::Error> for CryptoError {
-    fn from(value: std::io::Error) -> Self {
-        Self::IOError(value)
-    }
-}
-
-impl<E> From<E> for CryptoError<E>
-where
-    E: Into<Box<dyn std::error::Error + Send + Sync>>,
-{
-    fn from(value: E) -> Self {
-        Self::Error(value)
-    }
-}
-
-/// A generic crypto result.
-pub type Result<T, E = String> = core::result::Result<T, CryptoError<E>>;
-
 /// Encrypts data with AES.
-pub fn aes_encrypt(key: &[u8; AES_KEY_SIZE], plaintext: &[u8]) -> Result<Vec<u8>> {
+pub fn aes_encrypt(key: &[u8; AES_KEY_SIZE], plaintext: &[u8]) -> CryptoResult<Vec<u8>> {
     let cipher = Aes256Gcm::new_from_slice(key).unwrap();
     let nonce_slice: [u8; AES_NONCE_SIZE] = rand::random();
     let nonce = Nonce::from(nonce_slice);
@@ -83,7 +30,10 @@ pub fn aes_encrypt(key: &[u8; AES_KEY_SIZE], plaintext: &[u8]) -> Result<Vec<u8>
 }
 
 /// Decrypts data with AES.
-pub fn aes_decrypt(key: &[u8; AES_KEY_SIZE], ciphertext_with_nonce: &[u8]) -> Result<Vec<u8>> {
+pub fn aes_decrypt(
+    key: &[u8; AES_KEY_SIZE],
+    ciphertext_with_nonce: &[u8],
+) -> CryptoResult<Vec<u8>> {
     let cipher = Aes256Gcm::new_from_slice(key).unwrap();
     let (nonce_slice, ciphertext) = ciphertext_with_nonce.split_at(AES_NONCE_SIZE);
     let nonce_slice_sized: [u8; AES_NONCE_SIZE] =
@@ -95,7 +45,11 @@ pub fn aes_decrypt(key: &[u8; AES_KEY_SIZE], ciphertext_with_nonce: &[u8]) -> Re
 }
 
 /// Encrypts a file in chunks.
-pub async fn encrypt_file(src: &mut File, dest: &mut File, key: &[u8; AES_KEY_SIZE]) -> Result<()> {
+pub async fn encrypt_file(
+    src: &mut File,
+    dest: &mut File,
+    key: &[u8; AES_KEY_SIZE],
+) -> CryptoResult<()> {
     let mut buffer = [0u8; READER_CAPACITY];
 
     loop {
@@ -116,7 +70,11 @@ pub async fn encrypt_file(src: &mut File, dest: &mut File, key: &[u8; AES_KEY_SI
 }
 
 /// Decrypts a file in chunks.
-pub async fn decrypt_file(src: &mut File, dest: &mut File, key: &[u8; AES_KEY_SIZE]) -> Result<()> {
+pub async fn decrypt_file(
+    src: &mut File,
+    dest: &mut File,
+    key: &[u8; AES_KEY_SIZE],
+) -> CryptoResult<()> {
     loop {
         let data = match read_section(src).await? {
             Some(data) => data,
@@ -135,7 +93,7 @@ pub async fn decrypt_file(src: &mut File, dest: &mut File, key: &[u8; AES_KEY_SI
 }
 
 /// Attempts to decrypt a file in chunks, without writing the decrypted data anywhere. Useful for validating the crypto key.
-pub async fn try_decrypt_file(src: &mut File, key: &[u8; AES_KEY_SIZE]) -> Result<()> {
+pub async fn try_decrypt_file(src: &mut File, key: &[u8; AES_KEY_SIZE]) -> CryptoResult<()> {
     loop {
         let data = match read_section(src).await? {
             Some(data) => data,

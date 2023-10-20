@@ -14,12 +14,8 @@ pub trait Commands {
     async fn demo_mode(&self) -> bool;
 
     /// Lists all existing save files.
-    async fn list_save_files(&self) -> Vec<SaveMetadata>;
+    async fn list_save_files(&self) -> CommandResult<Vec<SaveMetadata>>;
 
     /// Attempts to open an existing save file.
-    async fn open_save_file(
-        &self,
-        save_name: String,
-        save_password: String,
-    ) -> Result<(), OpenSaveError>;
+    async fn open_save_file(&self, save_name: String, save_password: String) -> CommandResult<()>;
 }

@@ -5,6 +5,9 @@
 
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use std::error::Error as StdError;
+use std::fmt::Display;
+use std::ops::Deref;
 use thiserror::Error;
 
 /// Metadata associated with a database save file.
@@ -20,16 +23,83 @@ pub struct SaveMetadata {
     pub last_opened_at: NaiveDateTime,
 }
 
-/// An error occurred while opening a save file.
+/// A generic error that only cares about the error message.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GenericError(pub String);
+
+impl GenericError {
+    /// Creates a new generic error from any error type.
+    pub fn new<E>(err: &E) -> Self
+    where
+        E: StdError,
+    {
+        Self(err.to_string())
+    }
+}
+
+impl Deref for GenericError {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl Display for GenericError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl StdError for GenericError {}
+
+/// An expected command error.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Error)]
-pub enum OpenSaveError {
-    /// A save file is already open.
+pub enum ExpectedCommandError {
+    /// A save operation was attempted, but no save was open.
+    #[error("No save file is open")]
+    NoSaveOpen,
+    /// An attempt was made to open a save, but one was already open.
     #[error("A save file is already open")]
     SaveAlreadyOpen,
+    /// A save with the given name already exists.
+    #[error("A save with the given name already exists")]
+    SaveAlreadyExists,
     /// The save file could not be found.
     #[error("The save file could not be found")]
     SaveNotFound,
     /// The save file could not be unlocked with the provided password.
     #[error("The save file could not be unlocked with the provided password")]
-    InvalidPassword,
+    InvalidSavePassword,
 }
+
+/// An unexpected command error.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Error)]
+pub enum UnexpectedCommandError {
+    /// An I/O error occurred.
+    #[error("An I/O error occurred: {0}")]
+    IoError(GenericError),
+    /// An error in a database operation.
+    #[error("An error occurred in a database operation: {0}")]
+    SqlError(GenericError),
+    /// An error in a UTF-8 conversion operation.
+    #[error("An error occurred during UTF-8 conversion: {0}")]
+    Utf8Error(GenericError),
+}
+
+/// A generic command error. This makes a distinction between errors that are
+/// expected to occur and those that are not.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Error)]
+pub enum CommandError {
+    /// An expected command error. This kind of error will likely be shown to
+    /// the user.
+    #[error("An error occurred: {0}")]
+    Expected(#[from] ExpectedCommandError),
+    /// An unexpected command error. This kind of error will not commonly be
+    /// shown to the user, but will instead be immediately unwrapped.
+    #[error("An unexpected error occurred: {0}")]
+    Unexpected(#[from] UnexpectedCommandError),
+}
+
+/// A generic command result.
+pub type CommandResult<T> = Result<T, CommandError>;

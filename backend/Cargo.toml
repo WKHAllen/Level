@@ -8,7 +8,6 @@ tauri-build = { version = "1.2.1", features = [] }
 dotenv = "0.15.0"
 
 [dependencies]
-anyhow = "1.0"
 async-trait = "0.1"
 backend_common = { path = "../backend_common" }
 commands = { path = "../commands" }
@@ -18,6 +17,7 @@ rand = "0.8.5"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.2.4", features = ["dialog-open"] }
+thiserror = "1.0"
 tokio = { version = "1.25", features = ["full"] }
 
 [features]

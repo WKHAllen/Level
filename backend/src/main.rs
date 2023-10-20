@@ -9,13 +9,12 @@
 
 mod state;
 
-use anyhow::Result;
 pub use state::{command, State};
 use tauri::Manager;
 
 /// Start the backend Tauri application.
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() {
     let state = State::new();
 
     tauri::async_runtime::set(tokio::runtime::Handle::current());
@@ -34,6 +33,4 @@ async fn main() -> Result<()> {
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-
-    Ok(())
 }
