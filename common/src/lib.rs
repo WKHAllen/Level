@@ -31,7 +31,7 @@ impl GenericError {
     /// Creates a new generic error from any error type.
     pub fn new<E>(err: &E) -> Self
     where
-        E: StdError,
+        E: ToString,
     {
         Self(err.to_string())
     }
@@ -99,6 +99,10 @@ pub enum CommandError {
     /// shown to the user, but will instead be immediately unwrapped.
     #[error("An unexpected error occurred: {0}")]
     Unexpected(#[from] UnexpectedCommandError),
+    /// A different error occurred. Custom errors usually should not make it
+    /// to this point.
+    #[error("An error occurred: {0}")]
+    Other(GenericError),
 }
 
 /// A generic command result.

@@ -71,10 +71,10 @@ pub fn backend_commands(_: TokenStream, item: TokenStream) -> TokenStream {
 
         /// The command function that parses all commands from the frontend.
         #[::tauri::command(async)]
-        pub async fn command(name: String, args: String, state: ::tauri::State<'_, State>) -> Result<String, String> {
+        pub async fn command(name: String, args: String, state: ::tauri::State<'_, State>) -> ::std::result::Result<::std::string::String, ::backend_common::TauriCommandError> {
             match name.as_str() {
                 #(#method_matches)*
-                cmd => Err(format!("Invalid command: {}", cmd)),
+                cmd => Err(::backend_common::TauriCommandError::InvalidCommand(cmd.to_owned())),
             }
         }
     }

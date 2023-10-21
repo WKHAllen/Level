@@ -23,7 +23,7 @@ impl State {
     }
 
     /// Handle a tauri window event.
-    pub async fn handle_event(&self, event: &WindowEvent) -> StateResult<()> {
+    pub async fn handle_event(&self, event: &WindowEvent) -> Result<()> {
         if let WindowEvent::CloseRequested { .. } = event {
             if self.is_save_open().await {
                 self.close_save().await?;
@@ -49,11 +49,11 @@ impl State {
         save_name: &str,
         save_description: &str,
         save_password: &str,
-    ) -> StateResult<()> {
+    ) -> Result<()> {
         let mut save_option = self.save.lock().await;
 
         if save_option.is_some() {
-            Err(StateError::SaveAlreadyOpen)?;
+            Err(ExpectedCommandError::SaveAlreadyOpen)?;
         }
 
         let save = Save::create(save_name, save_description, save_password).await?;
@@ -63,11 +63,11 @@ impl State {
     }
 
     /// Opens a save file.
-    pub async fn open_save(&self, save_name: &str, save_password: &str) -> StateResult<()> {
+    pub async fn open_save(&self, save_name: &str, save_password: &str) -> Result<()> {
         let mut save_option = self.save.lock().await;
 
         if save_option.is_some() {
-            Err(StateError::SaveAlreadyOpen)?;
+            Err(ExpectedCommandError::SaveAlreadyOpen)?;
         }
 
         let save = Save::open(save_name, save_password).await?;
@@ -77,7 +77,7 @@ impl State {
     }
 
     /// Closes the open save file.
-    pub async fn close_save(&self) -> StateResult<()> {
+    pub async fn close_save(&self) -> Result<()> {
         let mut save_option = self.save.lock().await;
 
         match save_option.take() {
@@ -86,24 +86,24 @@ impl State {
 
                 Ok(())
             }
-            None => Err(StateError::NoSaveOpen)?,
+            None => Err(ExpectedCommandError::NoSaveOpen)?,
         }
     }
 
     /// Returns a handle to the inner save instance.
-    pub async fn save_handle(&self) -> StateResult<MappedMutexGuard<Save>> {
+    pub async fn save_handle(&self) -> Result<MappedMutexGuard<Save>> {
         let save_option = self.save.lock().await;
 
         match &*save_option {
             Some(_) => Ok(MutexGuard::map(save_option, |guard| {
                 guard.as_mut().unwrap()
             })),
-            None => Err(StateError::NoSaveOpen)?,
+            None => Err(ExpectedCommandError::NoSaveOpen)?,
         }
     }
 
     /// Grants exclusive access to the save instance via a closure.
-    pub async fn with_save<F, T, R>(&self, f: F) -> StateResult<R>
+    pub async fn with_save<F, T, R>(&self, f: F) -> Result<R>
     where
         F: FnOnce(&mut Save) -> T,
         T: Future<Output = R>,

@@ -17,7 +17,7 @@ pub const AES_KEY_SIZE: usize = 32;
 pub const AES_NONCE_SIZE: usize = 12;
 
 /// Encrypts data with AES.
-pub fn aes_encrypt(key: &[u8; AES_KEY_SIZE], plaintext: &[u8]) -> CryptoResult<Vec<u8>> {
+pub fn aes_encrypt(key: &[u8; AES_KEY_SIZE], plaintext: &[u8]) -> Result<Vec<u8>> {
     let cipher = Aes256Gcm::new_from_slice(key).unwrap();
     let nonce_slice: [u8; AES_NONCE_SIZE] = rand::random();
     let nonce = Nonce::from(nonce_slice);
@@ -30,10 +30,7 @@ pub fn aes_encrypt(key: &[u8; AES_KEY_SIZE], plaintext: &[u8]) -> CryptoResult<V
 }
 
 /// Decrypts data with AES.
-pub fn aes_decrypt(
-    key: &[u8; AES_KEY_SIZE],
-    ciphertext_with_nonce: &[u8],
-) -> CryptoResult<Vec<u8>> {
+pub fn aes_decrypt(key: &[u8; AES_KEY_SIZE], ciphertext_with_nonce: &[u8]) -> Result<Vec<u8>> {
     let cipher = Aes256Gcm::new_from_slice(key).unwrap();
     let (nonce_slice, ciphertext) = ciphertext_with_nonce.split_at(AES_NONCE_SIZE);
     let nonce_slice_sized: [u8; AES_NONCE_SIZE] =
@@ -45,11 +42,7 @@ pub fn aes_decrypt(
 }
 
 /// Encrypts a file in chunks.
-pub async fn encrypt_file(
-    src: &mut File,
-    dest: &mut File,
-    key: &[u8; AES_KEY_SIZE],
-) -> CryptoResult<()> {
+pub async fn encrypt_file(src: &mut File, dest: &mut File, key: &[u8; AES_KEY_SIZE]) -> Result<()> {
     let mut buffer = [0u8; READER_CAPACITY];
 
     loop {
@@ -70,11 +63,7 @@ pub async fn encrypt_file(
 }
 
 /// Decrypts a file in chunks.
-pub async fn decrypt_file(
-    src: &mut File,
-    dest: &mut File,
-    key: &[u8; AES_KEY_SIZE],
-) -> CryptoResult<()> {
+pub async fn decrypt_file(src: &mut File, dest: &mut File, key: &[u8; AES_KEY_SIZE]) -> Result<()> {
     loop {
         let data = match read_section(src).await? {
             Some(data) => data,
@@ -93,7 +82,7 @@ pub async fn decrypt_file(
 }
 
 /// Attempts to decrypt a file in chunks, without writing the decrypted data anywhere. Useful for validating the crypto key.
-pub async fn try_decrypt_file(src: &mut File, key: &[u8; AES_KEY_SIZE]) -> CryptoResult<()> {
+pub async fn try_decrypt_file(src: &mut File, key: &[u8; AES_KEY_SIZE]) -> Result<()> {
     loop {
         let data = match read_section(src).await? {
             Some(data) => data,

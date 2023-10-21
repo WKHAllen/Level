@@ -1,6 +1,6 @@
 use crate::convert_file_name;
 use crate::db::*;
-use backend_common::{copy_file_in_chunks, read_section, write_section};
+use backend_common::*;
 use chrono::{NaiveDateTime, Utc};
 use common::*;
 use crypto::*;
@@ -9,8 +9,6 @@ use std::io;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
 use tokio::fs::{self, File};
-
-pub use backend_common::{SaveError, SaveResult};
 
 /// The directory in which database save files are stored.
 pub(crate) const SAVES_DIR: &str = "saves";
@@ -153,7 +151,7 @@ pub struct Save {
 
 impl Save {
     /// Creates a new save file.
-    pub async fn create(name: &str, description: &str, password: &str) -> SaveResult<Self> {
+    pub async fn create(name: &str, description: &str, password: &str) -> Result<Self> {
         init_saves_dir().await?;
 
         Self::verify_does_not_exist(name)?;
@@ -176,7 +174,7 @@ impl Save {
     }
 
     /// Opens and decrypts a save file.
-    pub async fn open(name: &str, password: &str) -> SaveResult<Self> {
+    pub async fn open(name: &str, password: &str) -> Result<Self> {
         init_saves_dir().await?;
 
         Self::verify_exists(name)?;
@@ -208,7 +206,7 @@ impl Save {
     }
 
     /// Saves the state of the database to the save file.
-    pub async fn save(&mut self) -> SaveResult<()> {
+    pub async fn save(&mut self) -> Result<()> {
         let save_path = get_save_path(&self.metadata.name);
         let tmp_save_path = get_tmp_save_path(&self.metadata.name);
 
@@ -232,7 +230,7 @@ impl Save {
     }
 
     /// Saves and closes the database save file.
-    pub async fn close(self) -> SaveResult<()> {
+    pub async fn close(self) -> Result<()> {
         let save_path = get_save_path(&self.metadata.name);
         let tmp_save_path = get_tmp_save_path(&self.metadata.name);
 
@@ -262,7 +260,7 @@ impl Save {
 
     /// Gets the metadata of the save file without needing to decrypt the
     /// file.
-    pub async fn metadata(name: &str) -> SaveResult<SaveMetadata> {
+    pub async fn metadata(name: &str) -> Result<SaveMetadata> {
         let save_path = get_save_path(name);
         let mut save_file = File::open(&save_path).await?;
         let metadata_str = read_save_metadata(&mut save_file).await?;
@@ -272,7 +270,7 @@ impl Save {
     }
 
     /// Save a save file's metadata.
-    async fn save_metadata(name: &str, metadata: &SaveMetadata) -> SaveResult<()> {
+    async fn save_metadata(name: &str, metadata: &SaveMetadata) -> Result<()> {
         let save_path = get_save_path(name);
         let tmp_save_path = get_tmp_save_path(name);
 
@@ -293,19 +291,19 @@ impl Save {
 
     /// Checks if a save with the provided name exists, returning an error if
     /// it does not.
-    fn verify_exists(name: &str) -> SaveResult<()> {
+    fn verify_exists(name: &str) -> Result<()> {
         if Self::exists(name) {
             Ok(())
         } else {
-            Err(SaveError::SaveNotFound)
+            Err(ExpectedCommandError::SaveNotFound)?
         }
     }
 
     /// Checks if a save with the provided name exists, returning an error if
     /// it does.
-    fn verify_does_not_exist(name: &str) -> SaveResult<()> {
+    fn verify_does_not_exist(name: &str) -> Result<()> {
         if Self::exists(name) {
-            Err(SaveError::SaveAlreadyExists)
+            Err(ExpectedCommandError::SaveAlreadyExists)?
         } else {
             Ok(())
         }
@@ -313,7 +311,7 @@ impl Save {
 
     /// Checks if the provided password can successfully decrypt a save,
     /// returning an error if it cannot.
-    async fn verify_password(name: &str, password: &str) -> SaveResult<()> {
+    async fn verify_password(name: &str, password: &str) -> Result<()> {
         let key = password_to_key(password);
 
         let save_path = get_save_path(name);
@@ -327,7 +325,7 @@ impl Save {
 
     /// Sets the name of a save. This should not be used while the save is
     /// open.
-    pub async fn set_name(old_name: &str, new_name: &str, password: &str) -> SaveResult<()> {
+    pub async fn set_name(old_name: &str, new_name: &str, password: &str) -> Result<()> {
         Self::verify_password(old_name, password).await?;
         Self::verify_does_not_exist(new_name)?;
 
@@ -344,7 +342,7 @@ impl Save {
     }
 
     /// Sets the description of a save. This should not be used while the save is open.
-    pub async fn set_description(name: &str, description: &str, password: &str) -> SaveResult<()> {
+    pub async fn set_description(name: &str, description: &str, password: &str) -> Result<()> {
         Self::verify_password(name, password).await?;
 
         let mut metadata = Self::metadata(name).await?;
@@ -357,11 +355,7 @@ impl Save {
 
     /// Changes a save's password by decrypting and re-encrypting the save
     /// data. This should not be used while the save is open.
-    pub async fn change_password(
-        name: &str,
-        old_password: &str,
-        new_password: &str,
-    ) -> SaveResult<()> {
+    pub async fn change_password(name: &str, old_password: &str, new_password: &str) -> Result<()> {
         let new_key = password_to_key(new_password);
 
         let mut save = Self::open(name, old_password).await?;
@@ -370,7 +364,7 @@ impl Save {
     }
 
     /// Deletes a save. This should not be used while the save is open.
-    pub async fn delete(name: &str, password: &str) -> SaveResult<()> {
+    pub async fn delete(name: &str, password: &str) -> Result<()> {
         Self::verify_password(name, password).await?;
 
         let save_path = get_save_path(name);
@@ -381,7 +375,7 @@ impl Save {
     }
 
     /// Lists metadata on all saves.
-    pub async fn list() -> SaveResult<Vec<SaveMetadata>> {
+    pub async fn list() -> Result<Vec<SaveMetadata>> {
         init_saves_dir().await?;
 
         let saves_path = get_saves_path();
