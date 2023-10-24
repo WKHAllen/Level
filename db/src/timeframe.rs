@@ -1,9 +1,5 @@
-/// An error when parsing a timeframe.
-#[derive(Debug, Clone, Copy)]
-pub enum TimeframeError {
-    /// An invalid timeframe was specified.
-    InvalidTimeframe,
-}
+use backend_common::Result;
+use common::ExpectedCommandError as Error;
 
 /// A representation of a timeframe.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -28,7 +24,7 @@ pub enum Timeframe {
 
 impl Timeframe {
     /// Gets the timeframe from its internal name in the database.
-    pub fn from_internal_name(timeframe: &str) -> Result<Self, TimeframeError> {
+    pub fn from_internal_name(timeframe: &str) -> Result<Self> {
         match timeframe {
             "DAILY" => Ok(Self::Daily),
             "WEEKLY" => Ok(Self::Weekly),
@@ -38,7 +34,7 @@ impl Timeframe {
             "QUARTERLY" => Ok(Self::Quarterly),
             "SEMIANNUALLY" => Ok(Self::Semiannually),
             "ANNUALLY" => Ok(Self::Annually),
-            _ => Err(TimeframeError::InvalidTimeframe),
+            _ => Err(Error::InvalidTimeframe)?,
         }
     }
 

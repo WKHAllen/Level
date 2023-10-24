@@ -71,6 +71,18 @@ pub enum ExpectedCommandError {
     /// The save file could not be unlocked with the provided password.
     #[error("The save file could not be unlocked with the provided password")]
     InvalidSavePassword,
+    /// The specified subcategory is not within the specified category.
+    #[error("The specified subcategory is not within the specified category")]
+    InvalidSubcategory,
+    /// An invalid account type was specified.
+    #[error("An invalid account type was specified")]
+    InvalidAccountType,
+    /// A budget already exists for the specified account.
+    #[error("A budget already exists for the specified account")]
+    BudgetAlreadyExists,
+    /// An invalid timeframe was specified.
+    #[error("An invalid timeframe was specified")]
+    InvalidTimeframe,
 }
 
 /// An unexpected command error.
@@ -85,6 +97,9 @@ pub enum UnexpectedCommandError {
     /// An error in a UTF-8 conversion operation.
     #[error("An error occurred during UTF-8 conversion: {0}")]
     Utf8Error(GenericError),
+    /// A JSON serialization error.
+    #[error("An error occurred while processing JSON data: {0}")]
+    JsonError(GenericError),
 }
 
 /// A generic command error. This makes a distinction between errors that are

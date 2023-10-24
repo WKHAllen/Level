@@ -1,9 +1,5 @@
-/// An error when parsing an account type.
-#[derive(Debug, Clone, Copy)]
-pub enum AccountTypeError {
-    /// An invalid account type was specified.
-    InvalidAccountType,
-}
+use backend_common::Result;
+use common::ExpectedCommandError as Error;
 
 /// A representation of an account type.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -24,7 +20,7 @@ pub enum AccountType {
 
 impl AccountType {
     /// Gets the account type from its internal name in the database.
-    pub fn from_internal_name(account_type: &str) -> Result<Self, AccountTypeError> {
+    pub fn from_internal_name(account_type: &str) -> Result<Self> {
         match account_type {
             "BANK_ACCOUNT" => Ok(Self::BankAccount),
             "RETIREMENT_ACCOUNT" => Ok(Self::RetirementAccount),
@@ -32,7 +28,7 @@ impl AccountType {
             "PROPERTY" => Ok(Self::Property),
             "LIABILITY" => Ok(Self::Liability),
             "INVESTMENT" => Ok(Self::Investment),
-            _ => Err(AccountTypeError::InvalidAccountType),
+            _ => Err(Error::InvalidAccountType)?,
         }
     }
 

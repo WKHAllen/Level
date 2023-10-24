@@ -27,10 +27,13 @@ async fn main() {
 
             tokio::task::block_in_place(|| {
                 tauri::async_runtime::block_on(async {
-                    state.handle_event(event.event()).await.unwrap();
+                    state
+                        .handle_event(event.event())
+                        .await
+                        .expect("Error while handling window event");
                 });
             });
         })
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("Error while running tauri application");
 }

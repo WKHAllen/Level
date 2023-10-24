@@ -109,7 +109,7 @@ impl Metadata for SaveMetadata {
                 .unwrap_or(Utc::now().timestamp()),
             0,
         )
-        .unwrap();
+        .unwrap_or(Utc::now().naive_utc());
         let last_opened_at = NaiveDateTime::from_timestamp_opt(
             metadata_pairs
                 .get("last_opened_at")
@@ -118,7 +118,7 @@ impl Metadata for SaveMetadata {
                 .unwrap_or(Utc::now().timestamp()),
             0,
         )
-        .unwrap();
+        .unwrap_or(Utc::now().naive_utc());
 
         Self {
             name,
@@ -428,7 +428,7 @@ mod tests {
 
         // Create/use/close
         let mut save = Save::create(name, description, password).await.unwrap();
-        let tag1 = Tag::create(&mut save, "Test tag", "").await;
+        let tag1 = Tag::create(&mut save, "Test tag", "").await.unwrap();
         save.close().await.unwrap();
 
         // Get metadata
@@ -439,7 +439,7 @@ mod tests {
 
         // Open/use
         let mut save = Save::open(name, password).await.unwrap();
-        let tag2 = Tag::get(&mut save, &tag1.id).await.unwrap();
+        let tag2 = Tag::get(&mut save, &tag1.id).await.unwrap().unwrap();
         assert_eq!(tag1, tag2);
 
         // Save/close

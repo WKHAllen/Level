@@ -1,4 +1,5 @@
 use crate::{new_id, Category, DB};
+use backend_common::Result;
 use chrono::NaiveDateTime;
 
 /// A representation of a subcategory in the database.
@@ -18,7 +19,12 @@ pub struct Subcategory {
 
 impl Subcategory {
     /// Create a new subcategory.
-    pub async fn create(db: &mut DB, category: &Category, name: &str, description: &str) -> Self {
+    pub async fn create(
+        db: &mut DB,
+        category: &Category,
+        name: &str,
+        description: &str,
+    ) -> Result<Self> {
         let id = new_id();
 
         sqlx::query!(
@@ -29,69 +35,58 @@ impl Subcategory {
             description
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        Self::get(db, &id).await.unwrap()
+        Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
     /// Gets a subcategory from the database.
-    pub async fn get(db: &mut DB, id: &str) -> Option<Self> {
-        sqlx::query_as!(Self, "SELECT * FROM subcategory WHERE id = ?;", id)
-            .fetch_optional(&mut **db)
-            .await
-            .unwrap()
+    pub async fn get(db: &mut DB, id: &str) -> Result<Option<Self>> {
+        Ok(
+            sqlx::query_as!(Self, "SELECT * FROM subcategory WHERE id = ?;", id)
+                .fetch_optional(&mut **db)
+                .await?,
+        )
     }
 
     /// Gets a subcategory from the database by name.
-    pub async fn get_by_name(db: &mut DB, name: &str) -> Option<Self> {
-        sqlx::query_as!(Self, "SELECT * FROM subcategory WHERE name = ?;", name)
-            .fetch_optional(&mut **db)
-            .await
-            .unwrap()
+    pub async fn get_by_name(db: &mut DB, name: &str) -> Result<Option<Self>> {
+        Ok(
+            sqlx::query_as!(Self, "SELECT * FROM subcategory WHERE name = ?;", name)
+                .fetch_optional(&mut **db)
+                .await?,
+        )
     }
 
     /// Lists all subcategories in the database.
-    pub async fn list(db: &mut DB) -> Vec<Self> {
-        sqlx::query_as!(Self, "SELECT * FROM subcategory ORDER BY name;")
-            .fetch_all(&mut **db)
-            .await
-            .unwrap()
+    pub async fn list(db: &mut DB) -> Result<Vec<Self>> {
+        Ok(
+            sqlx::query_as!(Self, "SELECT * FROM subcategory ORDER BY name;")
+                .fetch_all(&mut **db)
+                .await?,
+        )
     }
 
     /// Lists all subcategories within a given category.
-    pub async fn list_within(db: &mut DB, category: &Category) -> Vec<Self> {
-        sqlx::query_as!(
+    pub async fn list_within(db: &mut DB, category: &Category) -> Result<Vec<Self>> {
+        Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM subcategory WHERE category_id = ? ORDER BY name;",
             category.id
         )
         .fetch_all(&mut **db)
-        .await
-        .unwrap()
+        .await?)
     }
 
     /// Gets the category in which the subcategory exists.
-    pub async fn get_category(&self, db: &mut DB) -> Category {
-        Category::get(db, &self.category_id).await.unwrap()
+    pub async fn get_category(&self, db: &mut DB) -> Result<Category> {
+        Category::get(db, &self.category_id)
+            .await
+            .map(|x| x.unwrap())
     }
 
-    // /// Sets the subcategory's parent category.
-    // pub async fn set_category(&mut self, db: &mut DB, category: &Category) {
-    //     self.category_id = category.id.clone();
-
-    //     sqlx::query!(
-    //         "UPDATE subcategory SET category_id = ? WHERE id = ?;",
-    //         self.category_id,
-    //         self.id
-    //     )
-    //     .execute(&mut **db)
-    //     .await
-    //     .unwrap();
-    // }
-
     /// Sets the subcategory name.
-    pub async fn set_name(&mut self, db: &mut DB, name: &str) {
+    pub async fn set_name(&mut self, db: &mut DB, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -100,12 +95,13 @@ impl Subcategory {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     /// Sets the subcategory description.
-    pub async fn set_description(&mut self, db: &mut DB, description: &str) {
+    pub async fn set_description(&mut self, db: &mut DB, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -114,16 +110,18 @@ impl Subcategory {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     /// Deletes the subcategory from the database.
-    pub async fn delete(self, db: &mut DB) {
+    pub async fn delete(self, db: &mut DB) -> Result<()> {
         sqlx::query!("DELETE FROM subcategory WHERE id = ?;", self.id)
             .execute(&mut **db)
-            .await
-            .unwrap();
+            .await?;
+
+        Ok(())
     }
 }
 
@@ -139,58 +137,74 @@ mod tests {
         let mut db = TestDB::new().await.unwrap();
 
         // Create
-        let category1 = Category::create(&mut db, "Category #1", "").await;
-        let category2 = Category::create(&mut db, "Category #2", "").await;
+        let category1 = Category::create(&mut db, "Category #1", "").await.unwrap();
+        let category2 = Category::create(&mut db, "Category #2", "").await.unwrap();
         let mut subcategory1 = Subcategory::create(
             &mut db,
             &category1,
             "Subcategory #1",
             "The first subcategory",
         )
-        .await;
+        .await
+        .unwrap();
         let subcategory2 = Subcategory::create(
             &mut db,
             &category1,
             "Subcategory #2",
             "The second subcategory",
         )
-        .await;
+        .await
+        .unwrap();
         let subcategory3 = Subcategory::create(
             &mut db,
             &category2,
             "Subcategory #3",
             "The third subcategory",
         )
-        .await;
+        .await
+        .unwrap();
 
         // Get
-        let subcategory4 = Subcategory::get(&mut db, &subcategory1.id).await.unwrap();
+        let subcategory4 = Subcategory::get(&mut db, &subcategory1.id)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(subcategory4, subcategory1);
-        let subcategory5 = Subcategory::get(&mut db, &subcategory2.id).await.unwrap();
+        let subcategory5 = Subcategory::get(&mut db, &subcategory2.id)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(subcategory5, subcategory2);
-        let subcategory6 = Subcategory::get(&mut db, &subcategory3.id).await.unwrap();
+        let subcategory6 = Subcategory::get(&mut db, &subcategory3.id)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(subcategory6, subcategory3);
-        assert!(Subcategory::get(&mut db, "").await.is_none());
+        assert!(Subcategory::get(&mut db, "").await.unwrap().is_none());
 
         // Get by name
         let subcategory7 = Subcategory::get_by_name(&mut db, &subcategory1.name)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(subcategory7, subcategory1);
         let subcategory8 = Subcategory::get_by_name(&mut db, &subcategory2.name)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(subcategory8, subcategory2);
         let subcategory9 = Subcategory::get_by_name(&mut db, &subcategory3.name)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(subcategory9, subcategory3);
         assert!(Subcategory::get_by_name(&mut db, "Invalid subcategory")
             .await
+            .unwrap()
             .is_none());
 
         // List
-        let subcategories1 = Subcategory::list(&mut db).await;
+        let subcategories1 = Subcategory::list(&mut db).await.unwrap();
         assert_eq!(subcategories1.len(), 3);
         let subcategory10 = subcategories1
             .iter()
@@ -209,7 +223,7 @@ mod tests {
         assert_eq!(subcategory12, &subcategory3);
 
         // List within category
-        let subcategories2 = Subcategory::list_within(&mut db, &category1).await;
+        let subcategories2 = Subcategory::list_within(&mut db, &category1).await.unwrap();
         assert_eq!(subcategories2.len(), 2);
         let subcategory13 = subcategories2
             .iter()
@@ -221,14 +235,14 @@ mod tests {
             .find(|x| x.id == subcategory2.id)
             .unwrap();
         assert_eq!(subcategory14, &subcategory2);
-        let subcategories3 = Subcategory::list_within(&mut db, &category2).await;
+        let subcategories3 = Subcategory::list_within(&mut db, &category2).await.unwrap();
         assert_eq!(subcategories3.len(), 1);
         assert_eq!(subcategories3[0], subcategory3);
 
         // Get category
-        assert_eq!(subcategory1.get_category(&mut db).await, category1);
-        assert_eq!(subcategory2.get_category(&mut db).await, category1);
-        assert_eq!(subcategory3.get_category(&mut db).await, category2);
+        assert_eq!(subcategory1.get_category(&mut db).await.unwrap(), category1);
+        assert_eq!(subcategory2.get_category(&mut db).await.unwrap(), category1);
+        assert_eq!(subcategory3.get_category(&mut db).await.unwrap(), category2);
 
         // // Set category
         // assert_eq!(subcategory1.category_id, category1.id);
@@ -237,30 +251,57 @@ mod tests {
         // assert_eq!(subcategory1.get_category(&mut db).await, category2);
 
         // Set name
-        subcategory1.set_name(&mut db, "name 1").await;
+        subcategory1.set_name(&mut db, "name 1").await.unwrap();
         assert_eq!(&subcategory1.name, "name 1");
-        let subcategory15 = Subcategory::get(&mut db, &subcategory1.id).await.unwrap();
+        let subcategory15 = Subcategory::get(&mut db, &subcategory1.id)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(subcategory15, subcategory1);
 
         // Set description
-        subcategory1.set_description(&mut db, "description 1").await;
+        subcategory1
+            .set_description(&mut db, "description 1")
+            .await
+            .unwrap();
         assert_eq!(subcategory1.description.as_ref().unwrap(), "description 1");
-        let subcategory16 = Subcategory::get(&mut db, &subcategory1.id).await.unwrap();
+        let subcategory16 = Subcategory::get(&mut db, &subcategory1.id)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(subcategory16, subcategory1);
 
         // Delete
         let subcategory_id1 = subcategory1.id.clone();
-        assert!(Subcategory::get(&mut db, &subcategory_id1).await.is_some());
-        subcategory1.delete(&mut db).await;
-        assert!(Subcategory::get(&mut db, &subcategory_id1).await.is_none());
+        assert!(Subcategory::get(&mut db, &subcategory_id1)
+            .await
+            .unwrap()
+            .is_some());
+        subcategory1.delete(&mut db).await.unwrap();
+        assert!(Subcategory::get(&mut db, &subcategory_id1)
+            .await
+            .unwrap()
+            .is_none());
         let subcategory_id2 = subcategory2.id.clone();
-        assert!(Subcategory::get(&mut db, &subcategory_id2).await.is_some());
-        subcategory2.delete(&mut db).await;
-        assert!(Subcategory::get(&mut db, &subcategory_id2).await.is_none());
+        assert!(Subcategory::get(&mut db, &subcategory_id2)
+            .await
+            .unwrap()
+            .is_some());
+        subcategory2.delete(&mut db).await.unwrap();
+        assert!(Subcategory::get(&mut db, &subcategory_id2)
+            .await
+            .unwrap()
+            .is_none());
         let subcategory_id3 = subcategory3.id.clone();
-        assert!(Subcategory::get(&mut db, &subcategory_id3).await.is_some());
-        subcategory3.delete(&mut db).await;
-        assert!(Subcategory::get(&mut db, &subcategory_id3).await.is_none());
+        assert!(Subcategory::get(&mut db, &subcategory_id3)
+            .await
+            .unwrap()
+            .is_some());
+        subcategory3.delete(&mut db).await.unwrap();
+        assert!(Subcategory::get(&mut db, &subcategory_id3)
+            .await
+            .unwrap()
+            .is_none());
 
         // Clean up
         db.delete().await.unwrap();

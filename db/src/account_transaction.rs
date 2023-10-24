@@ -1,12 +1,7 @@
 use crate::{new_id, Account, Category, Subcategory, DB};
+use backend_common::Result;
 use chrono::{NaiveDate, NaiveDateTime, Utc};
-
-/// An error relating to an account transaction operation.
-#[derive(Debug, Clone, Copy)]
-pub enum AccountTransactionError {
-    /// The specified subcategory is not within the specified category.
-    InvalidSubcategory,
-}
+use common::ExpectedCommandError as Error;
 
 /// A representation of an account transaction in the database.
 #[derive(Debug, PartialEq, PartialOrd)]
@@ -48,10 +43,10 @@ impl AccountTransaction {
         date: NaiveDate,
         category: &Category,
         subcategory: Option<&Subcategory>,
-    ) -> Result<Self, AccountTransactionError> {
+    ) -> Result<Self> {
         if let Some(given_subcategory) = subcategory {
             if given_subcategory.category_id != category.id {
-                return Err(AccountTransactionError::InvalidSubcategory);
+                Err(Error::InvalidSubcategory)?;
             }
         }
 
@@ -71,48 +66,46 @@ impl AccountTransaction {
             subcategory_id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        account.mark_edited(db).await;
+        account.mark_edited(db).await?;
 
-        Ok(Self::get(db, &id).await.unwrap())
+        Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
     /// Gets an account transaction from the database.
-    pub async fn get(db: &mut DB, id: &str) -> Option<Self> {
-        sqlx::query_as!(Self, "SELECT * FROM account_transaction WHERE id = ?;", id)
-            .fetch_optional(&mut **db)
-            .await
-            .unwrap()
+    pub async fn get(db: &mut DB, id: &str) -> Result<Option<Self>> {
+        Ok(
+            sqlx::query_as!(Self, "SELECT * FROM account_transaction WHERE id = ?;", id)
+                .fetch_optional(&mut **db)
+                .await?,
+        )
     }
 
     /// Lists all account transactions in the database.
-    pub async fn list(db: &mut DB) -> Vec<Self> {
-        sqlx::query_as!(
+    pub async fn list(db: &mut DB) -> Result<Vec<Self>> {
+        Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction ORDER BY transaction_date, created_at;"
         )
         .fetch_all(&mut **db)
-        .await
-        .unwrap()
+        .await?)
     }
 
     /// Lists all account transactions within a given account.
-    pub async fn list_within(db: &mut DB, account: &Account) -> Vec<Self> {
-        sqlx::query_as!(
+    pub async fn list_within(db: &mut DB, account: &Account) -> Result<Vec<Self>> {
+        Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction WHERE account_id = ? ORDER BY transaction_date, created_at;",
             account.id
         )
         .fetch_all(&mut **db)
-        .await
-        .unwrap()
+        .await?)
     }
 
     /// Gets the account the transaction is associated with.
-    pub async fn get_account(&self, db: &mut DB) -> Account {
-        Account::get(db, &self.account_id).await.unwrap()
+    pub async fn get_account(&self, db: &mut DB) -> Result<Account> {
+        Account::get(db, &self.account_id).await.map(|x| x.unwrap())
     }
 
     /// Gets the date the transaction took place.
@@ -121,20 +114,24 @@ impl AccountTransaction {
     }
 
     /// Gets the category in which the transaction exists.
-    pub async fn get_category(&self, db: &mut DB) -> Category {
-        Category::get(db, &self.category_id).await.unwrap()
+    pub async fn get_category(&self, db: &mut DB) -> Result<Category> {
+        Category::get(db, &self.category_id)
+            .await
+            .map(|x| x.unwrap())
     }
 
     /// Gets the subcategory in which the transaction exists.
-    pub async fn get_subcategory(&self, db: &mut DB) -> Option<Subcategory> {
+    pub async fn get_subcategory(&self, db: &mut DB) -> Result<Option<Subcategory>> {
         match &self.subcategory_id {
-            Some(subcategory_id) => Some(Subcategory::get(db, subcategory_id).await.unwrap()),
-            None => None,
+            Some(subcategory_id) => Subcategory::get(db, subcategory_id)
+                .await
+                .map(|x| Some(x.unwrap())),
+            None => Ok(None),
         }
     }
 
     /// Marks the transaction as edited.
-    pub async fn mark_edited(&mut self, db: &mut DB) {
+    pub async fn mark_edited(&mut self, db: &mut DB) -> Result<()> {
         self.edited_at = Some(Utc::now().naive_utc());
 
         sqlx::query!(
@@ -143,14 +140,15 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.get_account(db).await.mark_edited(db).await;
+        self.get_account(db).await?.mark_edited(db).await?;
+
+        Ok(())
     }
 
     /// Marks the transaction as reconciled.
-    pub async fn mark_reconciled(&mut self, db: &mut DB) {
+    pub async fn mark_reconciled(&mut self, db: &mut DB) -> Result<()> {
         self.reconciled_at = Some(Utc::now().naive_utc());
 
         sqlx::query!(
@@ -159,12 +157,13 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     /// Sets the account the transaction is associated with.
-    pub async fn set_account(&mut self, db: &mut DB, account: &Account) {
+    pub async fn set_account(&mut self, db: &mut DB, account: &Account) -> Result<()> {
         self.account_id = account.id.clone();
 
         sqlx::query!(
@@ -173,14 +172,15 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.mark_edited(db).await;
+        self.mark_edited(db).await?;
+
+        Ok(())
     }
 
     /// Sets the transaction name.
-    pub async fn set_name(&mut self, db: &mut DB, name: &str) {
+    pub async fn set_name(&mut self, db: &mut DB, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -189,14 +189,15 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.mark_edited(db).await;
+        self.mark_edited(db).await?;
+
+        Ok(())
     }
 
     /// Sets the transaction description.
-    pub async fn set_description(&mut self, db: &mut DB, description: &str) {
+    pub async fn set_description(&mut self, db: &mut DB, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -205,14 +206,15 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.mark_edited(db).await;
+        self.mark_edited(db).await?;
+
+        Ok(())
     }
 
     /// Sets the transaction amount.
-    pub async fn set_amount(&mut self, db: &mut DB, amount: f64) {
+    pub async fn set_amount(&mut self, db: &mut DB, amount: f64) -> Result<()> {
         self.amount = amount;
 
         sqlx::query!(
@@ -221,14 +223,15 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.mark_edited(db).await;
+        self.mark_edited(db).await?;
+
+        Ok(())
     }
 
     /// Sets the date of the transaction.
-    pub async fn set_date(&mut self, db: &mut DB, date: NaiveDate) {
+    pub async fn set_date(&mut self, db: &mut DB, date: NaiveDate) -> Result<()> {
         self.transaction_date = date.and_hms_milli_opt(12, 0, 0, 0).unwrap();
 
         sqlx::query!(
@@ -237,14 +240,15 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.mark_edited(db).await;
+        self.mark_edited(db).await?;
+
+        Ok(())
     }
 
     /// Sets the transaction's category. This invalidates the subcategory, setting it to None.
-    pub async fn set_category(&mut self, db: &mut DB, category: &Category) {
+    pub async fn set_category(&mut self, db: &mut DB, category: &Category) -> Result<()> {
         self.subcategory_id = None;
         self.category_id = category.id.clone();
 
@@ -254,10 +258,11 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.mark_edited(db).await;
+        self.mark_edited(db).await?;
+
+        Ok(())
     }
 
     /// Sets the transaction's subcategory. This can fail if the subcategory does not match the existing category.
@@ -265,10 +270,10 @@ impl AccountTransaction {
         &mut self,
         db: &mut DB,
         subcategory: Option<&Subcategory>,
-    ) -> Result<(), AccountTransactionError> {
+    ) -> Result<()> {
         if let Some(given_subcategory) = subcategory {
             if given_subcategory.category_id != self.category_id {
-                return Err(AccountTransactionError::InvalidSubcategory);
+                Err(Error::InvalidSubcategory)?;
             }
         }
 
@@ -280,10 +285,9 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.mark_edited(db).await;
+        self.mark_edited(db).await?;
 
         Ok(())
     }
@@ -294,10 +298,10 @@ impl AccountTransaction {
         db: &mut DB,
         category: &Category,
         subcategory: Option<&Subcategory>,
-    ) -> Result<(), AccountTransactionError> {
+    ) -> Result<()> {
         if let Some(given_subcategory) = subcategory {
             if given_subcategory.category_id != category.id {
-                return Err(AccountTransactionError::InvalidSubcategory);
+                Err(Error::InvalidSubcategory)?;
             }
         }
 
@@ -311,20 +315,20 @@ impl AccountTransaction {
             self.id
         )
         .execute(&mut **db)
-        .await
-        .unwrap();
+        .await?;
 
-        self.mark_edited(db).await;
+        self.mark_edited(db).await?;
 
         Ok(())
     }
 
     /// Deletes the account transaction from the database.
-    pub async fn delete(self, db: &mut DB) {
+    pub async fn delete(self, db: &mut DB) -> Result<()> {
         sqlx::query!("DELETE FROM account_transaction WHERE id = ?;", self.id)
             .execute(&mut **db)
-            .await
-            .unwrap();
+            .await?;
+
+        Ok(())
     }
 }
 
@@ -346,12 +350,19 @@ mod tests {
             "My Retirement Account",
             "",
         )
-        .await;
-        let mut account2 = Account::create(&mut db, AccountType::Property, "My Property", "").await;
-        let category1 = Category::create(&mut db, "Category #1", "").await;
-        let category2 = Category::create(&mut db, "Category #2", "").await;
-        let subcategory1 = Subcategory::create(&mut db, &category1, "Subcategory #1", "").await;
-        let subcategory2 = Subcategory::create(&mut db, &category2, "Subcategory #2", "").await;
+        .await
+        .unwrap();
+        let mut account2 = Account::create(&mut db, AccountType::Property, "My Property", "")
+            .await
+            .unwrap();
+        let category1 = Category::create(&mut db, "Category #1", "").await.unwrap();
+        let category2 = Category::create(&mut db, "Category #2", "").await.unwrap();
+        let subcategory1 = Subcategory::create(&mut db, &category1, "Subcategory #1", "")
+            .await
+            .unwrap();
+        let subcategory2 = Subcategory::create(&mut db, &category2, "Subcategory #2", "")
+            .await
+            .unwrap();
         let mut transaction1 = AccountTransaction::create(
             &mut db,
             &mut account1,
@@ -404,16 +415,21 @@ mod tests {
         // Get
         let transaction3 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction3, transaction1);
         let transaction4 = AccountTransaction::get(&mut db, &transaction2.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction4, transaction2);
-        assert!(AccountTransaction::get(&mut db, "").await.is_none());
+        assert!(AccountTransaction::get(&mut db, "")
+            .await
+            .unwrap()
+            .is_none());
 
         // List
-        let transactions1 = AccountTransaction::list(&mut db).await;
+        let transactions1 = AccountTransaction::list(&mut db).await.unwrap();
         assert_eq!(transactions1.len(), 2);
         let transaction5 = transactions1
             .iter()
@@ -427,17 +443,21 @@ mod tests {
         assert_eq!(transaction6, &transaction2);
 
         // List within account
-        let transactions2 = AccountTransaction::list_within(&mut db, &account1).await;
+        let transactions2 = AccountTransaction::list_within(&mut db, &account1)
+            .await
+            .unwrap();
         assert_eq!(transactions2.len(), 1);
         assert_eq!(transactions2[0], transaction1);
-        let transactions3 = AccountTransaction::list_within(&mut db, &account2).await;
+        let transactions3 = AccountTransaction::list_within(&mut db, &account2)
+            .await
+            .unwrap();
         assert_eq!(transactions3.len(), 1);
         assert_eq!(transactions3[0], transaction2);
 
         // Get account
-        let account3 = transaction1.get_account(&mut db).await;
+        let account3 = transaction1.get_account(&mut db).await.unwrap();
         assert_eq!(account3, account1);
-        let account4 = transaction2.get_account(&mut db).await;
+        let account4 = transaction2.get_account(&mut db).await.unwrap();
         assert_eq!(account4, account2);
 
         // Get date
@@ -447,85 +467,107 @@ mod tests {
         assert_eq!(date2, NaiveDate::from_ymd_opt(2020, 3, 15).unwrap());
 
         // Get category
-        let category3 = transaction1.get_category(&mut db).await;
+        let category3 = transaction1.get_category(&mut db).await.unwrap();
         assert_eq!(category3, category1);
-        let category4 = transaction2.get_category(&mut db).await;
+        let category4 = transaction2.get_category(&mut db).await.unwrap();
         assert_eq!(category4, category2);
 
         // Get subcategory
-        let subcategory3 = transaction1.get_subcategory(&mut db).await.unwrap();
+        let subcategory3 = transaction1
+            .get_subcategory(&mut db)
+            .await
+            .unwrap()
+            .unwrap();
         assert_eq!(subcategory3, subcategory1);
-        assert!(transaction2.get_subcategory(&mut db).await.is_none());
+        assert!(transaction2
+            .get_subcategory(&mut db)
+            .await
+            .unwrap()
+            .is_none());
 
         // Mark edited
         assert!(transaction1.edited_at.is_none());
-        transaction1.mark_edited(&mut db).await;
+        transaction1.mark_edited(&mut db).await.unwrap();
         assert!(transaction1.edited_at.is_some());
         assert_ne!(transaction1, transaction3);
 
         // Mark reconciled
         assert!(transaction2.reconciled_at.is_none());
-        transaction2.mark_reconciled(&mut db).await;
+        transaction2.mark_reconciled(&mut db).await.unwrap();
         assert!(transaction2.reconciled_at.is_some());
         assert_ne!(transaction2, transaction4);
 
         // Set account
         assert_eq!(transaction1.account_id, account1.id);
-        transaction1.set_account(&mut db, &account2).await;
+        transaction1.set_account(&mut db, &account2).await.unwrap();
         assert_eq!(transaction1.account_id, account2.id);
         let transaction7 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction7, transaction1);
 
         // Set name
-        transaction1.set_name(&mut db, "New transaction name").await;
+        transaction1
+            .set_name(&mut db, "New transaction name")
+            .await
+            .unwrap();
         assert_eq!(&transaction1.name, "New transaction name");
         let transaction8 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction8, transaction1);
 
         // Set description
         transaction1
             .set_description(&mut db, "New transaction description")
-            .await;
+            .await
+            .unwrap();
         assert_eq!(
             transaction1.description.as_ref().unwrap().as_str(),
             "New transaction description"
         );
         let transaction9 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction9, transaction1);
 
         // Set amount
-        transaction1.set_amount(&mut db, 0.01).await;
+        transaction1.set_amount(&mut db, 0.01).await.unwrap();
         assert_eq!(transaction1.amount, 0.01);
         let transaction10 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction10, transaction1);
 
         // Set date
         transaction1
             .set_date(&mut db, NaiveDate::from_ymd_opt(2020, 6, 27).unwrap())
-            .await;
+            .await
+            .unwrap();
         assert_eq!(
             transaction1.transaction_date.date(),
             NaiveDate::from_ymd_opt(2020, 6, 27).unwrap()
         );
         let transaction11 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction11, transaction1);
 
         // Set category
-        transaction1.set_category(&mut db, &category2).await;
+        transaction1
+            .set_category(&mut db, &category2)
+            .await
+            .unwrap();
         assert_eq!(transaction1.category_id, category2.id);
         assert!(transaction1.subcategory_id.is_none());
         let transaction12 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction12, transaction1);
 
@@ -540,12 +582,14 @@ mod tests {
         );
         let transaction13 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction13, transaction1);
         transaction1.set_subcategory(&mut db, None).await.unwrap();
         assert_eq!(transaction1.subcategory_id, None);
         let transaction14 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction14, transaction1);
         assert!(transaction1
@@ -565,6 +609,7 @@ mod tests {
         );
         let transaction15 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction15, transaction1);
         transaction1
@@ -575,6 +620,7 @@ mod tests {
         assert_eq!(transaction1.subcategory_id, None);
         let transaction16 = AccountTransaction::get(&mut db, &transaction1.id)
             .await
+            .unwrap()
             .unwrap();
         assert_eq!(transaction16, transaction1);
         assert!(transaction1
@@ -586,18 +632,22 @@ mod tests {
         let transaction_id1 = transaction1.id.clone();
         assert!(AccountTransaction::get(&mut db, &transaction_id1)
             .await
+            .unwrap()
             .is_some());
-        transaction1.delete(&mut db).await;
+        transaction1.delete(&mut db).await.unwrap();
         assert!(AccountTransaction::get(&mut db, &transaction_id1)
             .await
+            .unwrap()
             .is_none());
         let transaction_id2 = transaction2.id.clone();
         assert!(AccountTransaction::get(&mut db, &transaction_id2)
             .await
+            .unwrap()
             .is_some());
-        transaction2.delete(&mut db).await;
+        transaction2.delete(&mut db).await.unwrap();
         assert!(AccountTransaction::get(&mut db, &transaction_id2)
             .await
+            .unwrap()
             .is_none());
 
         // Clean up

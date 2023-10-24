@@ -37,6 +37,9 @@ pub enum UnexpectedError {
     /// An error in a UTF-8 conversion operation.
     #[error("An error occurred during UTF-8 conversion: {0}")]
     Utf8Error(#[from] FromUtf8Error),
+    /// A JSON serialization error.
+    #[error("An error occurred while processing JSON data: {0}")]
+    JsonError(#[from] serde_json::Error),
 }
 
 /// A generic application error.
@@ -77,15 +80,15 @@ impl<E> From<FromUtf8Error> for Error<E> {
     }
 }
 
-impl<E> From<ExpectedCommandError> for Error<E> {
-    fn from(value: ExpectedCommandError) -> Self {
-        ExpectedError::from(value).into()
+impl<E> From<serde_json::Error> for Error<E> {
+    fn from(value: serde_json::Error) -> Self {
+        UnexpectedError::from(value).into()
     }
 }
 
-impl From<ExpectedError> for CommandError {
-    fn from(value: ExpectedError) -> Self {
-        Self::Expected(value.0)
+impl<E> From<ExpectedCommandError> for Error<E> {
+    fn from(value: ExpectedCommandError) -> Self {
+        ExpectedError::from(value).into()
     }
 }
 
@@ -96,6 +99,12 @@ impl<E> From<Error<Error<E>>> for Error<E> {
             Error::Unexpected(err) => Self::Unexpected(err),
             Error::Other(err) => err,
         }
+    }
+}
+
+impl From<ExpectedError> for CommandError {
+    fn from(value: ExpectedError) -> Self {
+        Self::Expected(value.0)
     }
 }
 
@@ -110,6 +119,9 @@ impl From<UnexpectedError> for CommandError {
             }
             UnexpectedError::Utf8Error(err) => {
                 Self::Unexpected(UnexpectedCommandError::Utf8Error(GenericError::new(&err)))
+            }
+            UnexpectedError::JsonError(err) => {
+                Self::Unexpected(UnexpectedCommandError::JsonError(GenericError::new(&err)))
             }
         }
     }
