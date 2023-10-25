@@ -51,11 +51,14 @@ pub(crate) fn get_sql_init_path(table: &str) -> String {
     sql_init_path
 }
 
+/// The underlying database connection implementation.
+pub type DBImpl = SqliteConnection;
+
 /// A representation of a database.
 #[derive(Debug)]
 pub struct DB {
     /// The internal database connection.
-    conn: SqliteConnection,
+    conn: DBImpl,
     /// The name of the database.
     name: String,
 }
@@ -161,7 +164,21 @@ impl DB {
         Ok(())
     }
 
-    /// Pauses the connection temporarily, giving access to the raw file via a closure for reading and writing before continuing.
+    /// Performs a series of operations within a database transaction,
+    /// committing if successful or rolling back if not.
+    pub async fn transaction<F, T, R>(&mut self, f: F) -> Result<R>
+    where
+        F: FnOnce(&mut DBImpl) -> T + Send + Sync + 'static,
+        T: Future<Output = Result<R>> + Send,
+        R: Send,
+    {
+        self.conn
+            .transaction(|conn| Box::pin(async move { f(conn).await }))
+            .await
+    }
+
+    /// Pauses the connection temporarily, giving access to the raw file via a
+    /// closure for reading and writing before continuing.
     pub async fn pause_with<F, T, E>(&mut self, f: F) -> Result<(), E>
     where
         F: FnOnce(File) -> T,
@@ -242,7 +259,7 @@ impl DB {
 }
 
 impl Deref for DB {
-    type Target = SqliteConnection;
+    type Target = DBImpl;
 
     fn deref(&self) -> &Self::Target {
         &self.conn

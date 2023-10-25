@@ -1,4 +1,4 @@
-use crate::{new_id, AccountType, DB};
+use crate::{new_id, AccountType, DBImpl};
 use backend_common::Result;
 use chrono::{NaiveDateTime, Utc};
 
@@ -24,7 +24,7 @@ pub struct Account {
 impl Account {
     /// Creates a new account.
     pub async fn create(
-        db: &mut DB,
+        db: &mut DBImpl,
         account_type: AccountType,
         name: &str,
         description: &str,
@@ -39,28 +39,28 @@ impl Account {
             name,
             description
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
     /// Gets an account from the database.
-    pub async fn get(db: &mut DB, id: &str) -> Result<Option<Self>> {
+    pub async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM account WHERE id = ?;", id)
-                .fetch_optional(&mut **db)
+                .fetch_optional(&mut *db)
                 .await?,
         )
     }
 
     /// Lists all accounts in the database.
-    pub async fn list(db: &mut DB) -> Result<Vec<Self>> {
+    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account ORDER BY edited_at DESC, created_at DESC;"
         )
-        .fetch_all(&mut **db)
+        .fetch_all(&mut *db)
         .await?)
     }
 
@@ -70,7 +70,7 @@ impl Account {
     }
 
     /// Marks the account as edited.
-    pub async fn mark_edited(&mut self, db: &mut DB) -> Result<()> {
+    pub async fn mark_edited(&mut self, db: &mut DBImpl) -> Result<()> {
         self.edited_at = Some(Utc::now().naive_utc());
 
         sqlx::query!(
@@ -78,14 +78,14 @@ impl Account {
             self.edited_at,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
     }
 
     /// Marks the account as reconciled.
-    pub async fn mark_reconciled(&mut self, db: &mut DB) -> Result<()> {
+    pub async fn mark_reconciled(&mut self, db: &mut DBImpl) -> Result<()> {
         self.reconciled_at = Some(Utc::now().naive_utc());
 
         sqlx::query!(
@@ -93,14 +93,18 @@ impl Account {
             self.reconciled_at,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
     }
 
     /// Sets the account type.
-    pub async fn set_account_type(&mut self, db: &mut DB, account_type: AccountType) -> Result<()> {
+    pub async fn set_account_type(
+        &mut self,
+        db: &mut DBImpl,
+        account_type: AccountType,
+    ) -> Result<()> {
         self.account_type = account_type.to_internal_name();
 
         sqlx::query!(
@@ -108,7 +112,7 @@ impl Account {
             self.account_type,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         self.mark_edited(db).await?;
@@ -117,7 +121,7 @@ impl Account {
     }
 
     /// Sets the account name.
-    pub async fn set_name(&mut self, db: &mut DB, name: &str) -> Result<()> {
+    pub async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -125,7 +129,7 @@ impl Account {
             self.name,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         self.mark_edited(db).await?;
@@ -134,7 +138,7 @@ impl Account {
     }
 
     /// Sets the account description.
-    pub async fn set_description(&mut self, db: &mut DB, description: &str) -> Result<()> {
+    pub async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -142,7 +146,7 @@ impl Account {
             self.description,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         self.mark_edited(db).await?;
@@ -151,9 +155,9 @@ impl Account {
     }
 
     /// Deletes the account from the database.
-    pub async fn delete(self, db: &mut DB) -> Result<()> {
+    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM account WHERE id = ?;", self.id)
-            .execute(&mut **db)
+            .execute(&mut *db)
             .await?;
 
         Ok(())

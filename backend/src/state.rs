@@ -1,7 +1,7 @@
 use backend_common::*;
 use commands::BackendCommands;
 use common::*;
-use db::Save;
+use db::{DBImpl, Save};
 use std::env;
 use std::future::Future;
 use std::sync::Arc;
@@ -109,9 +109,36 @@ impl State {
         T: Future<Output = R>,
     {
         let mut handle = self.save_handle().await?;
-        let ret = f(&mut handle).await;
+        Ok(f(&mut handle).await)
+    }
 
-        Ok(ret)
+    /// Grants exclusive access to the database, automatically rolling back on
+    /// failure.
+    pub async fn with_db<F, T, R>(&self, f: F) -> Result<R>
+    where
+        F: FnOnce(&mut DBImpl) -> T + Send + Sync + 'static,
+        T: Future<Output = Result<R>> + Send,
+        R: Send,
+    {
+        let mut handle = self.save_handle().await?;
+        handle.transaction(f).await
+    }
+
+    /// Grants exclusive access to the database, automatically rolls back on
+    /// failure, and handles errors appropriately.
+    pub async fn with<F, T, R>(&self, f: F) -> CommandResult<R>
+    where
+        F: FnOnce(&mut DBImpl) -> T + Send + Sync + 'static,
+        T: Future<Output = Result<R>> + Send,
+        R: Send,
+    {
+        match self.with_db(f).await {
+            Ok(value) => Ok(value),
+            Err(_err) => {
+                todo!("handle expected/unexpected errors");
+                // Err(err.into())
+            }
+        }
     }
 }
 

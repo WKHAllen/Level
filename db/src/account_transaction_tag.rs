@@ -1,4 +1,4 @@
-use crate::{AccountTransaction, Tag, DB};
+use crate::{AccountTransaction, DBImpl, Tag};
 use backend_common::Result;
 use chrono::NaiveDateTime;
 
@@ -16,7 +16,7 @@ pub struct AccountTransactionTag {
 impl AccountTransactionTag {
     /// Create a new account transaction tag.
     pub async fn create(
-        db: &mut DB,
+        db: &mut DBImpl,
         account_transaction: &AccountTransaction,
         tag: &Tag,
     ) -> Result<Self> {
@@ -25,7 +25,7 @@ impl AccountTransactionTag {
             account_transaction.id,
             tag.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(Self::get(db, account_transaction, tag).await?.unwrap())
@@ -33,18 +33,18 @@ impl AccountTransactionTag {
 
     /// Gets an account transaction tag from the database.
     pub async fn get(
-        db: &mut DB,
+        db: &mut DBImpl,
         account_transaction: &AccountTransaction,
         tag: &Tag,
     ) -> Result<Option<Self>> {
         Ok(sqlx::query_as!(Self, "SELECT * FROM account_transaction_tag WHERE account_transaction_id = ? AND tag_id = ?;", account_transaction.id, tag.id)
-            .fetch_optional(&mut **db)
+            .fetch_optional(&mut *db)
             .await?)
     }
 
     /// Checks if an account transaction/tag link exists.
     pub async fn exists(
-        db: &mut DB,
+        db: &mut DBImpl,
         account_transaction: &AccountTransaction,
         tag: &Tag,
     ) -> Result<bool> {
@@ -54,18 +54,18 @@ impl AccountTransactionTag {
     }
 
     /// Lists all account transaction tags in the database.
-    pub async fn list(db: &mut DB) -> Result<Vec<Self>> {
+    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction_tag ORDER BY created_at;"
         )
-        .fetch_all(&mut **db)
+        .fetch_all(&mut *db)
         .await?)
     }
 
     /// Lists account transaction tags corresponding to a given account transaction.
     pub async fn list_by_transaction(
-        db: &mut DB,
+        db: &mut DBImpl,
         account_transaction: &AccountTransaction,
     ) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
@@ -73,41 +73,41 @@ impl AccountTransactionTag {
             "SELECT * FROM account_transaction_tag WHERE account_transaction_id = ? ORDER BY created_at;",
             account_transaction.id
         )
-        .fetch_all(&mut **db)
+        .fetch_all(&mut *db)
         .await?)
     }
 
     /// Lists account transaction tags corresponding to a given tag.
-    pub async fn list_by_tag(db: &mut DB, tag: &Tag) -> Result<Vec<Self>> {
+    pub async fn list_by_tag(db: &mut DBImpl, tag: &Tag) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction_tag WHERE tag_id = ? ORDER BY created_at;",
             tag.id
         )
-        .fetch_all(&mut **db)
+        .fetch_all(&mut *db)
         .await?)
     }
 
     /// Gets the associated account transaction.
-    pub async fn get_account_transaction(&self, db: &mut DB) -> Result<AccountTransaction> {
+    pub async fn get_account_transaction(&self, db: &mut DBImpl) -> Result<AccountTransaction> {
         AccountTransaction::get(db, &self.account_transaction_id)
             .await
             .map(|x| x.unwrap())
     }
 
     /// Gets the associated tag.
-    pub async fn get_tag(&self, db: &mut DB) -> Result<Tag> {
+    pub async fn get_tag(&self, db: &mut DBImpl) -> Result<Tag> {
         Tag::get(db, &self.tag_id).await.map(|x| x.unwrap())
     }
 
     /// Deletes the account transaction tag from the database.
-    pub async fn delete(self, db: &mut DB) -> Result<()> {
+    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!(
             "DELETE FROM account_transaction_tag WHERE account_transaction_id = ? AND tag_id = ?;",
             self.account_transaction_id,
             self.tag_id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())

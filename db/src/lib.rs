@@ -24,7 +24,7 @@ pub use crate::account_transaction_tag::*;
 pub use crate::account_type::*;
 pub use crate::budget::*;
 pub use crate::category::*;
-pub use crate::db::DB;
+pub use crate::db::{DBImpl, DB};
 pub use crate::reminder::*;
 pub use crate::report_template::*;
 pub use crate::save::Save;

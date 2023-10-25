@@ -1,4 +1,4 @@
-use crate::{new_id, Account, Timeframe, DB};
+use crate::{new_id, Account, DBImpl, Timeframe};
 use backend_common::Result;
 use chrono::NaiveDateTime;
 
@@ -22,7 +22,7 @@ pub struct Reminder {
 impl Reminder {
     /// Creates a new reminder.
     pub async fn create(
-        db: &mut DB,
+        db: &mut DBImpl,
         account: &Account,
         note: &str,
         timeframe: Timeframe,
@@ -39,32 +39,32 @@ impl Reminder {
             timeframe_name,
             timeframe_offset
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
     /// Gets a reminder from the database.
-    pub async fn get(db: &mut DB, id: &str) -> Result<Option<Self>> {
+    pub async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM reminder WHERE id = ?;", id)
-                .fetch_optional(&mut **db)
+                .fetch_optional(&mut *db)
                 .await?,
         )
     }
 
     /// Lists all reminders in the database.
-    pub async fn list(db: &mut DB) -> Result<Vec<Self>> {
+    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM reminder ORDER BY created_at;")
-                .fetch_all(&mut **db)
+                .fetch_all(&mut *db)
                 .await?,
         )
     }
 
     /// Gets the account the reminder is associated with.
-    pub async fn get_account(&self, db: &mut DB) -> Result<Account> {
+    pub async fn get_account(&self, db: &mut DBImpl) -> Result<Account> {
         Account::get(db, &self.account_id).await.map(|x| x.unwrap())
     }
 
@@ -74,7 +74,7 @@ impl Reminder {
     }
 
     /// Sets the associated account.
-    pub async fn set_account(&mut self, db: &mut DB, account: &Account) -> Result<()> {
+    pub async fn set_account(&mut self, db: &mut DBImpl, account: &Account) -> Result<()> {
         self.account_id = account.id.clone();
 
         sqlx::query!(
@@ -82,14 +82,14 @@ impl Reminder {
             self.account_id,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
     }
 
     /// Sets the reminder note.
-    pub async fn set_note(&mut self, db: &mut DB, note: &str) -> Result<()> {
+    pub async fn set_note(&mut self, db: &mut DBImpl, note: &str) -> Result<()> {
         self.note = Some(note.to_owned());
 
         sqlx::query!(
@@ -97,14 +97,14 @@ impl Reminder {
             self.note,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
     }
 
     /// Sets the timeframe.
-    pub async fn set_timeframe(&mut self, db: &mut DB, timeframe: Timeframe) -> Result<()> {
+    pub async fn set_timeframe(&mut self, db: &mut DBImpl, timeframe: Timeframe) -> Result<()> {
         self.timeframe = timeframe.to_internal_name();
 
         sqlx::query!(
@@ -112,7 +112,7 @@ impl Reminder {
             self.timeframe,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
@@ -121,7 +121,7 @@ impl Reminder {
     /// Sets the timeframe offset.
     pub async fn set_timeframe_offset(
         &mut self,
-        db: &mut DB,
+        db: &mut DBImpl,
         timeframe_offset: NaiveDateTime,
     ) -> Result<()> {
         self.timeframe_offset = timeframe_offset;
@@ -131,16 +131,16 @@ impl Reminder {
             self.timeframe_offset,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
     }
 
     /// Deletes the reminder from the database.
-    pub async fn delete(self, db: &mut DB) -> Result<()> {
+    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM reminder WHERE id = ?;", self.id)
-            .execute(&mut **db)
+            .execute(&mut *db)
             .await?;
 
         Ok(())

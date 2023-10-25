@@ -1,4 +1,4 @@
-use crate::{new_id, DB};
+use crate::{new_id, DBImpl};
 use backend_common::Result;
 use chrono::NaiveDateTime;
 use serde::{de::DeserializeOwned, ser::Serialize};
@@ -20,7 +20,7 @@ pub struct ReportTemplate {
 
 impl ReportTemplate {
     /// Creates a new report template.
-    pub async fn create(db: &mut DB, name: &str, description: &str) -> Result<Self> {
+    pub async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self> {
         let id = new_id();
 
         sqlx::query!(
@@ -30,26 +30,26 @@ impl ReportTemplate {
             description,
             "{}"
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
     /// Gets a report template from the database.
-    pub async fn get(db: &mut DB, id: &str) -> Result<Option<Self>> {
+    pub async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM report_template WHERE id = ?;", id)
-                .fetch_optional(&mut **db)
+                .fetch_optional(&mut *db)
                 .await?,
         )
     }
 
     /// Lists all report templates in the database.
-    pub async fn list(db: &mut DB) -> Result<Vec<Self>> {
+    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM report_template ORDER BY name;")
-                .fetch_all(&mut **db)
+                .fetch_all(&mut *db)
                 .await?,
         )
     }
@@ -60,7 +60,7 @@ impl ReportTemplate {
     }
 
     /// Sets the report template name.
-    pub async fn set_name(&mut self, db: &mut DB, name: &str) -> Result<()> {
+    pub async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -68,14 +68,14 @@ impl ReportTemplate {
             self.name,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
     }
 
     /// Sets the report template description.
-    pub async fn set_description(&mut self, db: &mut DB, description: &str) -> Result<()> {
+    pub async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -83,14 +83,18 @@ impl ReportTemplate {
             self.description,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
     }
 
     /// Serializes and sets the template data. This can fail if serialization fails.
-    pub async fn set_data<T: Serialize + ?Sized>(&mut self, db: &mut DB, data: &T) -> Result<()> {
+    pub async fn set_data<T: Serialize + ?Sized>(
+        &mut self,
+        db: &mut DBImpl,
+        data: &T,
+    ) -> Result<()> {
         self.data = serde_json::to_string(&data)?;
 
         sqlx::query!(
@@ -98,16 +102,16 @@ impl ReportTemplate {
             self.data,
             self.id
         )
-        .execute(&mut **db)
+        .execute(&mut *db)
         .await?;
 
         Ok(())
     }
 
     /// Deletes the template from the database.
-    pub async fn delete(self, db: &mut DB) -> Result<()> {
+    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM report_template WHERE id = ?;", self.id)
-            .execute(&mut **db)
+            .execute(&mut *db)
             .await?;
 
         Ok(())
