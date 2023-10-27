@@ -7,14 +7,19 @@
     windows_subsystem = "windows"
 )]
 
+mod logger;
 mod state;
 
+use log::info;
 pub use state::{command, State};
 use tauri::Manager;
 
 /// Start the backend Tauri application.
 #[tokio::main]
 async fn main() {
+    logger::init().expect("Error setting up logger");
+    info!("Starting up the application");
+
     let state = State::new();
 
     tauri::async_runtime::set(tokio::runtime::Handle::current());

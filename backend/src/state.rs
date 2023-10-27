@@ -2,6 +2,7 @@ use backend_common::*;
 use commands::BackendCommands;
 use common::*;
 use db::{DBImpl, Save};
+use log::error;
 use std::env;
 use std::future::Future;
 use std::sync::Arc;
@@ -134,9 +135,37 @@ impl State {
     {
         match self.with_db(f).await {
             Ok(value) => Ok(value),
-            Err(_err) => {
-                todo!("handle expected/unexpected errors");
-                // Err(err.into())
+            Err(err) => {
+                match &err {
+                    Error::Expected(_) => {}
+                    Error::Unexpected(inner) => {
+                        error!("An unexpected error occurred: {}", inner);
+                    }
+                    Error::Other(_) => unreachable!(),
+                }
+
+                Err(err.into())
+            }
+        }
+    }
+
+    /// Performs any async operation with automatic error handling.
+    pub async fn with_result<F, R>(&self, f: F) -> CommandResult<R>
+    where
+        F: Future<Output = Result<R>>,
+    {
+        match f.await {
+            Ok(value) => Ok(value),
+            Err(err) => {
+                match &err {
+                    Error::Expected(_) => {}
+                    Error::Unexpected(inner) => {
+                        error!("An unexpected error occurred: {}", inner);
+                    }
+                    Error::Other(_) => unreachable!(),
+                }
+
+                Err(err.into())
             }
         }
     }
@@ -155,10 +184,15 @@ impl BackendCommands for State {
     }
 
     async fn list_save_files(&self) -> CommandResult<Vec<SaveMetadata>> {
-        Ok(Save::list().await?)
+        self.with_result(Save::list()).await
     }
 
     async fn open_save_file(&self, save_name: String, save_password: String) -> CommandResult<()> {
-        Ok(self.open_save(&save_name, &save_password).await?)
+        self.with_result(self.open_save(&save_name, &save_password))
+            .await
+    }
+
+    async fn close_save_file(&self) -> CommandResult<()> {
+        self.with_result(self.close_save()).await
     }
 }

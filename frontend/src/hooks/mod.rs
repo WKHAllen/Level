@@ -1,18 +1,22 @@
+mod use_alert;
 mod use_async;
 mod use_command;
 mod use_demo;
 mod use_file_select;
 mod use_id;
 mod use_popup;
+mod use_result;
 mod use_theme;
 mod use_view;
 
+pub use use_alert::*;
 pub use use_async::*;
 pub use use_command::*;
 pub use use_demo::*;
 pub use use_file_select::*;
 pub use use_id::*;
 pub use use_popup::*;
+pub use use_result::*;
 pub use use_theme::*;
 pub use use_view::*;
 

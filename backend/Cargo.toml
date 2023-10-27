@@ -10,9 +10,12 @@ dotenv = "0.15.0"
 [dependencies]
 async-trait = "0.1"
 backend_common = { path = "../backend_common" }
+chrono = "0.4"
 commands = { path = "../commands" }
 common = { path = "../common" }
 db = { path = "../db" }
+log = { version = "0.4", features = ["std"] }
+project-root = "0.2.2"
 rand = "0.8.5"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }

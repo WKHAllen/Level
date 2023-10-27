@@ -110,12 +110,23 @@ pub fn new_id() -> String {
 #[allow(unused_macros)]
 macro_rules! console_log {
     ( $($arg:tt)* ) => {{
-        web_sys::console::log_1(&wasm_bindgen::JsValue::from_str(&format!($($arg)*)));
+        ::web_sys::console::log_1(&::wasm_bindgen::JsValue::from_str(&format!($($arg)*)))
     }};
 }
 
 #[allow(unused_imports)]
 pub(crate) use console_log;
+
+/// Logs an error to the console.
+#[allow(unused_macros)]
+macro_rules! console_error {
+    ( $($arg:tt)* ) => {{
+        ::web_sys::console::error_1(&::wasm_bindgen::JsValue::from_str(&format!($($arg)*)))
+    }};
+}
+
+#[allow(unused_imports)]
+pub(crate) use console_error;
 
 /// A trait for numeric values.
 pub trait Number:

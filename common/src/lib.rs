@@ -3,7 +3,7 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
-use chrono::NaiveDateTime;
+use chrono::{Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use std::error::Error as StdError;
 use std::fmt::Display;
@@ -56,6 +56,14 @@ impl StdError for GenericError {}
 /// An expected command error.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Error)]
 pub enum ExpectedCommandError {
+    /// An unexpected error. Counterintuitive as it may seem, this does serve
+    /// a legitimate purpose. It exists to indicate to the frontend that an
+    /// unexpected error has occurred and is being correctly handled. This
+    /// error will likely never appear in the UI, as it will only be set
+    /// between renders. This error variant should never be set by the
+    /// backend.
+    #[error("An unexpected error occurred")]
+    UnexpectedError,
     /// A save operation was attempted, but no save was open.
     #[error("No save file is open")]
     NoSaveOpen,
@@ -122,3 +130,9 @@ pub enum CommandError {
 
 /// A generic command result.
 pub type CommandResult<T> = Result<T, CommandError>;
+
+/// Formats log messages with the current timestamp.
+pub fn format_log_message(message: &str) -> String {
+    let now = Local::now().format("%a %Y-%m-%d %H:%M:%S%.3f");
+    format!("[{}] {}\n", now, message)
+}
