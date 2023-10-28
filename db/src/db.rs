@@ -130,7 +130,7 @@ impl DB {
             Err(err) => Err(match err {
                 Error::Expected(err) => Error::Expected(err),
                 Error::Unexpected(err) => Error::Unexpected(err),
-                Error::Other(_) => unreachable!(),
+                Error::Other(_) => unreachable!("`Other` variant inner error is `Infallible`"),
             }),
         }
     }

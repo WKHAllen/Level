@@ -2,7 +2,7 @@ use backend_common::*;
 use commands::BackendCommands;
 use common::*;
 use db::{DBImpl, Save};
-use log::error;
+use log::{error, info};
 use std::env;
 use std::future::Future;
 use std::sync::Arc;
@@ -26,6 +26,8 @@ impl State {
     /// Handle a tauri window event.
     pub async fn handle_event(&self, event: &WindowEvent) -> Result<()> {
         if let WindowEvent::CloseRequested { .. } = event {
+            info!("Window close requested, shutting down gracefully");
+
             if self.is_save_open().await {
                 self.close_save().await?;
             }
@@ -141,7 +143,7 @@ impl State {
                     Error::Unexpected(inner) => {
                         error!("An unexpected error occurred: {}", inner);
                     }
-                    Error::Other(_) => unreachable!(),
+                    Error::Other(_) => unreachable!("`Other` variant inner error is `Infallible`"),
                 }
 
                 Err(err.into())
@@ -162,7 +164,7 @@ impl State {
                     Error::Unexpected(inner) => {
                         error!("An unexpected error occurred: {}", inner);
                     }
-                    Error::Other(_) => unreachable!(),
+                    Error::Other(_) => unreachable!("`Other` variant inner error is `Infallible`"),
                 }
 
                 Err(err.into())
@@ -188,11 +190,15 @@ impl BackendCommands for State {
     }
 
     async fn open_save_file(&self, save_name: String, save_password: String) -> CommandResult<()> {
+        info!("Attempting to open save file: {}", &save_name);
+
         self.with_result(self.open_save(&save_name, &save_password))
             .await
     }
 
     async fn close_save_file(&self) -> CommandResult<()> {
+        info!("Attempting to close the save file");
+
         self.with_result(self.close_save()).await
     }
 }

@@ -104,7 +104,7 @@ pub fn Open() -> Html {
     match &*saves {
         UseCommandState::Init | UseCommandState::Loading => html! { <Loading /> },
         UseCommandState::Resolved(saves) => match saves {
-            Err(_err) => todo!("handle errors correctly"),
+            Err(_) => unreachable!("`list_save_files` throws no expected errors"),
             Ok(saves) => {
                 let mut saves = saves.clone();
                 saves.sort_by_key(|save| save.last_opened_at);

@@ -92,16 +92,28 @@ impl Log for AppLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            let message = format_log_message(&format!("{}", record.args()));
+            let this_module = module_path!();
+            let this_module_root = this_module.split("::").next().unwrap_or_default();
+            let record_module = record.module_path().unwrap_or_default();
+            let record_module_root = record_module.split("::").next().unwrap_or_default();
 
-            print!("{}", message);
+            // Only display log messages that come from this crate
+            if !this_module_root.is_empty() && this_module_root == record_module_root {
+                let message = format!(
+                    "[{}] {}",
+                    record.level(),
+                    format_log_message(&format!("{}", record.args()))
+                );
 
-            let mut out = self
-                .out
-                .lock()
-                .expect("Failed to acquire a lock on the log file");
-            out.write_all(message.as_bytes())
-                .expect("Failed to write to the log file");
+                print!("{}", message);
+
+                let mut out = self
+                    .out
+                    .lock()
+                    .expect("Failed to acquire a lock on the log file");
+                out.write_all(message.as_bytes())
+                    .expect("Failed to write to the log file");
+            }
         }
     }
 

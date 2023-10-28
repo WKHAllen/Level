@@ -127,7 +127,7 @@ pub fn derive_select_options(item: TokenStream) -> TokenStream {
             fn from_index(index: usize) -> Self {
                 match index {
                     #(#from_index_branches)*
-                    _ => unreachable!(),
+                    _ => unreachable!("Invalid option index"),
                 }
             }
 
