@@ -65,6 +65,9 @@ pub struct InputProps {
     /// Whether the input is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The input node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// An input element.
@@ -81,6 +84,7 @@ pub fn Input(props: &InputProps) -> Html {
         required,
         error,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| {
@@ -97,7 +101,7 @@ pub fn Input(props: &InputProps) -> Html {
     };
     let onkeydown = move |event: KeyboardEvent| {
         if event.key_code() == 13 {
-            // enter
+            // enter key pressed
             on_submit.emit(());
         }
     };
@@ -119,6 +123,7 @@ pub fn Input(props: &InputProps) -> Html {
                 {disabled}
                 maxlength={max_length.to_string()}
                 class={classes!("base-input", error.as_ref().map(|_| "base-input-invalid"))}
+                ref={node}
             />
             <Error message={error} size={ErrorSize::Small} />
         </div>

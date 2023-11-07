@@ -58,6 +58,8 @@ pub fn Open() -> Html {
     let save_password = (*save_password_state).clone();
     let unlock_save_error = (*unlock_save_error_state).clone();
 
+    let password_input_focus = use_focus();
+
     let default_timestamp = NaiveDate::from_ymd_opt(0000, 1, 1)
         .unwrap()
         .and_hms_opt(0, 0, 0)
@@ -76,6 +78,7 @@ pub fn Open() -> Html {
         })
         .run_on_init(false)
         .on_update({
+            let dialog_open_state = dialog_open_state.clone();
             let loading_overlay_state = loading_overlay_state.clone();
             let unlock_save_error_state = unlock_save_error_state.clone();
             move |open_save_result| match open_save_result {
@@ -88,6 +91,7 @@ pub fn Open() -> Html {
                 }
                 UseCommandState::Resolved(res) => match res {
                     Ok(_) => {
+                        dialog_open_state.set(false);
                         loading_overlay_state.set(false);
                         unlock_save_error_state.set(None);
                         view.set(View::Save);
@@ -117,9 +121,11 @@ pub fn Open() -> Html {
                         let onclick = {
                             let dialog_open_state = dialog_open_state.clone();
                             let selected_save_state = selected_save_state.clone();
+                            let password_input_focus = password_input_focus.clone();
                             move |_| {
                                 selected_save_state.set(Some(save.clone()));
                                 dialog_open_state.set(true);
+                                password_input_focus.focus_late();
                             }
                         };
 
@@ -180,7 +186,8 @@ pub fn Open() -> Html {
                             title={save_name}
                             ok_label="Unlock"
                             cancel_label="Close"
-                            on_close={dialog_open_save}
+                            on_close_request={dialog_open_save}
+                            close_on_ok={false}
                         >
                             <p>{save_description}</p>
                             <p>{"Created at: "}{created_at_str}</p>
@@ -192,6 +199,7 @@ pub fn Open() -> Html {
                                 label="Password"
                                 on_submit={input_open_save}
                                 error={unlock_save_error}
+                                node={password_input_focus.node_ref()}
                             />
                         </Dialog>
                         <LoadingOverlay state={loading_overlay_state} />

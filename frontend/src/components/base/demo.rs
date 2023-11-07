@@ -611,7 +611,7 @@ pub fn Demo() -> Html {
                     title="Small dialog"
                     ok_label="OK"
                     cancel_label="Cancel"
-                    on_close={move |ok| dialog_small_close_state.set(Some(ok))}
+                    on_close_request={move |ok| dialog_small_close_state.set(Some(ok))}
                     actions_layout={DialogActionsLayout::Left}
                 >
                     <p>{"A small dialog with left-aligned actions."}</p>
@@ -626,7 +626,7 @@ pub fn Demo() -> Html {
                     title="Medium dialog"
                     ok_label="OK"
                     cancel_label="Cancel"
-                    on_close={move |ok| dialog_medium_close_state.set(Some(ok))}
+                    on_close_request={move |ok| dialog_medium_close_state.set(Some(ok))}
                     actions_layout={DialogActionsLayout::Right}
                 >
                     <p>{"A medium dialog with right-aligned actions."}</p>
@@ -665,7 +665,7 @@ pub fn Demo() -> Html {
                     title="Large dialog"
                     ok_label="OK"
                     cancel_label="Cancel"
-                    on_close={move |ok| dialog_large_close_state.set(Some(ok))}
+                    on_close_request={move |ok| dialog_large_close_state.set(Some(ok))}
                     actions_layout={DialogActionsLayout::Spaced}
                 >
                     <p>{"A large dialog with spaced actions."}</p>
@@ -688,7 +688,7 @@ pub fn Demo() -> Html {
                     state={dialog_max_state}
                     size={DialogSize::Max}
                     title="Max dialog"
-                    on_close={move |ok| dialog_max_close_state.set(Some(ok))}
+                    on_close_request={move |ok| dialog_max_close_state.set(Some(ok))}
                 >
                     <p>{"A maximum size dialog with no actions."}</p>
                 </Dialog>
@@ -701,7 +701,7 @@ pub fn Demo() -> Html {
                     size={DialogSize::Auto}
                     title="Auto dialog"
                     ok_label="OK"
-                    on_close={move |ok| dialog_auto_close_state.set(Some(ok))}
+                    on_close_request={move |ok| dialog_auto_close_state.set(Some(ok))}
                 >
                     <p>{"An auto size dialog with only an OK action."}</p>
                 </Dialog>

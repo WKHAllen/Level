@@ -73,7 +73,13 @@ pub struct DialogProps {
     /// The callback called with the dialog closing state. Receives `true` if
     /// the ok button was clicked and `false` otherwise.
     #[prop_or_default]
-    pub on_close: Callback<bool>,
+    pub on_close_request: Callback<bool>,
+    /// Whether to close the dialog when the ok button is clicked.
+    #[prop_or(true)]
+    pub close_on_ok: bool,
+    /// Whether to close the dialog when the cancel button is clicked.
+    #[prop_or(true)]
+    pub close_on_cancel: bool,
     /// The layout of action buttons.
     #[prop_or_default]
     pub actions_layout: DialogActionsLayout,
@@ -92,7 +98,9 @@ pub fn Dialog(props: &DialogProps) -> Html {
         title,
         ok_label,
         cancel_label,
-        on_close,
+        on_close_request,
+        close_on_ok,
+        close_on_cancel,
         actions_layout,
         children,
     } = props.clone();
@@ -103,27 +111,33 @@ pub fn Dialog(props: &DialogProps) -> Html {
     let actions_layout_class = format!("base-dialog-actions-{}", actions_layout.layout_name());
 
     let x_close = {
-        let on_close = on_close.clone();
+        let on_close_request = on_close_request.clone();
         let state = state.clone();
         move |_| {
-            on_close.emit(false);
+            on_close_request.emit(false);
             state.set(false);
         }
     };
     let ok_close = {
-        let on_close = on_close.clone();
+        let on_close_request = on_close_request.clone();
         let state = state.clone();
         move |_| {
-            on_close.emit(true);
-            state.set(false);
+            on_close_request.emit(true);
+
+            if close_on_ok {
+                state.set(false);
+            }
         }
     };
     let cancel_close = {
-        let on_close = on_close.clone();
+        let on_close_request = on_close_request.clone();
         let state = state.clone();
         move |_| {
-            on_close.emit(false);
-            state.set(false);
+            on_close_request.emit(false);
+
+            if close_on_cancel {
+                state.set(false);
+            }
         }
     };
 
@@ -144,7 +158,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
         let state = state.clone();
         move |_| {
             if !*mouse_in_state {
-                on_close.emit(false);
+                on_close_request.emit(false);
                 state.set(false);
             }
         }
