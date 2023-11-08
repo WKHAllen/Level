@@ -48,6 +48,9 @@ pub struct SelectProps {
     /// Whether the selection is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The select button node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
     /// Child elements.
     #[prop_or_default]
     pub children: ChildrenWithProps<SelectOption>,
@@ -63,6 +66,7 @@ pub fn Select(props: &SelectProps) -> Html {
         required,
         error,
         disabled,
+        node,
         children,
     } = props.clone();
 
@@ -140,6 +144,7 @@ pub fn Select(props: &SelectProps) -> Html {
                     onclick={on_button_click}
                     {disabled}
                     class={classes!("base-select-button", error.as_ref().map(|_| "base-select-button-invalid"))}
+                    ref={node}
                 >
                     <div class="base-select-button-selection">
                         {selected_child}
@@ -180,6 +185,9 @@ pub struct SelectNullableProps {
     /// Whether the selection is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The select button node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
     /// Child elements.
     #[prop_or_default]
     pub children: ChildrenWithProps<SelectOption>,
@@ -196,6 +204,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         required,
         error,
         disabled,
+        node,
         children,
     } = props.clone();
 
@@ -287,6 +296,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
                     onclick={on_button_click}
                     {disabled}
                     class={classes!("base-select-button", error.as_ref().map(|_| "base-select-button-invalid"))}
+                    ref={node}
                 >
                     <div class="base-select-button-selection">
                         {selected_child}
@@ -327,6 +337,9 @@ pub struct SelectEnumProps<T: SelectOptions> {
     /// Whether the selection is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The select button node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A select component using enum variants as options.
@@ -339,6 +352,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         required,
         error,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
@@ -404,6 +418,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
                     onclick={on_button_click}
                     {disabled}
                     class={classes!("base-select-button", error.as_ref().map(|_| "base-select-button-invalid"))}
+                    ref={node}
                 >
                     <div class="base-select-button-selection">
                         {selected_child}
@@ -444,6 +459,9 @@ pub struct SelectNullableEnumProps<T: SelectOptions> {
     /// Whether the selection is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The select button node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A select component using nullable enum variants as options.
@@ -457,6 +475,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         required,
         error,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
@@ -536,6 +555,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
                     onclick={on_button_click}
                     {disabled}
                     class={classes!("base-select-button", error.as_ref().map(|_| "base-select-button-invalid"))}
+                    ref={node}
                 >
                     <div class="base-select-button-selection">
                         {selected_child}

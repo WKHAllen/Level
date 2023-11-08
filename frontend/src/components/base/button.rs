@@ -41,6 +41,9 @@ pub struct ButtonProps {
     /// The button click callback.
     #[prop_or_default]
     pub on_click: Callback<()>,
+    /// The button node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A button component.
@@ -51,6 +54,7 @@ pub fn Button(props: &ButtonProps) -> Html {
         style,
         disabled,
         on_click,
+        node,
     } = props.clone();
 
     let style_class = format!("base-button-{}", style.style_name());
@@ -66,6 +70,7 @@ pub fn Button(props: &ButtonProps) -> Html {
             {onclick}
             {disabled}
             class={classes!("base-button", style_class)}
+            ref={node}
         >
             {text}
         </button>

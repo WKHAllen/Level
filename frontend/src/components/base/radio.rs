@@ -8,6 +8,9 @@ pub struct RadioButtonProps {
     /// Whether the radio button is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The radio button input node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
     /// Child elements.
     #[prop_or_default]
     pub children: Children,
@@ -99,6 +102,7 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
         .map(|(index, child)| {
             let RadioButtonProps {
                 disabled: child_disabled,
+                node: child_node,
                 children: child_children,
             } = (*child.props).clone();
 
@@ -124,6 +128,7 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
                         {required}
                         disabled={this_disabled}
                         class="base-radio-input"
+                        ref={child_node}
                     />
                     <label for={id} class="base-radio-label">{child_children}</label>
                 </div>

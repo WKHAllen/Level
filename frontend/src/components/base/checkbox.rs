@@ -15,6 +15,9 @@ pub struct CheckboxProps {
     /// Whether the checkbox is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The checkbox input node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A checkbox component.
@@ -25,6 +28,7 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
         on_change,
         label,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
@@ -45,6 +49,7 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
                     {onclick}
                     {disabled}
                     class="base-checkbox-input"
+                    ref={node}
                 />
                 <span class="base-checkmark">
                     <img src="assets/svg/check-solid.svg" class="base-checkmark-icon" />

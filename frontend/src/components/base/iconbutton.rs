@@ -21,6 +21,9 @@ pub struct IconButtonProps {
     /// Classes to apply to the icon.
     #[prop_or_default]
     pub class: Classes,
+    /// The button node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// An icon button component.
@@ -32,6 +35,7 @@ pub fn IconButton(props: &IconButtonProps) -> Html {
         disabled,
         on_click,
         mut class,
+        node,
     } = props.clone();
 
     let size_class = format!("base-icon-button-{}", size.size_name());
@@ -49,6 +53,7 @@ pub fn IconButton(props: &IconButtonProps) -> Html {
             {onclick}
             {disabled}
             class={classes!("base-icon-button", size_class)}
+            ref={node}
         >
             <img src={svg_path} {class} />
         </button>

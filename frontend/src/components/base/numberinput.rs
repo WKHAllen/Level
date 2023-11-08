@@ -194,6 +194,9 @@ pub struct NumberInputProps<N: Number> {
     /// Whether the input is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The number input node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// An input element.
@@ -207,6 +210,7 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
         required,
         error,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(***new_state));
@@ -239,6 +243,7 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
                 {required}
                 {disabled}
                 class={classes!("base-input", error.as_ref().map(|_| "base-input-invalid"))}
+                ref={node}
             />
             <Error message={error} size={ErrorSize::Small} />
         </div>

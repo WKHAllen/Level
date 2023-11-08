@@ -26,6 +26,9 @@ pub struct SliderProps<N: Number> {
     /// Whether the slider is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The slider input node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A slider component.
@@ -39,6 +42,7 @@ pub fn Slider<N: Number + 'static>(props: &SliderProps<N>) -> Html {
         max,
         step,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
@@ -79,6 +83,7 @@ pub fn Slider<N: Number + 'static>(props: &SliderProps<N>) -> Html {
                     {oninput}
                     {disabled}
                     class="base-slider-input"
+                    ref={node}
                 />
             </div>
         </div>

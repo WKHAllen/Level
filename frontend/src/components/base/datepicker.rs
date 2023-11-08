@@ -342,6 +342,15 @@ pub struct DatePickerProps {
     /// Whether the date picker is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The year input node ref.
+    #[prop_or_default]
+    pub year_node: NodeRef,
+    /// The month input node ref.
+    #[prop_or_default]
+    pub month_node: NodeRef,
+    /// The day input node ref.
+    #[prop_or_default]
+    pub day_node: NodeRef,
 }
 
 /// A date picker component.
@@ -356,19 +365,19 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         required,
         error,
         disabled,
+        year_node,
+        month_node,
+        day_node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(***new_state));
 
     let year_id_state = use_id();
     let year_id = (*year_id_state).clone();
-    let year_node = use_node_ref();
     let month_id_state = use_id();
     let month_id = (*month_id_state).clone();
-    let month_node = use_node_ref();
     let day_id_state = use_id();
     let day_id = (*day_id_state).clone();
-    let day_node = use_node_ref();
     let calendar_open = use_state(|| false);
     let today = date_picker_today();
     let year_value = state.year.clone();

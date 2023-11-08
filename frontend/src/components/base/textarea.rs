@@ -59,6 +59,9 @@ pub struct TextAreaProps {
     /// Whether the textarea is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The textarea node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A textarea element.
@@ -74,6 +77,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
         resize,
         error,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| {
@@ -105,6 +109,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
                 {disabled}
                 maxlength={max_length.to_string()}
                 class={classes!("base-textarea", resize_class, error.as_ref().map(|_| "base-textarea-invalid"))}
+                ref={node}
             />
             <Error message={error} size={ErrorSize::Small} />
         </div>

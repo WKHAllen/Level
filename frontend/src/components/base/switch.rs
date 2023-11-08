@@ -15,6 +15,9 @@ pub struct SwitchProps {
     /// Whether the switch is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The switch node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A switch component.
@@ -25,6 +28,7 @@ pub fn Switch(props: &SwitchProps) -> Html {
         on_change,
         label,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
@@ -45,6 +49,7 @@ pub fn Switch(props: &SwitchProps) -> Html {
                     {onclick}
                     {disabled}
                     class="base-switch-input"
+                    ref={node}
                 />
                 <span class="base-switch-toggle"></span>
             </label>

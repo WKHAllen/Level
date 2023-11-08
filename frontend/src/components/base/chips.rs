@@ -128,6 +128,9 @@ pub struct ChipsProps {
     /// Whether the chip input is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The chips input node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A chip selection component.
@@ -144,6 +147,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
         max_length,
         error,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| {
@@ -301,6 +305,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
                         {disabled}
                         maxlength={max_length.to_string()}
                         class="base-chips-input"
+                        ref={node}
                     />
                 </div>
                 {conditional_chip_options}

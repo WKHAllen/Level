@@ -38,6 +38,9 @@ pub struct FileSelectProps {
     /// Whether the input is disabled.
     #[prop_or(false)]
     pub disabled: bool,
+    /// The button node ref.
+    #[prop_or_default]
+    pub node: NodeRef,
 }
 
 /// A file selection component.
@@ -54,6 +57,7 @@ pub fn FileSelect(props: &FileSelectProps) -> Html {
         multiple,
         extensions,
         disabled,
+        node,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| {
@@ -80,6 +84,7 @@ pub fn FileSelect(props: &FileSelectProps) -> Html {
             {style}
             {disabled}
             on_click={move |_| file_select.open()}
+            {node}
         />
     }
 }
