@@ -4,10 +4,10 @@ use yew::prelude::*;
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub enum FrameBackground {
+    #[default]
     BG1,
     BG2,
     BG3,
-    #[default]
     BG4,
     BG5,
     BG6,

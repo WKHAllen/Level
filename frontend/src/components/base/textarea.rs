@@ -50,6 +50,9 @@ pub struct TextAreaProps {
     /// Whether the textarea is required to be filled out.
     #[prop_or(false)]
     pub required: bool,
+    /// The number of rows displayed by default.
+    #[prop_or(3)]
+    pub rows: usize,
     /// In what way the textarea can be resized.
     #[prop_or_default]
     pub resize: TextAreaResize,
@@ -74,6 +77,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
         placeholder,
         max_length,
         required,
+        rows,
         resize,
         error,
         disabled,
@@ -100,7 +104,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
             </label>
             <textarea
-                rows={3}
+                rows={rows.to_string()}
                 {value}
                 {id}
                 {oninput}

@@ -21,4 +21,12 @@ pub trait Commands {
 
     /// Attempts to close the currently open save file.
     async fn close_save_file(&self) -> CommandResult<()>;
+
+    /// Attempts to create a new save file.
+    async fn create_save_file(
+        &self,
+        save_name: String,
+        save_description: String,
+        save_password: String,
+    ) -> CommandResult<()>;
 }

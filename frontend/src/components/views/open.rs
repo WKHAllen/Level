@@ -78,6 +78,7 @@ pub fn Open() -> Html {
         })
         .run_on_init(false)
         .on_update({
+            let view = view.clone();
             let dialog_open_state = dialog_open_state.clone();
             let loading_overlay_state = loading_overlay_state.clone();
             let unlock_save_error_state = unlock_save_error_state.clone();
@@ -173,12 +174,28 @@ pub fn Open() -> Html {
                     }
                 };
 
+                let create_on_click = move |_| view.set(View::Create);
+
                 html! {
                     <div class="view open">
                         <h2>{"Open a save file"}</h2>
                         <Frame>
                             <div class="open-saves">
                                 {save_buttons}
+                                <div class="open-save-create">
+                                    <div
+                                        class="open-save-create-button hoverable"
+                                        onclick={create_on_click}
+                                    >
+                                        <div class="save-icon-create">
+                                            <img
+                                                src="assets/svg/plus-solid.svg"
+                                                class="save-icon-plus"
+                                            />
+                                        </div>
+                                        <span class="open-save-create-name">{"New save"}</span>
+                                    </div>
+                                </div>
                             </div>
                         </Frame>
                         <Dialog
@@ -197,6 +214,7 @@ pub fn Open() -> Html {
                                 state={save_password_state}
                                 input_type={InputType::Password}
                                 label="Password"
+                                required={true}
                                 on_submit={input_open_save}
                                 error={unlock_save_error}
                                 node={password_input_focus.node_ref()}

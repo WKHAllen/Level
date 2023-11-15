@@ -59,6 +59,8 @@ img {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .open-saves {
@@ -69,7 +71,8 @@ img {
   padding: 8px;
 }
 
-.open-save-button {
+.open-save-button,
+.open-save-create-button {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -82,6 +85,36 @@ img {
 .open-save-name {
   text-align: center;
   font-size: 0.8rem;
+}
+
+.create {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.create-save-passwords {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.create-save-passwords > * {
+  flex: 1 0;
+}
+
+.create-save-error {
+  margin-bottom: 8px;
+}
+
+.create-save-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .loading {
@@ -112,7 +145,8 @@ img {
   opacity: 1;
 }
 
-.save-icon {
+.save-icon,
+.save-icon-create {
   display: flex;
   position: relative;
 }
@@ -127,6 +161,13 @@ img {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -30%);
+}
+
+.save-icon-plus {
+  width: 32px;
+  height: 32px;
+  filter: invert(87%) sepia(1%) saturate(0%) hue-rotate(211deg) brightness(89%)
+    contrast(90%);
 }
 
 .hoverable {

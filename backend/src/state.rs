@@ -151,7 +151,7 @@ impl State {
         }
     }
 
-    /// Performs any async operation with automatic error handling.
+    /// Performs any fallible async operation with automatic error handling.
     pub async fn with_result<F, R>(&self, f: F) -> CommandResult<R>
     where
         F: Future<Output = Result<R>>,
@@ -200,5 +200,17 @@ impl BackendCommands for State {
         info!("Attempting to close the save file");
 
         self.with_result(self.close_save()).await
+    }
+
+    async fn create_save_file(
+        &self,
+        save_name: String,
+        save_description: String,
+        save_password: String,
+    ) -> CommandResult<()> {
+        info!("Attempting to create save file: {}", &save_name);
+
+        self.with_result(self.create_save(&save_name, &save_description, &save_password))
+            .await
     }
 }
