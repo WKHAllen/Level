@@ -4,6 +4,8 @@ CREATE TABLE account_transaction (
   name             TEXT     NOT NULL,
   description      TEXT,
   amount           REAL     NOT NULL,
+  transaction_type TEXT     NOT NULL,
+  institution_id   TEXT     NOT NULL,
   transaction_date DATETIME NOT NULL,
   category_id      TEXT     NOT NULL,
   subcategory_id   TEXT,
@@ -17,6 +19,9 @@ CREATE TABLE account_transaction (
   FOREIGN KEY (account_id)
     REFERENCES account (id)
       ON DELETE CASCADE,
+
+  FOREIGN KEY (institution_id)
+    REFERENCES institution (id),
 
   FOREIGN KEY (category_id)
     REFERENCES category (id),

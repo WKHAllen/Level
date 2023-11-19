@@ -9,6 +9,7 @@ const TABLES: &[&str] = &[
     "budget",
     "category",
     "subcategory",
+    "institution",
     "account_transaction",
     "tag",
     "account_transaction_tag",

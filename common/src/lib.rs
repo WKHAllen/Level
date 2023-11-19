@@ -85,6 +85,9 @@ pub enum ExpectedCommandError {
     /// An invalid account type was specified.
     #[error("An invalid account type was specified")]
     InvalidAccountType,
+    /// An invalid transaction type was specified.
+    #[error("An invalid transaction type was specified")]
+    InvalidTransactionType,
     /// A budget already exists for the specified account.
     #[error("A budget already exists for the specified account")]
     BudgetAlreadyExists,

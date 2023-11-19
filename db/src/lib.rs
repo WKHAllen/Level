@@ -11,12 +11,14 @@ mod budget;
 mod category;
 mod db;
 mod id;
+mod institution;
 mod reminder;
 mod report_template;
 mod save;
 mod subcategory;
 mod tag;
 mod timeframe;
+mod transaction_type;
 
 pub use crate::account::*;
 pub use crate::account_transaction::*;
@@ -25,12 +27,14 @@ pub use crate::account_type::*;
 pub use crate::budget::*;
 pub use crate::category::*;
 pub use crate::db::{DBImpl, DB};
+pub use crate::institution::*;
 pub use crate::reminder::*;
 pub use crate::report_template::*;
 pub use crate::save::Save;
 pub use crate::subcategory::*;
 pub use crate::tag::*;
 pub use crate::timeframe::*;
+pub use crate::transaction_type::*;
 
 use crate::id::*;
 
@@ -41,6 +45,7 @@ pub(crate) const TABLES: &[&str] = &[
     "budget",
     "category",
     "subcategory",
+    "institution",
     "account_transaction",
     "tag",
     "account_transaction_tag",

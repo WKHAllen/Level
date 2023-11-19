@@ -1,4 +1,4 @@
-use crate::{new_id, Account, Category, DBImpl, Subcategory};
+use crate::{new_id, Account, Category, DBImpl, Institution, Subcategory, TransactionType};
 use backend_common::Result;
 use chrono::{NaiveDate, NaiveDateTime, Utc};
 use common::ExpectedCommandError as Error;
@@ -16,6 +16,10 @@ pub struct AccountTransaction {
     pub description: Option<String>,
     /// The monetary amount of the transaction.
     pub amount: f64,
+    /// The type of transaction.
+    pub transaction_type: String,
+    /// The ID of the institution which the transaction is associated with.
+    pub institution_id: String,
     /// The date of the transaction.
     pub transaction_date: NaiveDateTime,
     /// The ID of the category in which the transaction exists.
@@ -40,6 +44,8 @@ impl AccountTransaction {
         name: &str,
         description: &str,
         amount: f64,
+        transaction_type: TransactionType,
+        institution: &Institution,
         date: NaiveDate,
         category: &Category,
         subcategory: Option<&Subcategory>,
@@ -51,16 +57,19 @@ impl AccountTransaction {
         }
 
         let id = new_id();
+        let transaction_type_name = transaction_type.to_internal_name();
         let transaction_date = date.and_hms_milli_opt(12, 0, 0, 0).unwrap();
         let subcategory_id = subcategory.map(|x| x.id.as_str());
 
         sqlx::query!(
-            "INSERT INTO account_transaction (id, account_id, name, description, amount, transaction_date, category_id, subcategory_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+            "INSERT INTO account_transaction (id, account_id, name, description, amount, transaction_type, institution_id, transaction_date, category_id, subcategory_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
             id,
             account.id,
             name,
             description,
             amount,
+            transaction_type_name,
+            institution.id,
             transaction_date,
             category.id,
             subcategory_id
@@ -106,6 +115,18 @@ impl AccountTransaction {
     /// Gets the account the transaction is associated with.
     pub async fn get_account(&self, db: &mut DBImpl) -> Result<Account> {
         Account::get(db, &self.account_id).await.map(|x| x.unwrap())
+    }
+
+    /// Gets the type of the transaction.
+    pub fn get_transaction_type(&self) -> TransactionType {
+        TransactionType::from_internal_name(&self.transaction_type).unwrap()
+    }
+
+    /// Gets the institution which the transaction is associated with.
+    pub async fn get_institution(&self, db: &mut DBImpl) -> Result<Institution> {
+        Institution::get(db, &self.institution_id)
+            .await
+            .map(|x| x.unwrap())
     }
 
     /// Gets the date the transaction took place.
@@ -355,6 +376,12 @@ mod tests {
         let mut account2 = Account::create(&mut db, AccountType::Property, "My Property", "")
             .await
             .unwrap();
+        let institution1 = Institution::create(&mut db, "IHOP", "Internation House of Pancakes")
+            .await
+            .unwrap();
+        let institution2 = Institution::create(&mut db, "Another institution", "")
+            .await
+            .unwrap();
         let category1 = Category::create(&mut db, "Category #1", "").await.unwrap();
         let category2 = Category::create(&mut db, "Category #2", "").await.unwrap();
         let subcategory1 = Subcategory::create(&mut db, &category1, "Subcategory #1", "")
@@ -369,6 +396,8 @@ mod tests {
             "Breakfast",
             "Breakfast at IHOP",
             16.75,
+            TransactionType::Debit,
+            &institution1,
             NaiveDate::from_ymd_opt(2023, 4, 1).unwrap(),
             &category1,
             Some(&subcategory1),
@@ -381,6 +410,8 @@ mod tests {
             "Another transaction",
             "",
             20.00,
+            TransactionType::Credit,
+            &institution2,
             NaiveDate::from_ymd_opt(2020, 3, 15).unwrap(),
             &category2,
             None,
@@ -393,6 +424,8 @@ mod tests {
             "",
             "",
             0.00,
+            TransactionType::Credit,
+            &institution1,
             NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
             &category1,
             Some(&subcategory2)
@@ -405,6 +438,8 @@ mod tests {
             "",
             "",
             0.00,
+            TransactionType::Debit,
+            &institution2,
             NaiveDate::from_ymd_opt(2023, 1, 1).unwrap(),
             &category2,
             Some(&subcategory1)
@@ -459,6 +494,18 @@ mod tests {
         assert_eq!(account3, account1);
         let account4 = transaction2.get_account(&mut db).await.unwrap();
         assert_eq!(account4, account2);
+
+        // Get transaction type
+        let transaction_type1 = transaction1.get_transaction_type();
+        assert_eq!(transaction_type1, TransactionType::Debit);
+        let transaction_type2 = transaction2.get_transaction_type();
+        assert_eq!(transaction_type2, TransactionType::Credit);
+
+        // Get institution
+        let institution3 = transaction1.get_institution(&mut db).await.unwrap();
+        assert_eq!(institution3, institution1);
+        let institution4 = transaction2.get_institution(&mut db).await.unwrap();
+        assert_eq!(institution4, institution2);
 
         // Get date
         let date1 = transaction1.get_date();

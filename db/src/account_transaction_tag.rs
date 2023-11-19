@@ -118,7 +118,7 @@ impl AccountTransactionTag {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Account, AccountType, Category, TestDB};
+    use crate::{Account, AccountType, Category, Institution, TestDB, TransactionType};
     use chrono::NaiveDate;
 
     #[tokio::test]
@@ -130,6 +130,9 @@ mod tests {
         let mut account = Account::create(&mut db, AccountType::BankAccount, "My account", "")
             .await
             .unwrap();
+        let institution = Institution::create(&mut db, "My institution", "")
+            .await
+            .unwrap();
         let category = Category::create(&mut db, "My category", "").await.unwrap();
         let transaction1 = AccountTransaction::create(
             &mut db,
@@ -137,6 +140,8 @@ mod tests {
             "Transaction 1",
             "",
             0.01,
+            TransactionType::Credit,
+            &institution,
             NaiveDate::from_ymd_opt(2023, 4, 1).unwrap(),
             &category,
             None,
@@ -149,6 +154,8 @@ mod tests {
             "Transaction 2",
             "",
             0.99,
+            TransactionType::Debit,
+            &institution,
             NaiveDate::from_ymd_opt(2023, 3, 31).unwrap(),
             &category,
             None,
