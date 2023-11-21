@@ -8,6 +8,7 @@ use std::io;
 use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::path::Path;
+use std::pin::Pin;
 use std::result::Result as StdResult;
 use std::str::FromStr;
 use tokio::fs::{self, File, OpenOptions};
@@ -166,15 +167,18 @@ impl DB {
 
     /// Performs a series of operations within a database transaction,
     /// committing if successful or rolling back if not.
-    pub async fn transaction<F, T, R>(&mut self, f: F) -> Result<R>
+    pub fn transaction<'a, F, R>(
+        &'a mut self,
+        f: F,
+    ) -> Pin<Box<dyn Future<Output = Result<R>> + Send + 'a>>
     where
-        F: FnOnce(&mut DBImpl) -> T + Send + Sync + 'static,
-        T: Future<Output = Result<R>> + Send,
+        for<'c> F: FnOnce(&'c mut DBImpl) -> Pin<Box<dyn Future<Output = Result<R>> + Send + 'c>>
+            + Send
+            + Sync
+            + 'a,
         R: Send,
     {
-        self.conn
-            .transaction(|conn| Box::pin(async move { f(conn).await }))
-            .await
+        self.conn.transaction(|conn| f(conn))
     }
 
     /// Pauses the connection temporarily, giving access to the raw file via a

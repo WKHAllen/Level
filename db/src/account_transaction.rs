@@ -1,44 +1,94 @@
-use crate::{new_id, Account, Category, DBImpl, Institution, Subcategory, TransactionType};
+use crate::{new_id, DBAccount, DBCategory, DBImpl, DBInstitution, DBSubcategory};
+use async_trait::async_trait;
 use backend_common::Result;
-use chrono::{NaiveDate, NaiveDateTime, Utc};
-use common::ExpectedCommandError as Error;
+use chrono::{NaiveDate, Utc};
+use common::{ExpectedCommandError as Error, *};
 
-/// A representation of an account transaction in the database.
-#[derive(Debug, PartialEq, PartialOrd)]
-pub struct AccountTransaction {
-    /// The account transaction's identifier.
-    pub id: String,
-    /// The ID of the account which the transaction is associated with.
-    pub account_id: String,
-    /// The name of the account.
-    pub name: String,
-    /// A description of the account.
-    pub description: Option<String>,
-    /// The monetary amount of the transaction.
-    pub amount: f64,
-    /// The type of transaction.
-    pub transaction_type: String,
-    /// The ID of the institution which the transaction is associated with.
-    pub institution_id: String,
-    /// The date of the transaction.
-    pub transaction_date: NaiveDateTime,
-    /// The ID of the category in which the transaction exists.
-    pub category_id: String,
-    /// The ID of the subcategory in which the transaction exists.
-    pub subcategory_id: Option<String>,
-    /// Whether the transaction has been reconciled.
-    pub reconciled: bool,
-    /// When the transaction was created.
-    pub created_at: NaiveDateTime,
-    /// When the transaction was last edited.
-    pub edited_at: Option<NaiveDateTime>,
-    /// When the transaction was last reconciled.
-    pub reconciled_at: Option<NaiveDateTime>,
+/// The database implementation of the account transaction model.
+#[async_trait]
+pub trait DBAccountTransaction: Sized {
+    /// Creates a new account transaction. This can fail if the
+    /// category/subcategory combination is invalid.
+    async fn create(
+        db: &mut DBImpl,
+        account: &mut Account,
+        name: &str,
+        description: &str,
+        amount: f64,
+        transaction_type: TransactionType,
+        institution: &Institution,
+        date: NaiveDate,
+        category: &Category,
+        subcategory: Option<&Subcategory>,
+    ) -> Result<Self>;
+
+    /// Gets an account transaction from the database.
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>>;
+
+    /// Lists all account transactions in the database.
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>>;
+
+    /// Lists all account transactions within a given account.
+    async fn list_within(db: &mut DBImpl, account: &Account) -> Result<Vec<Self>>;
+
+    /// Gets the account the transaction is associated with.
+    async fn get_account(&self, db: &mut DBImpl) -> Result<Account>;
+
+    /// Gets the institution which the transaction is associated with.
+    async fn get_institution(&self, db: &mut DBImpl) -> Result<Institution>;
+
+    /// Gets the category in which the transaction exists.
+    async fn get_category(&self, db: &mut DBImpl) -> Result<Category>;
+
+    /// Gets the subcategory in which the transaction exists.
+    async fn get_subcategory(&self, db: &mut DBImpl) -> Result<Option<Subcategory>>;
+
+    /// Marks the transaction as edited.
+    async fn mark_edited(&mut self, db: &mut DBImpl) -> Result<()>;
+
+    /// Marks the transaction as reconciled.
+    async fn mark_reconciled(&mut self, db: &mut DBImpl) -> Result<()>;
+
+    /// Sets the account the transaction is associated with.
+    async fn set_account(&mut self, db: &mut DBImpl, account: &Account) -> Result<()>;
+
+    /// Sets the transaction name.
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()>;
+
+    /// Sets the transaction description.
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()>;
+
+    /// Sets the transaction amount.
+    async fn set_amount(&mut self, db: &mut DBImpl, amount: f64) -> Result<()>;
+
+    /// Sets the date of the transaction.
+    async fn set_date(&mut self, db: &mut DBImpl, date: NaiveDate) -> Result<()>;
+
+    /// Sets the transaction's category. This invalidates the subcategory, setting it to None.
+    async fn set_category(&mut self, db: &mut DBImpl, category: &Category) -> Result<()>;
+
+    /// Sets the transaction's subcategory. This can fail if the subcategory does not match the existing category.
+    async fn set_subcategory(
+        &mut self,
+        db: &mut DBImpl,
+        subcategory: Option<&Subcategory>,
+    ) -> Result<()>;
+
+    /// Sets the category and subcategory at the same time. This can fail if the category/subcategory combination is invalid.
+    async fn set_category_and_subcategory(
+        &mut self,
+        db: &mut DBImpl,
+        category: &Category,
+        subcategory: Option<&Subcategory>,
+    ) -> Result<()>;
+
+    /// Deletes the account transaction from the database.
+    async fn delete(self, db: &mut DBImpl) -> Result<()>;
 }
 
-impl AccountTransaction {
-    /// Creates a new account transaction. This can fail if the category/subcategory combination is invalid.
-    pub async fn create(
+#[async_trait]
+impl DBAccountTransaction for AccountTransaction {
+    async fn create(
         db: &mut DBImpl,
         account: &mut Account,
         name: &str,
@@ -82,8 +132,7 @@ impl AccountTransaction {
         Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
-    /// Gets an account transaction from the database.
-    pub async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM account_transaction WHERE id = ?;", id)
                 .fetch_optional(&mut *db)
@@ -91,8 +140,7 @@ impl AccountTransaction {
         )
     }
 
-    /// Lists all account transactions in the database.
-    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction ORDER BY transaction_date, created_at;"
@@ -101,8 +149,7 @@ impl AccountTransaction {
         .await?)
     }
 
-    /// Lists all account transactions within a given account.
-    pub async fn list_within(db: &mut DBImpl, account: &Account) -> Result<Vec<Self>> {
+    async fn list_within(db: &mut DBImpl, account: &Account) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction WHERE account_id = ? ORDER BY transaction_date, created_at;",
@@ -112,37 +159,23 @@ impl AccountTransaction {
         .await?)
     }
 
-    /// Gets the account the transaction is associated with.
-    pub async fn get_account(&self, db: &mut DBImpl) -> Result<Account> {
+    async fn get_account(&self, db: &mut DBImpl) -> Result<Account> {
         Account::get(db, &self.account_id).await.map(|x| x.unwrap())
     }
 
-    /// Gets the type of the transaction.
-    pub fn get_transaction_type(&self) -> TransactionType {
-        TransactionType::from_internal_name(&self.transaction_type).unwrap()
-    }
-
-    /// Gets the institution which the transaction is associated with.
-    pub async fn get_institution(&self, db: &mut DBImpl) -> Result<Institution> {
+    async fn get_institution(&self, db: &mut DBImpl) -> Result<Institution> {
         Institution::get(db, &self.institution_id)
             .await
             .map(|x| x.unwrap())
     }
 
-    /// Gets the date the transaction took place.
-    pub fn get_date(&self) -> NaiveDate {
-        self.transaction_date.date()
-    }
-
-    /// Gets the category in which the transaction exists.
-    pub async fn get_category(&self, db: &mut DBImpl) -> Result<Category> {
+    async fn get_category(&self, db: &mut DBImpl) -> Result<Category> {
         Category::get(db, &self.category_id)
             .await
             .map(|x| x.unwrap())
     }
 
-    /// Gets the subcategory in which the transaction exists.
-    pub async fn get_subcategory(&self, db: &mut DBImpl) -> Result<Option<Subcategory>> {
+    async fn get_subcategory(&self, db: &mut DBImpl) -> Result<Option<Subcategory>> {
         match &self.subcategory_id {
             Some(subcategory_id) => Subcategory::get(db, subcategory_id)
                 .await
@@ -151,8 +184,7 @@ impl AccountTransaction {
         }
     }
 
-    /// Marks the transaction as edited.
-    pub async fn mark_edited(&mut self, db: &mut DBImpl) -> Result<()> {
+    async fn mark_edited(&mut self, db: &mut DBImpl) -> Result<()> {
         self.edited_at = Some(Utc::now().naive_utc());
 
         sqlx::query!(
@@ -168,8 +200,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Marks the transaction as reconciled.
-    pub async fn mark_reconciled(&mut self, db: &mut DBImpl) -> Result<()> {
+    async fn mark_reconciled(&mut self, db: &mut DBImpl) -> Result<()> {
         self.reconciled_at = Some(Utc::now().naive_utc());
 
         sqlx::query!(
@@ -183,8 +214,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Sets the account the transaction is associated with.
-    pub async fn set_account(&mut self, db: &mut DBImpl, account: &Account) -> Result<()> {
+    async fn set_account(&mut self, db: &mut DBImpl, account: &Account) -> Result<()> {
         self.account_id = account.id.clone();
 
         sqlx::query!(
@@ -200,8 +230,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Sets the transaction name.
-    pub async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -217,8 +246,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Sets the transaction description.
-    pub async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -234,8 +262,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Sets the transaction amount.
-    pub async fn set_amount(&mut self, db: &mut DBImpl, amount: f64) -> Result<()> {
+    async fn set_amount(&mut self, db: &mut DBImpl, amount: f64) -> Result<()> {
         self.amount = amount;
 
         sqlx::query!(
@@ -251,8 +278,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Sets the date of the transaction.
-    pub async fn set_date(&mut self, db: &mut DBImpl, date: NaiveDate) -> Result<()> {
+    async fn set_date(&mut self, db: &mut DBImpl, date: NaiveDate) -> Result<()> {
         self.transaction_date = date.and_hms_milli_opt(12, 0, 0, 0).unwrap();
 
         sqlx::query!(
@@ -268,8 +294,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Sets the transaction's category. This invalidates the subcategory, setting it to None.
-    pub async fn set_category(&mut self, db: &mut DBImpl, category: &Category) -> Result<()> {
+    async fn set_category(&mut self, db: &mut DBImpl, category: &Category) -> Result<()> {
         self.subcategory_id = None;
         self.category_id = category.id.clone();
 
@@ -286,8 +311,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Sets the transaction's subcategory. This can fail if the subcategory does not match the existing category.
-    pub async fn set_subcategory(
+    async fn set_subcategory(
         &mut self,
         db: &mut DBImpl,
         subcategory: Option<&Subcategory>,
@@ -313,8 +337,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Sets the category and subcategory at the same time. This can fail if the category/subcategory combination is invalid.
-    pub async fn set_category_and_subcategory(
+    async fn set_category_and_subcategory(
         &mut self,
         db: &mut DBImpl,
         category: &Category,
@@ -343,8 +366,7 @@ impl AccountTransaction {
         Ok(())
     }
 
-    /// Deletes the account transaction from the database.
-    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
+    async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM account_transaction WHERE id = ?;", self.id)
             .execute(&mut *db)
             .await?;
@@ -357,7 +379,7 @@ impl AccountTransaction {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AccountType, TestDB};
+    use crate::TestDB;
 
     #[tokio::test]
     async fn test_account_transaction() {

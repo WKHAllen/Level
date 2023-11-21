@@ -1,25 +1,47 @@
-use crate::{new_id, Category, DBImpl};
+use crate::{new_id, DBCategory, DBImpl};
+use async_trait::async_trait;
 use backend_common::Result;
-use chrono::NaiveDateTime;
+use common::*;
 
-/// A representation of a subcategory in the database.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Subcategory {
-    /// The subcategory's identifier.
-    pub id: String,
-    /// The ID of the category in which the subcategory exists.
-    pub category_id: String,
-    /// The name of the category.
-    pub name: String,
-    /// A description of the category.
-    pub description: Option<String>,
-    /// When the category was created.
-    pub created_at: NaiveDateTime,
+/// The database implementation of the subcategory model.
+#[async_trait]
+pub trait DBSubcategory: Sized {
+    /// Create a new subcategory.
+    async fn create(
+        db: &mut DBImpl,
+        category: &Category,
+        name: &str,
+        description: &str,
+    ) -> Result<Self>;
+
+    /// Gets a subcategory from the database.
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>>;
+
+    /// Gets a subcategory from the database by name.
+    async fn get_by_name(db: &mut DBImpl, name: &str) -> Result<Option<Self>>;
+
+    /// Lists all subcategories in the database.
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>>;
+
+    /// Lists all subcategories within a given category.
+    async fn list_within(db: &mut DBImpl, category: &Category) -> Result<Vec<Self>>;
+
+    /// Gets the category in which the subcategory exists.
+    async fn get_category(&self, db: &mut DBImpl) -> Result<Category>;
+
+    /// Sets the subcategory name.
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()>;
+
+    /// Sets the subcategory description.
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()>;
+
+    /// Deletes the subcategory from the database.
+    async fn delete(self, db: &mut DBImpl) -> Result<()>;
 }
 
-impl Subcategory {
-    /// Create a new subcategory.
-    pub async fn create(
+#[async_trait]
+impl DBSubcategory for Subcategory {
+    async fn create(
         db: &mut DBImpl,
         category: &Category,
         name: &str,
@@ -40,8 +62,7 @@ impl Subcategory {
         Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
-    /// Gets a subcategory from the database.
-    pub async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM subcategory WHERE id = ?;", id)
                 .fetch_optional(&mut *db)
@@ -49,8 +70,7 @@ impl Subcategory {
         )
     }
 
-    /// Gets a subcategory from the database by name.
-    pub async fn get_by_name(db: &mut DBImpl, name: &str) -> Result<Option<Self>> {
+    async fn get_by_name(db: &mut DBImpl, name: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM subcategory WHERE name = ?;", name)
                 .fetch_optional(&mut *db)
@@ -58,8 +78,7 @@ impl Subcategory {
         )
     }
 
-    /// Lists all subcategories in the database.
-    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM subcategory ORDER BY name;")
                 .fetch_all(&mut *db)
@@ -67,8 +86,7 @@ impl Subcategory {
         )
     }
 
-    /// Lists all subcategories within a given category.
-    pub async fn list_within(db: &mut DBImpl, category: &Category) -> Result<Vec<Self>> {
+    async fn list_within(db: &mut DBImpl, category: &Category) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM subcategory WHERE category_id = ? ORDER BY name;",
@@ -78,15 +96,13 @@ impl Subcategory {
         .await?)
     }
 
-    /// Gets the category in which the subcategory exists.
-    pub async fn get_category(&self, db: &mut DBImpl) -> Result<Category> {
+    async fn get_category(&self, db: &mut DBImpl) -> Result<Category> {
         Category::get(db, &self.category_id)
             .await
             .map(|x| x.unwrap())
     }
 
-    /// Sets the subcategory name.
-    pub async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -100,8 +116,7 @@ impl Subcategory {
         Ok(())
     }
 
-    /// Sets the subcategory description.
-    pub async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -115,8 +130,7 @@ impl Subcategory {
         Ok(())
     }
 
-    /// Deletes the subcategory from the database.
-    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
+    async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM subcategory WHERE id = ?;", self.id)
             .execute(&mut *db)
             .await?;

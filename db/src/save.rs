@@ -269,6 +269,11 @@ impl Save {
         Ok(metadata)
     }
 
+    /// Gets the metadata of the currently open save file.
+    pub fn this_metadata(&self) -> SaveMetadata {
+        self.metadata.clone()
+    }
+
     /// Save a save file's metadata.
     async fn save_metadata(name: &str, metadata: &SaveMetadata) -> Result<()> {
         let save_path = get_save_path(name);
@@ -418,7 +423,8 @@ impl DerefMut for Save {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Tag;
+    use crate::DBTag;
+    use common::Tag;
 
     #[tokio::test]
     async fn test_save() {

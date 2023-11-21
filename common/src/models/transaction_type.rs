@@ -1,8 +1,8 @@
-use backend_common::Result;
-use common::ExpectedCommandError as Error;
+use crate::ExpectedCommandError as Error;
+use serde::{Deserialize, Serialize};
 
 /// A representation of a transaction type.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum TransactionType {
     /// A credit transaction.
     Credit,
@@ -12,7 +12,7 @@ pub enum TransactionType {
 
 impl TransactionType {
     /// Gets the transaction type from its internal name in the database.
-    pub fn from_internal_name(transaction_type: &str) -> Result<Self> {
+    pub fn from_internal_name(transaction_type: &str) -> Result<Self, Error> {
         match transaction_type {
             "CREDIT" => Ok(Self::Credit),
             "DEBIT" => Ok(Self::Debit),

@@ -1,23 +1,36 @@
 use crate::{new_id, DBImpl};
+use async_trait::async_trait;
 use backend_common::Result;
-use chrono::NaiveDateTime;
+use common::*;
 
-/// A representation of a category in the database.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Category {
-    /// The category's identifier.
-    pub id: String,
-    /// The name of the category.
-    pub name: String,
-    /// A description of the category.
-    pub description: Option<String>,
-    /// When the category was created.
-    pub created_at: NaiveDateTime,
+/// The database implementation of the category model.
+#[async_trait]
+pub trait DBCategory: Sized {
+    /// Creates a new category.
+    async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self>;
+
+    /// Gets a category from the database.
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>>;
+
+    /// Gets a category from the database by name.
+    async fn get_by_name(db: &mut DBImpl, name: &str) -> Result<Option<Self>>;
+
+    /// Lists all categories in the database.
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>>;
+
+    /// Sets the category name.
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()>;
+
+    /// Sets the category description.
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()>;
+
+    /// Deletes the category from the database.
+    async fn delete(self, db: &mut DBImpl) -> Result<()>;
 }
 
-impl Category {
-    /// Creates a new category.
-    pub async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self> {
+#[async_trait]
+impl DBCategory for Category {
+    async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self> {
         let id = new_id();
 
         sqlx::query!(
@@ -32,8 +45,7 @@ impl Category {
         Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
-    /// Gets a category from the database.
-    pub async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM category WHERE id = ?;", id)
                 .fetch_optional(&mut *db)
@@ -41,8 +53,7 @@ impl Category {
         )
     }
 
-    /// Gets a category from the database by name.
-    pub async fn get_by_name(db: &mut DBImpl, name: &str) -> Result<Option<Self>> {
+    async fn get_by_name(db: &mut DBImpl, name: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM category WHERE name = ?;", name)
                 .fetch_optional(&mut *db)
@@ -50,8 +61,7 @@ impl Category {
         )
     }
 
-    /// Lists all categories in the database.
-    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM category ORDER BY name;")
                 .fetch_all(&mut *db)
@@ -59,8 +69,7 @@ impl Category {
         )
     }
 
-    /// Sets the category name.
-    pub async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -74,8 +83,7 @@ impl Category {
         Ok(())
     }
 
-    /// Sets the category description.
-    pub async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -89,8 +97,7 @@ impl Category {
         Ok(())
     }
 
-    /// Deletes the category from the database.
-    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
+    async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM category WHERE id = ?;", self.id)
             .execute(&mut *db)
             .await?;

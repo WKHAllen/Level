@@ -1,23 +1,33 @@
 use crate::{new_id, DBImpl};
+use async_trait::async_trait;
 use backend_common::Result;
-use chrono::NaiveDateTime;
+use common::*;
 
-/// A representation of an institution in the database.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Institution {
-    /// The institution's identifier.
-    pub id: String,
-    /// The name of the institution.
-    pub name: String,
-    /// A description of the institution.
-    pub description: Option<String>,
-    /// When the institution was created.
-    pub created_at: NaiveDateTime,
+/// The database implementation of the institution model.
+#[async_trait]
+pub trait DBInstitution: Sized {
+    /// Creates a new institution.
+    async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self>;
+
+    /// Gets an institution from the database.
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>>;
+
+    /// Lists all institutions in the database.
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>>;
+
+    /// Sets the institution name.
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()>;
+
+    /// Sets the institution description.
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()>;
+
+    /// Deletes the institution from the database.
+    async fn delete(self, db: &mut DBImpl) -> Result<()>;
 }
 
-impl Institution {
-    /// Creates a new institution.
-    pub async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self> {
+#[async_trait]
+impl DBInstitution for Institution {
+    async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self> {
         let id = new_id();
 
         sqlx::query!(
@@ -32,8 +42,7 @@ impl Institution {
         Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
-    /// Gets an institution from the database.
-    pub async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM institution WHERE id = ?;", id)
                 .fetch_optional(&mut *db)
@@ -41,8 +50,7 @@ impl Institution {
         )
     }
 
-    /// Lists all institutions in the database.
-    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM institution ORDER BY name;")
                 .fetch_all(&mut *db)
@@ -50,8 +58,7 @@ impl Institution {
         )
     }
 
-    /// Sets the institution name.
-    pub async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!(
@@ -65,8 +72,7 @@ impl Institution {
         Ok(())
     }
 
-    /// Sets the institution description.
-    pub async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -80,8 +86,7 @@ impl Institution {
         Ok(())
     }
 
-    /// Deletes the institution from the database.
-    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
+    async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM institution WHERE id = ?;", self.id)
             .execute(&mut *db)
             .await?;

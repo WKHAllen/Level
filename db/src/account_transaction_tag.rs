@@ -1,21 +1,57 @@
-use crate::{AccountTransaction, DBImpl, Tag};
+use crate::{DBAccountTransaction, DBImpl, DBTag};
+use async_trait::async_trait;
 use backend_common::Result;
-use chrono::NaiveDateTime;
+use common::*;
 
-/// A representation of a link between transactions and tags in the database.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct AccountTransactionTag {
-    /// The ID of the account transaction.
-    pub account_transaction_id: String,
-    /// The ID of the tag.
-    pub tag_id: String,
-    /// When the account transaction tag was created.
-    pub created_at: NaiveDateTime,
+/// The database implementation of the account transaction tag model.
+#[async_trait]
+pub trait DBAccountTransactionTag: Sized {
+    /// Create a new account transaction tag.
+    async fn create(
+        db: &mut DBImpl,
+        account_transaction: &AccountTransaction,
+        tag: &Tag,
+    ) -> Result<Self>;
+
+    /// Gets an account transaction tag from the database.
+    async fn get(
+        db: &mut DBImpl,
+        account_transaction: &AccountTransaction,
+        tag: &Tag,
+    ) -> Result<Option<Self>>;
+
+    /// Checks if an account transaction/tag link exists.
+    async fn exists(
+        db: &mut DBImpl,
+        account_transaction: &AccountTransaction,
+        tag: &Tag,
+    ) -> Result<bool>;
+
+    /// Lists all account transaction tags in the database.
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>>;
+
+    /// Lists account transaction tags corresponding to a given account transaction.
+    async fn list_by_transaction(
+        db: &mut DBImpl,
+        account_transaction: &AccountTransaction,
+    ) -> Result<Vec<Self>>;
+
+    /// Lists account transaction tags corresponding to a given tag.
+    async fn list_by_tag(db: &mut DBImpl, tag: &Tag) -> Result<Vec<Self>>;
+
+    /// Gets the associated account transaction.
+    async fn get_account_transaction(&self, db: &mut DBImpl) -> Result<AccountTransaction>;
+
+    /// Gets the associated tag.
+    async fn get_tag(&self, db: &mut DBImpl) -> Result<Tag>;
+
+    /// Deletes the account transaction tag from the database.
+    async fn delete(self, db: &mut DBImpl) -> Result<()>;
 }
 
-impl AccountTransactionTag {
-    /// Create a new account transaction tag.
-    pub async fn create(
+#[async_trait]
+impl DBAccountTransactionTag for AccountTransactionTag {
+    async fn create(
         db: &mut DBImpl,
         account_transaction: &AccountTransaction,
         tag: &Tag,
@@ -31,8 +67,7 @@ impl AccountTransactionTag {
         Ok(Self::get(db, account_transaction, tag).await?.unwrap())
     }
 
-    /// Gets an account transaction tag from the database.
-    pub async fn get(
+    async fn get(
         db: &mut DBImpl,
         account_transaction: &AccountTransaction,
         tag: &Tag,
@@ -42,8 +77,7 @@ impl AccountTransactionTag {
             .await?)
     }
 
-    /// Checks if an account transaction/tag link exists.
-    pub async fn exists(
+    async fn exists(
         db: &mut DBImpl,
         account_transaction: &AccountTransaction,
         tag: &Tag,
@@ -53,8 +87,7 @@ impl AccountTransactionTag {
             .map(|x| x.is_some())
     }
 
-    /// Lists all account transaction tags in the database.
-    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction_tag ORDER BY created_at;"
@@ -63,8 +96,7 @@ impl AccountTransactionTag {
         .await?)
     }
 
-    /// Lists account transaction tags corresponding to a given account transaction.
-    pub async fn list_by_transaction(
+    async fn list_by_transaction(
         db: &mut DBImpl,
         account_transaction: &AccountTransaction,
     ) -> Result<Vec<Self>> {
@@ -77,8 +109,7 @@ impl AccountTransactionTag {
         .await?)
     }
 
-    /// Lists account transaction tags corresponding to a given tag.
-    pub async fn list_by_tag(db: &mut DBImpl, tag: &Tag) -> Result<Vec<Self>> {
+    async fn list_by_tag(db: &mut DBImpl, tag: &Tag) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM account_transaction_tag WHERE tag_id = ? ORDER BY created_at;",
@@ -88,20 +119,17 @@ impl AccountTransactionTag {
         .await?)
     }
 
-    /// Gets the associated account transaction.
-    pub async fn get_account_transaction(&self, db: &mut DBImpl) -> Result<AccountTransaction> {
+    async fn get_account_transaction(&self, db: &mut DBImpl) -> Result<AccountTransaction> {
         AccountTransaction::get(db, &self.account_transaction_id)
             .await
             .map(|x| x.unwrap())
     }
 
-    /// Gets the associated tag.
-    pub async fn get_tag(&self, db: &mut DBImpl) -> Result<Tag> {
+    async fn get_tag(&self, db: &mut DBImpl) -> Result<Tag> {
         Tag::get(db, &self.tag_id).await.map(|x| x.unwrap())
     }
 
-    /// Deletes the account transaction tag from the database.
-    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
+    async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!(
             "DELETE FROM account_transaction_tag WHERE account_transaction_id = ? AND tag_id = ?;",
             self.account_transaction_id,
@@ -118,7 +146,7 @@ impl AccountTransactionTag {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Account, AccountType, Category, Institution, TestDB, TransactionType};
+    use crate::{DBAccount, DBCategory, DBInstitution, TestDB};
     use chrono::NaiveDate;
 
     #[tokio::test]

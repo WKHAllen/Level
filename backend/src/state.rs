@@ -1,10 +1,11 @@
 use backend_common::*;
 use commands::BackendCommands;
 use common::*;
-use db::{DBImpl, Save};
+use db::*;
 use log::{error, info};
 use std::env;
 use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 use tauri::WindowEvent;
 use tokio::sync::{MappedMutexGuard, Mutex, MutexGuard};
@@ -106,49 +107,67 @@ impl State {
     }
 
     /// Grants exclusive access to the save instance via a closure.
-    pub async fn with_save<F, T, R>(&self, f: F) -> Result<R>
+    pub fn with_save<'a, F, R>(
+        &'a self,
+        f: F,
+    ) -> Pin<Box<dyn Future<Output = Result<R>> + Send + 'a>>
     where
-        F: FnOnce(&mut Save) -> T,
-        T: Future<Output = R>,
+        for<'c> F:
+            FnOnce(&'c mut Save) -> Pin<Box<dyn Future<Output = R> + Send + 'c>> + Send + Sync + 'a,
     {
-        let mut handle = self.save_handle().await?;
-        Ok(f(&mut handle).await)
+        Box::pin(async move {
+            let mut handle = self.save_handle().await?;
+            Ok(f(&mut handle).await)
+        })
     }
 
     /// Grants exclusive access to the database, automatically rolling back on
     /// failure.
-    pub async fn with_db<F, T, R>(&self, f: F) -> Result<R>
+    pub fn with_db<'a, F, R>(&'a self, f: F) -> Pin<Box<dyn Future<Output = Result<R>> + Send + 'a>>
     where
-        F: FnOnce(&mut DBImpl) -> T + Send + Sync + 'static,
-        T: Future<Output = Result<R>> + Send,
+        for<'c> F: FnOnce(&'c mut DBImpl) -> Pin<Box<dyn Future<Output = Result<R>> + Send + 'c>>
+            + Send
+            + Sync
+            + 'a,
         R: Send,
     {
-        let mut handle = self.save_handle().await?;
-        handle.transaction(f).await
+        Box::pin(async move {
+            let mut handle = self.save_handle().await?;
+            handle.transaction(f).await
+        })
     }
 
     /// Grants exclusive access to the database, automatically rolls back on
     /// failure, and handles errors appropriately.
-    pub async fn with<F, T, R>(&self, f: F) -> CommandResult<R>
+    pub fn with<'a, F, R>(
+        &'a self,
+        f: F,
+    ) -> Pin<Box<dyn Future<Output = CommandResult<R>> + Send + 'a>>
     where
-        F: FnOnce(&mut DBImpl) -> T + Send + Sync + 'static,
-        T: Future<Output = Result<R>> + Send,
+        for<'c> F: FnOnce(&'c mut DBImpl) -> Pin<Box<dyn Future<Output = Result<R>> + Send + 'c>>
+            + Send
+            + Sync
+            + 'a,
         R: Send,
     {
-        match self.with_db(f).await {
-            Ok(value) => Ok(value),
-            Err(err) => {
-                match &err {
-                    Error::Expected(_) => {}
-                    Error::Unexpected(inner) => {
-                        error!("An unexpected error occurred: {}", inner);
+        Box::pin(async move {
+            match self.with_db(f).await {
+                Ok(value) => Ok(value),
+                Err(err) => {
+                    match &err {
+                        Error::Expected(_) => {}
+                        Error::Unexpected(inner) => {
+                            error!("An unexpected error occurred: {}", inner);
+                        }
+                        Error::Other(_) => {
+                            unreachable!("`Other` variant inner error is `Infallible`")
+                        }
                     }
-                    Error::Other(_) => unreachable!("`Other` variant inner error is `Infallible`"),
-                }
 
-                Err(err.into())
+                    Err(err.into())
+                }
             }
-        }
+        })
     }
 
     /// Performs any fallible async operation with automatic error handling.
@@ -212,5 +231,17 @@ impl BackendCommands for State {
 
         self.with_result(self.create_save(&save_name, &save_description, &save_password))
             .await
+    }
+
+    async fn save_info(&self) -> CommandResult<SaveMetadata> {
+        self.with_result(async {
+            let handle = self.save_handle().await?;
+            Ok(handle.this_metadata())
+        })
+        .await
+    }
+
+    async fn accounts(&self) -> CommandResult<Vec<Account>> {
+        self.with(|db| Account::list(db)).await
     }
 }

@@ -3,6 +3,10 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+mod models;
+
+pub use models::*;
+
 use chrono::{Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use std::error::Error as StdError;

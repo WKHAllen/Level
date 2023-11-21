@@ -1,8 +1,8 @@
-use backend_common::Result;
-use common::ExpectedCommandError as Error;
+use crate::ExpectedCommandError as Error;
+use serde::{Deserialize, Serialize};
 
 /// A representation of an account type.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum AccountType {
     /// A bank account.
     BankAccount,
@@ -20,7 +20,7 @@ pub enum AccountType {
 
 impl AccountType {
     /// Gets the account type from its internal name in the database.
-    pub fn from_internal_name(account_type: &str) -> Result<Self> {
+    pub fn from_internal_name(account_type: &str) -> Result<Self, Error> {
         match account_type {
             "BANK_ACCOUNT" => Ok(Self::BankAccount),
             "RETIREMENT_ACCOUNT" => Ok(Self::RetirementAccount),

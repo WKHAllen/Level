@@ -1,23 +1,33 @@
 use crate::{new_id, DBImpl};
+use async_trait::async_trait;
 use backend_common::Result;
-use chrono::NaiveDateTime;
+use common::*;
 
-/// A representation of a tag on a transaction in the database.
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Tag {
-    /// The tag's identifier.
-    pub id: String,
-    /// The name of the tag.
-    pub name: String,
-    /// A description of the tag.
-    pub description: Option<String>,
-    /// When the tag was created.
-    pub created_at: NaiveDateTime,
+/// The database implementation of the tag model.
+#[async_trait]
+pub trait DBTag: Sized {
+    /// Creates a new tag.
+    async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self>;
+
+    /// Gets a tag from the database.
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>>;
+
+    /// Lists all tags in the database.
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>>;
+
+    /// Sets the tag name.
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()>;
+
+    /// Sets the tag description.
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()>;
+
+    /// Deletes the tag from the database.
+    async fn delete(self, db: &mut DBImpl) -> Result<()>;
 }
 
-impl Tag {
-    /// Creates a new tag.
-    pub async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self> {
+#[async_trait]
+impl DBTag for Tag {
+    async fn create(db: &mut DBImpl, name: &str, description: &str) -> Result<Self> {
         let id = new_id();
 
         sqlx::query!(
@@ -32,22 +42,19 @@ impl Tag {
         Self::get(db, &id).await.map(|x| x.unwrap())
     }
 
-    /// Gets a tag from the database.
-    pub async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
+    async fn get(db: &mut DBImpl, id: &str) -> Result<Option<Self>> {
         Ok(sqlx::query_as!(Self, "SELECT * FROM tag WHERE id = ?;", id)
             .fetch_optional(&mut *db)
             .await?)
     }
 
-    /// Lists all tags in the database.
-    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(sqlx::query_as!(Self, "SELECT * FROM tag ORDER BY name;")
             .fetch_all(&mut *db)
             .await?)
     }
 
-    /// Sets the tag name.
-    pub async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
+    async fn set_name(&mut self, db: &mut DBImpl, name: &str) -> Result<()> {
         self.name = name.to_owned();
 
         sqlx::query!("UPDATE tag SET name = ? WHERE id = ?;", self.name, self.id)
@@ -57,8 +64,7 @@ impl Tag {
         Ok(())
     }
 
-    /// Sets the tag description.
-    pub async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
+    async fn set_description(&mut self, db: &mut DBImpl, description: &str) -> Result<()> {
         self.description = Some(description.to_owned());
 
         sqlx::query!(
@@ -72,8 +78,7 @@ impl Tag {
         Ok(())
     }
 
-    /// Deletes the tag from the database.
-    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
+    async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM tag WHERE id = ?;", self.id)
             .execute(&mut *db)
             .await?;

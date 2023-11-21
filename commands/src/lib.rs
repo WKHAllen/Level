@@ -29,4 +29,10 @@ pub trait Commands {
         save_description: String,
         save_password: String,
     ) -> CommandResult<()>;
+
+    /// Gets information on the currently open save file.
+    async fn save_info(&self) -> CommandResult<SaveMetadata>;
+
+    /// Retrieves the accounts within the save file.
+    async fn accounts(&self) -> CommandResult<Vec<Account>>;
 }

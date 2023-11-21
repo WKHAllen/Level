@@ -1,28 +1,57 @@
-use crate::{Account, DBImpl, Timeframe};
+use crate::{DBAccount, DBImpl};
+use async_trait::async_trait;
 use backend_common::Result;
 use chrono::NaiveDateTime;
-use common::ExpectedCommandError as Error;
+use common::{ExpectedCommandError as Error, *};
 
-/// A representation of an account budget in the database.
-#[derive(Debug, PartialEq, PartialOrd)]
-pub struct Budget {
-    /// The ID of the account the budget is associated with.
-    pub account_id: String,
-    /// The note associated with the budget.
-    pub note: Option<String>,
-    /// The budget limit.
-    pub total_limit: f64,
-    /// The budget timeframe.
-    pub timeframe: String,
-    /// The time offset of the budget.
-    pub timeframe_offset: NaiveDateTime,
-    /// When the budget was created.
-    pub created_at: NaiveDateTime,
+/// The database implementation of the budget model.
+#[async_trait]
+pub trait DBBudget: Sized {
+    /// Creates a new budget.
+    async fn create(
+        db: &mut DBImpl,
+        account: &Account,
+        note: &str,
+        limit: f64,
+        timeframe: Timeframe,
+        timeframe_offset: NaiveDateTime,
+    ) -> Result<Self>;
+
+    /// Gets the budget for the specified account.
+    async fn get(db: &mut DBImpl, account: &Account) -> Result<Option<Self>>;
+
+    /// Lists all budgets in the database.
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>>;
+
+    /// Gets the account the budget is associated with.
+    async fn get_account(&self, db: &mut DBImpl) -> Result<Account>;
+
+    /// Sets the associated account.
+    async fn set_account(&mut self, db: &mut DBImpl, account: &Account) -> Result<()>;
+
+    /// Sets the budget note.
+    async fn set_note(&mut self, db: &mut DBImpl, note: &str) -> Result<()>;
+
+    /// Sets the budget limit.
+    async fn set_limit(&mut self, db: &mut DBImpl, limit: f64) -> Result<()>;
+
+    /// Sets the timeframe.
+    async fn set_timeframe(&mut self, db: &mut DBImpl, timeframe: Timeframe) -> Result<()>;
+
+    /// Sets the timeframe offset.
+    async fn set_timeframe_offset(
+        &mut self,
+        db: &mut DBImpl,
+        timeframe_offset: NaiveDateTime,
+    ) -> Result<()>;
+
+    /// Deletes the budget from the database.
+    async fn delete(self, db: &mut DBImpl) -> Result<()>;
 }
 
-impl Budget {
-    /// Creates a new budget.
-    pub async fn create(
+#[async_trait]
+impl DBBudget for Budget {
+    async fn create(
         db: &mut DBImpl,
         account: &Account,
         note: &str,
@@ -42,8 +71,7 @@ impl Budget {
         }
     }
 
-    /// Gets the budget for the specified account.
-    pub async fn get(db: &mut DBImpl, account: &Account) -> Result<Option<Self>> {
+    async fn get(db: &mut DBImpl, account: &Account) -> Result<Option<Self>> {
         Ok(sqlx::query_as!(
             Self,
             "SELECT * FROM budget WHERE account_id = ?;",
@@ -53,8 +81,7 @@ impl Budget {
         .await?)
     }
 
-    /// Lists all budgets in the database.
-    pub async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
+    async fn list(db: &mut DBImpl) -> Result<Vec<Self>> {
         Ok(
             sqlx::query_as!(Self, "SELECT * FROM budget ORDER BY created_at;")
                 .fetch_all(&mut *db)
@@ -62,18 +89,11 @@ impl Budget {
         )
     }
 
-    /// Gets the account the budget is associated with.
-    pub async fn get_account(&self, db: &mut DBImpl) -> Result<Account> {
+    async fn get_account(&self, db: &mut DBImpl) -> Result<Account> {
         Account::get(db, &self.account_id).await.map(|x| x.unwrap())
     }
 
-    /// Gets the timeframe.
-    pub fn get_timeframe(&self) -> Timeframe {
-        Timeframe::from_internal_name(&self.timeframe).unwrap()
-    }
-
-    /// Sets the associated account.
-    pub async fn set_account(&mut self, db: &mut DBImpl, account: &Account) -> Result<()> {
+    async fn set_account(&mut self, db: &mut DBImpl, account: &Account) -> Result<()> {
         let old_account_id = self.account_id.clone();
         self.account_id = account.id.clone();
 
@@ -88,8 +108,7 @@ impl Budget {
         Ok(())
     }
 
-    /// Sets the budget note.
-    pub async fn set_note(&mut self, db: &mut DBImpl, note: &str) -> Result<()> {
+    async fn set_note(&mut self, db: &mut DBImpl, note: &str) -> Result<()> {
         self.note = Some(note.to_owned());
 
         sqlx::query!(
@@ -103,8 +122,7 @@ impl Budget {
         Ok(())
     }
 
-    /// Sets the budget limit.
-    pub async fn set_limit(&mut self, db: &mut DBImpl, limit: f64) -> Result<()> {
+    async fn set_limit(&mut self, db: &mut DBImpl, limit: f64) -> Result<()> {
         self.total_limit = limit;
 
         sqlx::query!(
@@ -118,8 +136,7 @@ impl Budget {
         Ok(())
     }
 
-    /// Sets the timeframe.
-    pub async fn set_timeframe(&mut self, db: &mut DBImpl, timeframe: Timeframe) -> Result<()> {
+    async fn set_timeframe(&mut self, db: &mut DBImpl, timeframe: Timeframe) -> Result<()> {
         self.timeframe = timeframe.to_internal_name();
 
         sqlx::query!(
@@ -133,8 +150,7 @@ impl Budget {
         Ok(())
     }
 
-    /// Sets the timeframe offset.
-    pub async fn set_timeframe_offset(
+    async fn set_timeframe_offset(
         &mut self,
         db: &mut DBImpl,
         timeframe_offset: NaiveDateTime,
@@ -152,8 +168,7 @@ impl Budget {
         Ok(())
     }
 
-    /// Deletes the budget from the database.
-    pub async fn delete(self, db: &mut DBImpl) -> Result<()> {
+    async fn delete(self, db: &mut DBImpl) -> Result<()> {
         sqlx::query!("DELETE FROM budget WHERE account_id = ?;", self.account_id)
             .execute(&mut *db)
             .await?;
@@ -166,7 +181,7 @@ impl Budget {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{AccountType, TestDB};
+    use crate::TestDB;
 
     #[tokio::test]
     async fn test_budget() {

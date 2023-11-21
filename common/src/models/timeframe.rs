@@ -1,8 +1,8 @@
-use backend_common::Result;
-use common::ExpectedCommandError as Error;
+use crate::ExpectedCommandError as Error;
+use serde::{Deserialize, Serialize};
 
 /// A representation of a timeframe.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum Timeframe {
     /// Every day.
     Daily,
@@ -24,7 +24,7 @@ pub enum Timeframe {
 
 impl Timeframe {
     /// Gets the timeframe from its internal name in the database.
-    pub fn from_internal_name(timeframe: &str) -> Result<Self> {
+    pub fn from_internal_name(timeframe: &str) -> Result<Self, Error> {
         match timeframe {
             "DAILY" => Ok(Self::Daily),
             "WEEKLY" => Ok(Self::Weekly),
