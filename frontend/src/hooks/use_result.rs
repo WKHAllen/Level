@@ -70,7 +70,7 @@ impl UseResultHandle {
                             view.set(View::Home);
                             alert.open(UseAlert::new().title("Unexpected Error").text(
                                 "An unexpected error occurred. See the logs for more details.",
-                            ))
+                            ));
                         });
 
                         // This should be the only place in the entire

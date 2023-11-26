@@ -4,8 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-tauri-build = { version = "1.2.1", features = [] }
+anyhow = "1.0"
+db = { path = "../db" }
 dotenv = "0.15.0"
+project-root = "0.2.2"
+tauri-build = { version = "1.2.1", features = [] }
+tokio = { version = "1.25", features = ["full"] }
 
 [dependencies]
 async-trait = "0.1"

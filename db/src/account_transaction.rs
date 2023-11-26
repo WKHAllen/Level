@@ -31,6 +31,14 @@ pub trait DBAccountTransaction: Sized {
     /// Lists all account transactions within a given account.
     async fn list_within(db: &mut DBImpl, account: &Account) -> Result<Vec<Self>>;
 
+    /// Gets a batch of transactions.
+    async fn batch(
+        db: &mut DBImpl,
+        account: &Account,
+        num_transactions: usize,
+        limit: usize,
+    ) -> Result<Vec<Self>>;
+
     /// Gets the account the transaction is associated with.
     async fn get_account(&self, db: &mut DBImpl) -> Result<Account>;
 
@@ -157,6 +165,24 @@ impl DBAccountTransaction for AccountTransaction {
         )
         .fetch_all(&mut *db)
         .await?)
+    }
+
+    async fn batch(
+        db: &mut DBImpl,
+        account: &Account,
+        num_transactions: usize,
+        limit: usize,
+    ) -> Result<Vec<Self>> {
+        let total_transactions = (num_transactions + limit) as u32;
+        let transaction_limit = limit as u32;
+
+        // This is stupid and annoying but unfortunately there's currently no
+        // alternative
+        Ok(sqlx::query_as!(Self, r#"
+            SELECT id as 'id!', account_id as 'account_id!', name as 'name!', description, amount as 'amount!', transaction_type as 'transaction_type!', institution_id as 'institution_id!', transaction_date as 'transaction_date!', category_id as 'category_id!', subcategory_id, reconciled as 'reconciled!', created_at as 'created_at!', edited_at, reconciled_at FROM (
+                SELECT * FROM account_transaction WHERE account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ?
+            ) ORDER BY transaction_date ASC, created_at ASC LIMIT ?;
+        "#, account.id, total_transactions, transaction_limit).fetch_all(&mut *db).await?)
     }
 
     async fn get_account(&self, db: &mut DBImpl) -> Result<Account> {

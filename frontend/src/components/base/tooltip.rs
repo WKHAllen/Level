@@ -33,8 +33,12 @@ pub fn Tooltip(props: &TooltipProps) -> Html {
     html! {
         <div class={classes!("base-tooltip", disabled.then_some("base-tooltip-disabled"), class)}>
             {children}
-            <div ref={popup_node} class="base-tooltip-popup">
-                <div class="base-tooltip-text">{text}</div>
+            <div class="base-tooltip-container">
+                <div class="base-tooltip-popup-container">
+                    <div ref={popup_node} class="base-tooltip-popup">
+                        <span class="base-tooltip-text">{text}</span>
+                    </div>
+                </div>
             </div>
         </div>
     }

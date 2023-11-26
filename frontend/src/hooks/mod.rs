@@ -8,6 +8,7 @@ mod use_id;
 mod use_popup;
 mod use_result;
 mod use_theme;
+mod use_tooltip;
 mod use_view;
 
 pub use use_alert::*;
@@ -20,6 +21,7 @@ pub use use_id::*;
 pub use use_popup::*;
 pub use use_result::*;
 pub use use_theme::*;
+pub use use_tooltip::*;
 pub use use_view::*;
 
 use crate::backend::BackendHandle;

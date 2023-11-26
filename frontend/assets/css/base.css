@@ -565,6 +565,7 @@
   /*    TOOLTIP    */
   /*               */
 
+  --base-tooltip-popup-max-width: 200px;
   --base-tooltip-background-color: #4f4f4fef;
   --base-tooltip-text-color: #ffffff;
   --base-tooltip-font-size: 0.8em;
@@ -1884,15 +1885,21 @@ body {
 /*    TOOLTIP    */
 /*               */
 
-.base-tooltip {
+.base-tooltip-container {
   position: relative;
 }
 
-.base-tooltip-popup {
+.base-tooltip-popup-container {
   position: absolute;
   top: 100%;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--base-tooltip-popup-max-width);
+  display: flex;
+  justify-content: center;
+}
+
+.base-tooltip-popup {
   visibility: hidden;
   opacity: 0;
   z-index: 1;
