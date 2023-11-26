@@ -83,9 +83,6 @@ pub fn Save() -> Html {
         }
     });
 
-    let new_account_node = use_node_ref();
-    use_tooltip(new_account_node.clone(), "New account");
-
     match &*save_data {
         UseCommandState::Init | UseCommandState::Loading => html! { <Loading /> },
         UseCommandState::Resolved(res) => match res {
