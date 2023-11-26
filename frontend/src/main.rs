@@ -6,6 +6,7 @@
 mod backend;
 mod components;
 mod hooks;
+mod subview;
 mod util;
 mod view;
 

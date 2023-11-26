@@ -14,6 +14,7 @@ pub fn App() -> Html {
     let demo = use_demo();
     let (_, dispatch_theme) = use_theme();
     let view = use_view();
+    let subview = use_subview();
     let (alert, dispatch_alert) = use_store::<GlobalAlert>();
     let alert_state = use_state(|| false);
 
@@ -21,6 +22,11 @@ pub fn App() -> Html {
         dispatch_theme.reduce_mut(|theme| theme.set_primary_color(APP_PRIMARY_COLOR));
         || ()
     });
+
+    let subviews_html = subview
+        .iter()
+        .map(|subview| subview.html_subview())
+        .collect::<Html>();
 
     match alert.status {
         GlobalAlertStatus::Opening => {
@@ -48,8 +54,9 @@ pub fn App() -> Html {
         UseDemoHandle::Resolved(true) => html! { <Demo /> },
         UseDemoHandle::Resolved(false) => html! {
             <div class="app">
-                <div class="main">
+                <div class="main view-mount">
                     {view.html_view()}
+                    {subviews_html}
                 </div>
                 <Alert
                     state={alert_state}

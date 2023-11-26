@@ -7,6 +7,7 @@ mod use_focus;
 mod use_id;
 mod use_popup;
 mod use_result;
+mod use_subview;
 mod use_theme;
 mod use_view;
 
@@ -19,6 +20,7 @@ pub use use_focus::*;
 pub use use_id::*;
 pub use use_popup::*;
 pub use use_result::*;
+pub use use_subview::*;
 pub use use_theme::*;
 pub use use_view::*;
 

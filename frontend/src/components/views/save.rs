@@ -1,6 +1,7 @@
 use crate::components::base::*;
 use crate::components::misc::*;
 use crate::hooks::*;
+use crate::subview::Subview;
 use crate::view::View;
 use commands::FrontendCommands;
 use common::Account;
@@ -20,6 +21,7 @@ pub fn Save() -> Html {
     let answers_pane_state = use_state(|| false);
 
     let view = use_view();
+    let subview = use_subview();
     let alert = use_alert();
 
     let save_data = use_command(UseCommand::new(|backend| async move {
@@ -97,7 +99,7 @@ pub fn Save() -> Html {
             }
             Ok((save_info, accounts)) => {
                 let new_account = move |_| {
-                    // TODO: push new account view to view stack
+                    subview.push(Subview::CreateAccount);
                 };
 
                 let account_selection = accounts

@@ -1,3 +1,4 @@
+use super::{use_subview, UseSubviewHandle};
 use crate::view::*;
 use gloo_storage::*;
 use std::ops::Deref;
@@ -13,12 +14,15 @@ pub struct UseViewHandle {
     value: Rc<View>,
     /// The dispatcher for the inner value.
     dispatch: Dispatch<View>,
+    /// The subview handle.
+    subview: UseSubviewHandle,
 }
 
 impl UseViewHandle {
     /// Sets the new view state.
     pub fn set(&self, value: View) {
         self.dispatch.set(value);
+        self.subview.clear();
 
         SessionStorage::set(VIEW_STORAGE_KEY, value)
             .expect_throw("session storage failed to set view");
@@ -37,9 +41,11 @@ impl Deref for UseViewHandle {
 #[hook]
 pub fn use_view() -> UseViewHandle {
     let (view, dispatch_view) = use_store::<View>();
+    let subview = use_subview();
 
     UseViewHandle {
         value: view,
         dispatch: dispatch_view,
+        subview,
     }
 }

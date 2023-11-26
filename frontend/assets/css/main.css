@@ -26,6 +26,10 @@ img {
   display: flex;
 }
 
+.view-mount > *:not(:last-child) {
+  display: none;
+}
+
 .footer {
   flex-grow: 0;
 }
@@ -331,39 +335,4 @@ img {
 
 .bg-6 {
   background-color: var(--base-background-color-6);
-}
-
-.tooltip-container {
-  position: relative;
-}
-
-.tooltip {
-  position: absolute;
-  /* top: 100%; */
-  /* left: 0; */
-  /* right: 0; */
-  width: 200px;
-  visibility: hidden;
-  opacity: 0;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  transition: all 0.15s ease-in-out;
-}
-
-.tooltip-text-container {
-  background-color: var(--base-tooltip-background-color);
-  color: var(--base-tooltip-text-color);
-  font-size: var(--base-tooltip-font-size);
-  padding: 2px 6px;
-  border-radius: var(--base-tooltip-border-radius);
-  box-shadow: var(--base-standard-box-shadow);
-}
-
-.tooltip-text {
-}
-
-.tooltip-visible {
-  visibility: visible;
-  opacity: 1;
 }
