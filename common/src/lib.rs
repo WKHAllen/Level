@@ -138,6 +138,31 @@ pub enum CommandError {
 /// A generic command result.
 pub type CommandResult<T> = Result<T, CommandError>;
 
+/// A trait indented to be derived for an enum of select options. The
+/// `Display` trait is used to determine what text to display for each
+/// variant.
+pub trait SelectOptions: Display + Copy + PartialEq {
+    /// The total number of options.
+    const NUM_OPTIONS: usize;
+
+    /// Creates an instance of `Self` given the index of the selected option.
+    /// This is never expected to fail. It should panic if the index is
+    /// invalid.
+    fn from_index(index: usize) -> Self;
+
+    /// Gets the index of the selected option.
+    fn current_index(&self) -> usize;
+
+    /// Gets the string representation of all options.
+    fn options() -> Vec<String> {
+        (0..Self::NUM_OPTIONS)
+            .map(|index| Self::from_index(index).to_string())
+            .collect()
+    }
+}
+
+pub use macros::SelectOptions;
+
 /// Formats log messages with the current timestamp.
 pub fn format_log_message(message: &str) -> String {
     let now = Local::now().format("%a %Y-%m-%d %H:%M:%S%.3f");

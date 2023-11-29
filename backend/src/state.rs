@@ -245,13 +245,25 @@ impl BackendCommands for State {
         self.with(|db| Account::list(db)).await
     }
 
+    async fn create_account(
+        &self,
+        account_type: AccountType,
+        name: String,
+        description: String,
+    ) -> CommandResult<Account> {
+        self.with(|db| {
+            Box::pin(async move { Account::create(db, account_type, &name, &description).await })
+        })
+        .await
+    }
+
     async fn transaction_batch(
         &self,
         account: Account,
         num_transactions: usize,
         limit: usize,
     ) -> CommandResult<Vec<AccountTransaction>> {
-        self.with(move |db| {
+        self.with(|db| {
             Box::pin(async move {
                 AccountTransaction::batch(db, &account, num_transactions, limit).await
             })

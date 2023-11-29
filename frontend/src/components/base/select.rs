@@ -3,7 +3,7 @@ use crate::hooks::*;
 use yew::prelude::*;
 use yew_hooks::use_click_away;
 
-pub use frontend_common::SelectOptions;
+pub use common::SelectOptions;
 
 /// Select option properties.
 #[derive(Properties, PartialEq, Clone)]

@@ -5,7 +5,6 @@
 
 use js_sys::{Function, Promise, Reflect};
 use serde::{de::DeserializeOwned, Serialize};
-use std::fmt::Display;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 
@@ -45,27 +44,4 @@ where
     let command_res = response_future.await.unwrap();
     let serialized_res: String = serde_wasm_bindgen::from_value(command_res).unwrap();
     serde_json::from_str(&serialized_res).unwrap()
-}
-
-/// A trait indented to be derived for an enum of select options. The
-/// `Display` trait is used to determine what text to display for each
-/// variant.
-pub trait SelectOptions: Display + Copy + PartialEq {
-    /// The total number of options.
-    const NUM_OPTIONS: usize;
-
-    /// Creates an instance of `Self` given the index of the selected option.
-    /// This is never expected to fail. It should panic if the index is
-    /// invalid.
-    fn from_index(index: usize) -> Self;
-
-    /// Gets the index of the selected option.
-    fn current_index(&self) -> usize;
-
-    /// Gets the string representation of all options.
-    fn options() -> Vec<String> {
-        (0..Self::NUM_OPTIONS)
-            .map(|index| Self::from_index(index).to_string())
-            .collect()
-    }
 }

@@ -1371,6 +1371,7 @@ body {
 /*              */
 
 .base-select-container {
+  padding: var(--base-form-padding);
   display: flex;
   flex-direction: column;
   gap: var(--base-padding-small);
@@ -1920,6 +1921,11 @@ body {
 .base-tooltip:hover .base-tooltip-popup {
   visibility: visible;
   opacity: 1;
+}
+
+.base-tooltip:hover .base-tooltip-popup-container:hover .base-tooltip-popup {
+  visibility: hidden;
+  opacity: 0;
 }
 
 .base-tooltip.base-tooltip-disabled:hover .base-tooltip-popup {

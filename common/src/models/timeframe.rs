@@ -1,8 +1,11 @@
 use crate::ExpectedCommandError as Error;
+use crate::SelectOptions;
 use serde::{Deserialize, Serialize};
 
 /// A representation of a timeframe.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, SelectOptions,
+)]
 pub enum Timeframe {
     /// Every day.
     Daily,
@@ -20,6 +23,12 @@ pub enum Timeframe {
     Semiannually,
     /// Every year.
     Annually,
+}
+
+impl std::fmt::Display for Timeframe {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.as_str())
+    }
 }
 
 impl Timeframe {

@@ -36,6 +36,14 @@ pub trait Commands {
     /// Retrieves the accounts within the save file.
     async fn accounts(&self) -> CommandResult<Vec<Account>>;
 
+    /// Creates an account.
+    async fn create_account(
+        &self,
+        account_type: AccountType,
+        name: String,
+        description: String,
+    ) -> CommandResult<Account>;
+
     /// Retrieves a batch of transactions within an account.
     async fn transaction_batch(
         &self,

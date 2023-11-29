@@ -8,7 +8,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
-use syn::{parse_macro_input, Fields, FnArg, ItemEnum, ItemStruct, Signature};
+use syn::{parse_macro_input, FnArg, ItemStruct, Signature};
 
 /// Implement application command methods for the frontend.
 #[proc_macro_derive(FrontendCommands)]
@@ -67,75 +67,6 @@ pub fn derive_frontend_commands(item: TokenStream) -> TokenStream {
         #[::async_trait::async_trait(?Send)]
         impl ::commands::FrontendCommands for #ident {
             #(#methods)*
-        }
-    }
-    .into()
-}
-
-/// Derive selection options behavior on an enum.
-#[proc_macro_derive(SelectOptions)]
-pub fn derive_select_options(item: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(item as ItemEnum);
-
-    let ident = &input.ident;
-
-    let variants = match input
-        .variants
-        .iter()
-        .enumerate()
-        .map(|(index, variant)| match variant.fields {
-            Fields::Unit => Ok((index, &variant.ident)),
-            _ => Err((
-                "`SelectOptions` cannot be derived for enums containing non-unit variants",
-                variant,
-            )),
-        })
-        .collect::<Result<Vec<_>, _>>()
-    {
-        Ok(val) => val,
-        Err((msg, tokens)) => {
-            return syn::Error::new_spanned(tokens, msg)
-                .to_compile_error()
-                .into();
-        }
-    };
-
-    let from_index_branches = variants
-        .iter()
-        .map(|(index, variant)| {
-            quote! {
-                #index => Self::#variant,
-            }
-        })
-        .collect::<Vec<_>>();
-
-    let current_index_branches = variants
-        .iter()
-        .map(|(index, variant)| {
-            quote! {
-                Self::#variant => #index,
-            }
-        })
-        .collect::<Vec<_>>();
-
-    let num_options = variants.len();
-
-    quote! {
-        impl ::frontend_common::SelectOptions for #ident {
-            const NUM_OPTIONS: usize = #num_options;
-
-            fn from_index(index: usize) -> Self {
-                match index {
-                    #(#from_index_branches)*
-                    _ => unreachable!("Invalid option index"),
-                }
-            }
-
-            fn current_index(&self) -> usize {
-                match self {
-                    #(#current_index_branches)*
-                }
-            }
         }
     }
     .into()

@@ -183,6 +183,29 @@ img {
 .account-info {
 }
 
+.subview {
+  flex-grow: 1;
+}
+
+.create-account {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-account .create-account-title {
+  margin-bottom: 8px;
+}
+
+.create-account .create-account-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
 .loading {
   flex-grow: 1;
   display: flex;

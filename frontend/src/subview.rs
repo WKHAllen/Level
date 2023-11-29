@@ -1,34 +1,19 @@
-use crate::components::subviews::*;
 use yew::prelude::*;
 
 /// An application subview.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Subview {
-    /// Account creation subview.
-    CreateAccount,
-    /// Account editing subview.
-    EditAccount,
-    /// Category editing subview.
-    EditCategories,
-    /// Subcategory editing subview.
-    EditSubcategories,
-    /// Tag editing subview.
-    EditTags,
-    /// Institution editing subview.
-    EditInstitutions,
-}
+#[derive(Debug, Clone, PartialEq)]
+pub struct Subview(Html);
 
 impl Subview {
     /// Renders the subview as HTML.
     pub fn html_subview(&self) -> Html {
-        match self {
-            Self::CreateAccount => html! { <CreateAccount /> },
-            Self::EditAccount => html! { <EditAccount /> },
-            Self::EditCategories => html! { <EditCategories /> },
-            Self::EditSubcategories => html! { <EditSubcategories /> },
-            Self::EditTags => html! { <EditTags /> },
-            Self::EditInstitutions => html! { <EditInstitutions /> },
-        }
+        self.0.clone()
+    }
+}
+
+impl From<Html> for Subview {
+    fn from(value: Html) -> Self {
+        Self(value)
     }
 }
 

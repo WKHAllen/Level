@@ -5,23 +5,29 @@ use yew::prelude::*;
 use yewdux::prelude::*;
 
 /// The subview stack.
-#[derive(Debug, Clone, PartialEq, Default, Store)]
+#[derive(Clone, PartialEq, Default, Store)]
 pub struct SubviewStack(Vec<Subview>);
 
 impl SubviewStack {
     /// Replaces the current subview with the specified subview. If the
     /// subview stack is empty, the specified subview will be pushed onto the
     /// stack.
-    pub fn set(&mut self, subview: Subview) {
+    pub fn set<S>(&mut self, subview: S)
+    where
+        S: Into<Subview>,
+    {
         match self.0.last_mut() {
-            Some(current) => *current = subview,
+            Some(current) => *current = subview.into(),
             None => self.push(subview),
         }
     }
 
     /// Pushes the specified subview onto the stack.
-    pub fn push(&mut self, subview: Subview) {
-        self.0.push(subview);
+    pub fn push<S>(&mut self, subview: S)
+    where
+        S: Into<Subview>,
+    {
+        self.0.push(subview.into());
     }
 
     /// Pops the top-most subview from the stack. If the stack is empty, this
@@ -56,12 +62,18 @@ impl UseSubviewHandle {
     /// Replaces the current subview with the specified subview. If the
     /// subview stack is empty, the specified subview will be pushed onto the
     /// stack.
-    pub fn set(&self, subview: Subview) {
+    pub fn set<S>(&self, subview: S)
+    where
+        S: Into<Subview>,
+    {
         self.dispatch.reduce_mut(|stack| stack.set(subview))
     }
 
     /// Pushes the specified subview onto the stack.
-    pub fn push(&self, subview: Subview) {
+    pub fn push<S>(&self, subview: S)
+    where
+        S: Into<Subview>,
+    {
         self.dispatch.reduce_mut(|stack| stack.push(subview))
     }
 
