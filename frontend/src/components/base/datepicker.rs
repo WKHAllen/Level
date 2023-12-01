@@ -231,6 +231,7 @@ pub struct DatePickerState {
     day: String,
 }
 
+#[allow(dead_code)]
 impl DatePickerState {
     /// Creates a new date picker state with no date selected.
     pub fn new() -> Self {
@@ -238,7 +239,6 @@ impl DatePickerState {
     }
 
     /// Creates a new date picker state with the given date selected.
-    #[allow(dead_code)]
     pub fn new_with(state: NaiveDate) -> Self {
         let mut this = Self::new();
         this.state = Some(state);
@@ -249,7 +249,6 @@ impl DatePickerState {
     }
 
     /// Creates a new date picker state with today selected.
-    #[allow(dead_code)]
     pub fn new_today() -> Self {
         Self::new_with(date_picker_today())
     }

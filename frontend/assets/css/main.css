@@ -146,18 +146,25 @@ img {
   flex-grow: 1;
   display: flex;
   flex-direction: row;
+  max-width: 100vw;
 }
 
 .save-body .save-left {
+  flex-grow: 0;
+  flex-shrink: 0;
   width: 200px;
   border-right: 1px solid #7f7f7f3f;
 }
 
 .save-body .save-main {
   flex-grow: 1;
+  overflow-x: auto;
+  display: flex;
 }
 
 .save-body .save-right {
+  flex-grow: 0;
+  flex-shrink: 0;
   width: 200px;
   border-left: 1px solid #7f7f7f3f;
 }
@@ -178,6 +185,33 @@ img {
 }
 
 .account-transactions {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.account-transactions-header {
+  flex-grow: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-transactions-title {
+}
+
+.account-transactions-actions {
+}
+
+.account-transactions-loading {
+  flex-grow: 0;
+}
+
+.account-transactions-list {
+  flex-grow: 1;
+}
+
+.account-transaction {
 }
 
 .account-info {
@@ -201,6 +235,25 @@ img {
 }
 
 .create-account .create-account-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.create-transaction {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-transaction .create-transaction-title {
+  margin-bottom: 8px;
+}
+
+.create-transaction .create-transaction-actions {
   display: flex;
   flex-direction: row;
   gap: 8px;

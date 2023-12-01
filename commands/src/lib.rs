@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+use chrono::NaiveDate;
 use common::*;
 use macros::command_trait;
 
@@ -51,4 +52,31 @@ pub trait Commands {
         num_transactions: usize,
         limit: usize,
     ) -> CommandResult<Vec<AccountTransaction>>;
+
+    /// Creates a new transaction.
+    async fn create_transaction(
+        &self,
+        account: Account,
+        name: String,
+        description: String,
+        amount: f64,
+        transaction_type: TransactionType,
+        institution: Institution,
+        date: NaiveDate,
+        category: Category,
+        subcategory: Option<Subcategory>,
+        tags: Vec<Tag>,
+    ) -> CommandResult<AccountTransaction>;
+
+    /// Retrieves the institutions within the save file.
+    async fn institutions(&self) -> CommandResult<Vec<Institution>>;
+
+    /// Retrieves the categories within the save file.
+    async fn categories(&self) -> CommandResult<Vec<Category>>;
+
+    /// Retrieves the subcategories that fall under a category.
+    async fn subcategories_within(&self, category: Category) -> CommandResult<Vec<Subcategory>>;
+
+    /// Retrieves the tags within the save file.
+    async fn tags(&self) -> CommandResult<Vec<Tag>>;
 }

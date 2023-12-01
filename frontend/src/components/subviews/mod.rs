@@ -1,4 +1,5 @@
 mod create_account;
+mod create_transaction;
 mod edit_account;
 mod edit_categories;
 mod edit_institutions;
@@ -6,6 +7,7 @@ mod edit_subcategories;
 mod edit_tags;
 
 pub use create_account::*;
+pub use create_transaction::*;
 pub use edit_account::*;
 pub use edit_categories::*;
 pub use edit_institutions::*;

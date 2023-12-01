@@ -8,6 +8,7 @@ use yewdux::prelude::*;
 #[derive(Clone, PartialEq, Default, Store)]
 pub struct SubviewStack(Vec<Subview>);
 
+#[allow(dead_code)]
 impl SubviewStack {
     /// Replaces the current subview with the specified subview. If the
     /// subview stack is empty, the specified subview will be pushed onto the
@@ -58,6 +59,7 @@ pub struct UseSubviewHandle {
     dispatch: Dispatch<SubviewStack>,
 }
 
+#[allow(dead_code)]
 impl UseSubviewHandle {
     /// Replaces the current subview with the specified subview. If the
     /// subview stack is empty, the specified subview will be pushed onto the

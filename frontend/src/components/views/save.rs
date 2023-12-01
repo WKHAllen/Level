@@ -4,7 +4,7 @@ use crate::components::subviews::*;
 use crate::hooks::*;
 use crate::view::View;
 use commands::FrontendCommands;
-use common::Account;
+use common::*;
 use yew::prelude::*;
 
 /// The number of transactions to request in one batch.
@@ -26,7 +26,7 @@ pub fn Save() -> Html {
     let subview = use_subview();
     let alert = use_alert();
 
-    let get_save_info = use_command(UseCommand::new({
+    let _get_save_info = use_command(UseCommand::new({
         let save_info_state = save_info_state.clone();
         |backend| async move {
             let save_info = backend.save_info().await?;
@@ -57,7 +57,7 @@ pub fn Save() -> Html {
                     Some(index) => match &*accounts_state {
                         Some(accounts) => match accounts.get(*index) {
                             Some::<&Account>(account) => {
-                                let transactions = backend
+                                let mut transactions = backend
                                     .transaction_batch(
                                         account.clone(),
                                         loaded_transactions_state.len(),
@@ -69,9 +69,9 @@ pub fn Save() -> Html {
                                     all_transactions_loaded_state.set(true);
                                 }
 
-                                let mut loaded_transactions = (*loaded_transactions_state).clone();
-                                loaded_transactions.extend(transactions);
-                                loaded_transactions_state.set(loaded_transactions);
+                                let loaded_transactions = (*loaded_transactions_state).clone();
+                                transactions.extend(loaded_transactions);
+                                loaded_transactions_state.set(transactions);
 
                                 Ok(())
                             }
@@ -101,12 +101,15 @@ pub fn Save() -> Html {
         None => html! { <Loading /> },
         Some(save_info) => {
             let new_account = {
+                let subview = subview.clone();
                 let get_accounts = get_accounts.clone();
                 move |_| {
-                    let get_accounts = get_accounts.clone();
-                    let on_exit = move |created| {
-                        if created {
-                            get_accounts.run();
+                    let on_exit = {
+                        let get_accounts = get_accounts.clone();
+                        move |maybe_account: Option<Account>| {
+                            if maybe_account.is_some() {
+                                get_accounts.run();
+                            }
                         }
                     };
                     subview.push(html! {
@@ -137,6 +140,37 @@ pub fn Save() -> Html {
                     .collect::<Html>(),
             };
 
+            let new_transaction = {
+                let subview = subview.clone();
+                let selected_account_index_state = selected_account_index_state.clone();
+                let loaded_transactions_state = loaded_transactions_state.clone();
+                move |_| {
+                    if let Some(index) = &*selected_account_index_state {
+                        if let Some(accounts) = &*accounts_state {
+                            if let Some(account) = accounts.get(*index) {
+                                let account = account.clone();
+                                let on_exit = {
+                                    let loaded_transactions_state =
+                                        loaded_transactions_state.clone();
+                                    move |maybe_transaction: Option<AccountTransaction>| {
+                                        if let Some(transaction) = maybe_transaction {
+                                            // TODO: put the new transaction into the correct place in the loaded transactions vector
+                                            let mut loaded_transactions =
+                                                (*loaded_transactions_state).clone();
+                                            loaded_transactions.push(transaction);
+                                            loaded_transactions_state.set(loaded_transactions);
+                                        }
+                                    }
+                                };
+                                subview.push(html! {
+                                    <CreateTransaction {account} {on_exit} />
+                                });
+                            }
+                        }
+                    }
+                }
+            };
+
             let account_transactions_loading = if let Some(res) = get_transactions.value() {
                 if let Err(err) = res {
                     view.set(View::Home);
@@ -156,7 +190,7 @@ pub fn Save() -> Html {
                 .iter()
                 .map(|transaction| {
                     html! {
-                        <div>
+                        <div class="account-transaction">
                             // TODO: display transaction
                             <span>{"Transaction"}</span>
                         </div>
@@ -201,10 +235,29 @@ pub fn Save() -> Html {
                         </div>
                         <div class="save-main bg-2">
                             <div class="account-transactions">
-                                // TODO: transaction actions
-                                {account_transactions_loading}
-                                {account_transactions}
-                                // TODO: new transaction
+                                <div class="account-transactions-header">
+                                    <div class="account-transactions-title">
+                                        <span>{"Transactions"}</span>
+                                    </div>
+                                    <div class="account-transactions-actions">
+                                        <div class="account-transactions-actions-new">
+                                            <Tooltip text="New transaction">
+                                                <IconButton
+                                                    name="plus-solid"
+                                                    size={IconButtonSize::Small}
+                                                    on_click={new_transaction}
+                                                />
+                                            </Tooltip>
+                                        </div>
+                                        // TODO: more transaction actions
+                                    </div>
+                                </div>
+                                <div class="account-transactions-loading">
+                                    {account_transactions_loading}
+                                </div>
+                                <div class="account-transactions-list">
+                                    {account_transactions}
+                                </div>
                             </div>
                         </div>
                         <div class="save-right bg-3">

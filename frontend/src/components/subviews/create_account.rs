@@ -9,9 +9,10 @@ use yew::prelude::*;
 #[derive(Clone, PartialEq, Properties)]
 pub struct CreateAccountProps {
     /// The callback called when the subview is exited. The parameter passed
-    /// to the function represents whether a new account was created.
+    /// to the function is the new account, or `None` if the account was not
+    /// created.
     #[prop_or_default]
-    pub on_exit: Callback<bool>,
+    pub on_exit: Callback<Option<Account>>,
 }
 
 /// The account creation subview.
@@ -33,7 +34,7 @@ pub fn CreateAccount(props: &CreateAccountProps) -> Html {
             let account_name_state = account_name_state.clone();
             let account_description_state = account_description_state.clone();
             |backend| async move {
-                let account_type = (*account_type_state).unwrap(); // unwrap allowed because `None` case is being checked before the command is run
+                let account_type = (*account_type_state).unwrap(); // `None` case handled by validation
                 let account_name = (*account_name_state).clone();
                 let account_description = (*account_description_state).clone();
                 backend
@@ -53,9 +54,10 @@ pub fn CreateAccount(props: &CreateAccountProps) -> Html {
                 }
                 UseCommandState::Resolved(res) => {
                     loading_state.set(false);
-                    if res.is_ok() {
+
+                    if let Ok(account) = res {
                         subview.pop();
-                        on_exit.emit(true);
+                        on_exit.emit(Some(account.clone()));
                     }
                 }
             }
@@ -64,13 +66,14 @@ pub fn CreateAccount(props: &CreateAccountProps) -> Html {
 
     let cancel_click = move |_| {
         subview.pop();
-        on_exit.emit(false);
+        on_exit.emit(None);
     };
 
     let create_click = {
         let account_type_state = account_type_state.clone();
         let account_type_error_state = account_type_error_state.clone();
         move |_| {
+            // TODO: validate all fields
             if account_type_state.is_none() {
                 account_type_error_state.set(Some("Please select an account type"));
             } else {

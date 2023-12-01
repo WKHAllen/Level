@@ -1,4 +1,5 @@
 use backend_common::*;
+use chrono::NaiveDate;
 use commands::BackendCommands;
 use common::*;
 use db::*;
@@ -269,5 +270,61 @@ impl BackendCommands for State {
             })
         })
         .await
+    }
+
+    async fn create_transaction(
+        &self,
+        mut account: Account,
+        name: String,
+        description: String,
+        amount: f64,
+        transaction_type: TransactionType,
+        institution: Institution,
+        date: NaiveDate,
+        category: Category,
+        subcategory: Option<Subcategory>,
+        tags: Vec<Tag>,
+    ) -> CommandResult<AccountTransaction> {
+        self.with(|db| {
+            Box::pin(async move {
+                let transaction = AccountTransaction::create(
+                    db,
+                    &mut account,
+                    &name,
+                    &description,
+                    amount,
+                    transaction_type,
+                    &institution,
+                    date,
+                    &category,
+                    subcategory.as_ref(),
+                )
+                .await?;
+
+                for tag in tags.iter() {
+                    AccountTransactionTag::create(db, &transaction, tag).await?;
+                }
+
+                Ok(transaction)
+            })
+        })
+        .await
+    }
+
+    async fn institutions(&self) -> CommandResult<Vec<Institution>> {
+        self.with(|db| Institution::list(db)).await
+    }
+
+    async fn categories(&self) -> CommandResult<Vec<Category>> {
+        self.with(|db| Category::list(db)).await
+    }
+
+    async fn subcategories_within(&self, category: Category) -> CommandResult<Vec<Subcategory>> {
+        self.with(|db| Box::pin(async move { Subcategory::list_within(db, &category).await }))
+            .await
+    }
+
+    async fn tags(&self) -> CommandResult<Vec<Tag>> {
+        self.with(|db| Tag::list(db)).await
     }
 }
