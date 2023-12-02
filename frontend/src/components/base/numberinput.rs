@@ -1,6 +1,7 @@
 use super::*;
 use crate::hooks::use_id;
 use crate::util::*;
+use std::borrow::Borrow;
 use std::ops::Deref;
 use yew::prelude::*;
 
@@ -139,6 +140,12 @@ impl<N: Number> Deref for NumberState<N> {
     type Target = N;
 
     fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+impl<N: Number> Borrow<N> for NumberState<N> {
+    fn borrow(&self) -> &N {
         &self.value
     }
 }

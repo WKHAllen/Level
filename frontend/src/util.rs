@@ -128,6 +128,17 @@ macro_rules! console_error {
 #[allow(unused_imports)]
 pub(crate) use console_error;
 
+/// Clones any number of stateful values.
+macro_rules! clone_states {
+    ( $( $state:ident ),* $(,)? ) => {
+        $(
+            let $state = $state.clone();
+        )*
+    };
+}
+
+pub(crate) use clone_states;
+
 /// A trait for numeric values.
 pub trait Number:
     PartialEq

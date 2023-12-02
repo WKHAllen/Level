@@ -1,6 +1,8 @@
 use crate::components::base::*;
 use crate::components::misc::*;
 use crate::hooks::*;
+use crate::util::*;
+use crate::validation::*;
 use crate::view::View;
 use commands::FrontendCommands;
 use yew::prelude::*;
@@ -12,8 +14,11 @@ pub fn Create() -> Html {
     let view = use_view();
 
     let save_name_state = use_state(String::new);
+    let save_name_error_state = use_state(|| None);
     let save_description_state = use_state(String::new);
+    let save_description_error_state = use_state(|| None);
     let save_password_state = use_state(String::new);
+    let save_password_error_state = use_state(|| None);
     let save_password_confirm_state = use_state(String::new);
     let create_save_error_state = use_state(|| None);
     let loading_overlay_state = use_state(|| false);
@@ -30,31 +35,33 @@ pub fn Create() -> Html {
 
     let try_create_save = use_command(
         UseCommand::new({
-            let save_name_state = save_name_state.clone();
-            let save_description_state = save_description_state.clone();
-            let save_password_state = save_password_state.clone();
-            let save_password_confirm_state = save_password_confirm_state.clone();
+            clone_states!(
+                save_name_state,
+                save_name_error_state,
+                save_description_state,
+                save_description_error_state,
+                save_password_state,
+                save_password_error_state,
+                save_password_confirm_state,
+            );
             |backend| async move {
-                let save_name = (*save_name_state).clone();
-                let save_description = (*save_description_state).clone();
-                let save_password = (*save_password_state).clone();
-                let save_password_confirm = (*save_password_confirm_state).clone();
-
-                if save_password == save_password_confirm {
+                if let Some((name, description, password)) = validate_all!(
+                    save_name_state, save_name_error_state, validate_save_name;
+                    save_description_state, save_description_error_state, validate_save_description;
+                    save_password_state, save_password_error_state, validate_save_password with &*save_password_confirm_state;
+                ) {
                     backend
-                        .create_save_file(save_name, save_description, save_password)
+                        .create_save_file(name, description, password)
                         .await?;
-                    Ok(Ok(()))
+                    Ok(true)
                 } else {
-                    Ok(Err("Error: passwords do not match"))
+                    Ok(false)
                 }
             }
         })
         .run_on_init(false)
         .on_update({
-            let view = view.clone();
-            let create_save_error_state = create_save_error_state.clone();
-            let loading_overlay_state = loading_overlay_state.clone();
+            clone_states!(view, create_save_error_state, loading_overlay_state);
             move |create_save_result| match create_save_result {
                 UseCommandState::Init => {
                     loading_overlay_state.set(false);
@@ -64,17 +71,13 @@ pub fn Create() -> Html {
                     create_save_error_state.set(None);
                 }
                 UseCommandState::Resolved(res) => match res {
-                    Ok(inner_res) => match inner_res {
-                        Ok(_) => {
+                    Ok(success) => {
+                        if *success {
                             loading_overlay_state.set(false);
                             create_save_error_state.set(None);
                             view.set(View::Save);
                         }
-                        Err(err) => {
-                            loading_overlay_state.set(false);
-                            create_save_error_state.set(Some((*err).to_owned()));
-                        }
-                    },
+                    }
                     Err(err) => {
                         loading_overlay_state.set(false);
                         create_save_error_state.set(Some(err.to_string()));
@@ -98,12 +101,14 @@ pub fn Create() -> Html {
                     on_submit={run_try_create_save.clone()}
                     required={true}
                     node={save_name_focus.node_ref()}
+                    error={(*save_name_error_state).clone()}
                 />
                 <TextArea
                     state={save_description_state}
                     label="Save description"
                     max_length={1023}
                     rows={4}
+                    error={(*save_description_error_state).clone()}
                 />
                 <div class="create-save-passwords">
                     <Input
@@ -113,6 +118,7 @@ pub fn Create() -> Html {
                         max_length={255}
                         on_submit={run_try_create_save.clone()}
                         required={true}
+                        error={(*save_password_error_state).clone()}
                     />
                     <Input
                         state={save_password_confirm_state}

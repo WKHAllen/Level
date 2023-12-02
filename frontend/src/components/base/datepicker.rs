@@ -2,6 +2,7 @@ use super::*;
 use crate::hooks::*;
 use crate::util::*;
 use chrono::{Datelike, Duration, Local, NaiveDate};
+use std::borrow::Borrow;
 use std::ops::Deref;
 use yew::prelude::*;
 use yew_hooks::use_click_away;
@@ -297,6 +298,12 @@ impl Deref for DatePickerState {
     type Target = Option<NaiveDate>;
 
     fn deref(&self) -> &Self::Target {
+        &self.state
+    }
+}
+
+impl Borrow<Option<NaiveDate>> for DatePickerState {
+    fn borrow(&self) -> &Option<NaiveDate> {
         &self.state
     }
 }

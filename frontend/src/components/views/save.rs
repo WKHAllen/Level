@@ -2,6 +2,7 @@ use crate::components::base::*;
 use crate::components::misc::*;
 use crate::components::subviews::*;
 use crate::hooks::*;
+use crate::util::*;
 use crate::view::View;
 use commands::FrontendCommands;
 use common::*;
@@ -27,7 +28,7 @@ pub fn Save() -> Html {
     let alert = use_alert();
 
     let _get_save_info = use_command(UseCommand::new({
-        let save_info_state = save_info_state.clone();
+        clone_states!(save_info_state);
         |backend| async move {
             let save_info = backend.save_info().await?;
             save_info_state.set(Some(save_info));
@@ -36,8 +37,7 @@ pub fn Save() -> Html {
     }));
 
     let get_accounts = use_command(UseCommand::new({
-        let accounts_state = accounts_state.clone();
-        let selected_account_index_state = selected_account_index_state.clone();
+        clone_states!(accounts_state, selected_account_index_state);
         |backend| async move {
             let accounts = backend.accounts().await?;
             accounts_state.set(Some(accounts));
@@ -48,10 +48,12 @@ pub fn Save() -> Html {
 
     let get_transactions = use_command(
         UseCommand::new({
-            let accounts_state = accounts_state.clone();
-            let selected_account_index_state = selected_account_index_state.clone();
-            let loaded_transactions_state = loaded_transactions_state.clone();
-            let all_transactions_loaded_state = all_transactions_loaded_state.clone();
+            clone_states!(
+                accounts_state,
+                selected_account_index_state,
+                loaded_transactions_state,
+                all_transactions_loaded_state
+            );
             move |backend| async move {
                 match &*selected_account_index_state {
                     Some(index) => match &*accounts_state {
@@ -87,9 +89,11 @@ pub fn Save() -> Html {
     );
 
     use_effect_with(selected_account_index_state.clone(), {
-        let loaded_transactions_state = loaded_transactions_state.clone();
-        let all_transactions_loaded_state = all_transactions_loaded_state.clone();
-        let get_transactions = get_transactions.clone();
+        clone_states!(
+            loaded_transactions_state,
+            all_transactions_loaded_state,
+            get_transactions
+        );
         move |_| {
             loaded_transactions_state.set(Vec::new());
             all_transactions_loaded_state.set(false);
@@ -101,11 +105,10 @@ pub fn Save() -> Html {
         None => html! { <Loading /> },
         Some(save_info) => {
             let new_account = {
-                let subview = subview.clone();
-                let get_accounts = get_accounts.clone();
+                clone_states!(subview, get_accounts);
                 move |_| {
                     let on_exit = {
-                        let get_accounts = get_accounts.clone();
+                        clone_states!(get_accounts);
                         move |maybe_account: Option<Account>| {
                             if maybe_account.is_some() {
                                 get_accounts.run();
@@ -125,7 +128,7 @@ pub fn Save() -> Html {
                     .enumerate()
                     .map(|(index, account)| {
                         let onclick = {
-                            let selected_account_index_state = selected_account_index_state.clone();
+                            clone_states!(selected_account_index_state);
                             move |_| {
                                 selected_account_index_state.set(Some(index));
                             }
@@ -141,17 +144,18 @@ pub fn Save() -> Html {
             };
 
             let new_transaction = {
-                let subview = subview.clone();
-                let selected_account_index_state = selected_account_index_state.clone();
-                let loaded_transactions_state = loaded_transactions_state.clone();
+                clone_states!(
+                    subview,
+                    selected_account_index_state,
+                    loaded_transactions_state
+                );
                 move |_| {
                     if let Some(index) = &*selected_account_index_state {
                         if let Some(accounts) = &*accounts_state {
                             if let Some(account) = accounts.get(*index) {
-                                let account = account.clone();
+                                clone_states!(account);
                                 let on_exit = {
-                                    let loaded_transactions_state =
-                                        loaded_transactions_state.clone();
+                                    clone_states!(loaded_transactions_state);
                                     move |maybe_transaction: Option<AccountTransaction>| {
                                         if let Some(transaction) = maybe_transaction {
                                             // TODO: put the new transaction into the correct place in the loaded transactions vector

@@ -67,7 +67,7 @@ pub fn Open() -> Html {
 
     let try_open_save = use_command(
         UseCommand::new({
-            let selected_save_state = selected_save_state.clone();
+            clone_states!(selected_save_state);
             move |backend| async move {
                 let save_name = selected_save_state
                     .as_ref()
@@ -78,10 +78,12 @@ pub fn Open() -> Html {
         })
         .run_on_init(false)
         .on_update({
-            let view = view.clone();
-            let dialog_open_state = dialog_open_state.clone();
-            let loading_overlay_state = loading_overlay_state.clone();
-            let unlock_save_error_state = unlock_save_error_state.clone();
+            clone_states!(
+                view,
+                dialog_open_state,
+                loading_overlay_state,
+                unlock_save_error_state
+            );
             move |open_save_result| match open_save_result {
                 UseCommandState::Init => {
                     loading_overlay_state.set(false);
@@ -120,9 +122,11 @@ pub fn Open() -> Html {
                     .map(|save| {
                         let save_name = save.name.clone();
                         let onclick = {
-                            let dialog_open_state = dialog_open_state.clone();
-                            let selected_save_state = selected_save_state.clone();
-                            let password_input_focus = password_input_focus.clone();
+                            clone_states!(
+                                dialog_open_state,
+                                selected_save_state,
+                                password_input_focus
+                            );
                             move |_| {
                                 selected_save_state.set(Some(save.clone()));
                                 dialog_open_state.set(true);
@@ -166,7 +170,7 @@ pub fn Open() -> Html {
 
                 let input_open_save = move |_| try_open_save.run();
                 let dialog_open_save = {
-                    let input_open_save = input_open_save.clone();
+                    clone_states!(input_open_save);
                     move |unlock| {
                         if unlock {
                             input_open_save(());

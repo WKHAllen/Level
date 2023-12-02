@@ -1,6 +1,8 @@
 use crate::components::base::*;
 use crate::components::misc::*;
 use crate::hooks::*;
+use crate::util::*;
+use crate::validation::*;
 use commands::FrontendCommands;
 use common::*;
 use yew::prelude::*;
@@ -28,16 +30,20 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
     let tags_state = use_state(Vec::new);
 
     let transaction_name_state = use_state(String::new);
+    let transaction_name_error_state = use_state(|| None::<String>);
     let transaction_description_state = use_state(String::new);
+    let transaction_description_error_state = use_state(|| None::<String>);
     let transaction_amount_state = use_state(|| NumberState::new(0.0).decimals(2));
     let transaction_type_state = use_state(|| None);
-    let transaction_type_error_state = use_state(|| None);
+    let transaction_type_error_state = use_state(|| None::<String>);
     let transaction_institution_state = use_state(|| None);
-    let transaction_institution_error_state = use_state(|| None);
+    let transaction_institution_error_state = use_state(|| None::<String>);
     let transaction_date_state = use_state(DatePickerState::new_today);
+    let transaction_date_error_state = use_state(|| None::<String>);
     let transaction_category_state = use_state(|| None);
-    let transaction_category_error_state = use_state(|| None);
+    let transaction_category_error_state = use_state(|| None::<String>);
     let transaction_subcategory_state = use_state(|| None);
+    let transaction_subcategory_error_state = use_state(|| None::<String>);
     let transaction_tags_state = use_state(Vec::new);
 
     let loading_state = use_state(|| false);
@@ -45,7 +51,7 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
     let subview = use_subview();
 
     let _get_institutions = use_command(UseCommand::new({
-        let institutions_state = institutions_state.clone();
+        clone_states!(institutions_state);
         |backend| async move {
             let institutions = backend.institutions().await?;
             institutions_state.set(institutions);
@@ -54,7 +60,7 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
     }));
 
     let _get_categories = use_command(UseCommand::new({
-        let categories_state = categories_state.clone();
+        clone_states!(categories_state);
         |backend| async move {
             let categories = backend.categories().await?;
             categories_state.set(categories);
@@ -64,9 +70,11 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
 
     let get_subcategories = use_command(
         UseCommand::new({
-            let transaction_category_state = transaction_category_state.clone();
-            let categories_state = categories_state.clone();
-            let subcategories_state = subcategories_state.clone();
+            clone_states!(
+                transaction_category_state,
+                categories_state,
+                subcategories_state
+            );
             |backend| async move {
                 match *transaction_category_state {
                     Some(category_index) => match categories_state.get(category_index) {
@@ -91,7 +99,7 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
     );
 
     let _get_tags = use_command(UseCommand::new({
-        let tags_state = tags_state.clone();
+        clone_states!(tags_state);
         |backend| async move {
             let tags = backend.tags().await?;
             tags_state.set(tags);
@@ -101,40 +109,41 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
 
     let create_transaction = use_command(
         UseCommand::new({
-            let transaction_name_state = transaction_name_state.clone();
-            let transaction_description_state = transaction_description_state.clone();
-            let transaction_amount_state = transaction_amount_state.clone();
-            let transaction_type_state = transaction_type_state.clone();
-            let transaction_institution_state = transaction_institution_state.clone();
-            let transaction_date_state = transaction_date_state.clone();
-            let transaction_category_state = transaction_category_state.clone();
-            let transaction_subcategory_state = transaction_subcategory_state.clone();
-            let transaction_tags_state = transaction_tags_state.clone();
+            clone_states!(
+                transaction_name_state,
+                transaction_name_error_state,
+                transaction_description_state,
+                transaction_description_error_state,
+                transaction_amount_state,
+                transaction_type_state,
+                transaction_type_error_state,
+                transaction_institution_state,
+                transaction_institution_error_state,
+                transaction_date_state,
+                transaction_date_error_state,
+                transaction_category_state,
+                transaction_category_error_state,
+                transaction_subcategory_state,
+                transaction_subcategory_error_state,
+                transaction_tags_state
+            );
             |backend| async move {
-                // let transaction_name = (*transaction_name_state).clone();
-                // let transaction_description = (*transaction_description_state).clone();
-                // let transaction_amount = **transaction_amount_state;
-                // let transaction_type = (*transaction_type_state).unwrap(); // `None` case handled by validation
-                // let transaction_institution = (*transaction_institution_state).unwrap(); // `None` case handled by validation
-                // let transaction_date = (**transaction_date_state).unwrap(); // `None` case handled by validation
-                // let transaction_category = (*transaction_category_state).unwrap(); // `None` case handled by validation
-                // let transaction_subcategory = *transaction_subcategory_state;
-                // let transaction_tags = *transaction_tags_state;
-                // backend
-                //     .create_transaction(
-                //         account,
-                //         transaction_name,
-                //         transaction_description,
-                //         transaction_amount,
-                //         transaction_type,
-                //         transaction_institution,
-                //         transaction_date,
-                //         transaction_category,
-                //         transaction_subcategory,
-                //         transaction_tags,
-                //     )
-                //     .await
-                Ok(AccountTransaction {
+                // if let Some((name, description, transaction_type, institution, date, category, subcategory)) = validate_all!(
+                //     transaction_name_state, transaction_name_error_state, validate_transaction_name;
+                //     transaction_description_state, transaction_description_error_state, validate_transaction_description;
+                //     transaction_type_state, transaction_type_error_state, validate_transaction_type;
+                //     transaction_institution_state, transaction_institution_error_state, validate_transaction_institution;
+                //     transaction_date_state, transaction_date_error_state, validate_transaction_date;
+                //     transaction_category_state, transaction_category_error_state, validate_transaction_category;
+                //     transaction_subcategory_state, transaction_subcategory_error_state, validate_transaction_subcategory with &*transaction_category_state;
+                // ) {
+                //     let amount = **transaction_amount_state;
+                //     let tags = (*transaction_tags_state).clone();
+                //     backend.create_transaction(account, name, description, amount, transaction_type, institution, date, category, subcategory, tags).await.map(Some)
+                // } else {
+                //     Ok(None)
+                // }
+                Ok(Some(AccountTransaction {
                     id: "".to_owned(),
                     account_id: "".to_owned(),
                     name: "".to_owned(),
@@ -149,14 +158,12 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                     created_at: chrono::NaiveDateTime::MIN,
                     edited_at: None,
                     reconciled_at: None,
-                })
+                }))
             }
         })
         .run_on_init(false)
         .on_update({
-            let loading_state = loading_state.clone();
-            let subview = subview.clone();
-            let on_exit = on_exit.clone();
+            clone_states!(loading_state, subview, on_exit);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
@@ -165,7 +172,8 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                 UseCommandState::Resolved(res) => {
                     loading_state.set(false);
 
-                    if let Ok(transaction) = res {
+                    // TODO: handle future expected errors
+                    if let Ok(Some(transaction)) = res {
                         subview.pop();
                         on_exit.emit(Some(transaction.clone()));
                     }
@@ -179,23 +187,7 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
         on_exit.emit(None);
     };
 
-    let create_click = {
-        let transaction_type_state = transaction_type_state.clone();
-        let transaction_institution_state = transaction_institution_state.clone();
-        let transaction_category_state = transaction_category_state.clone();
-        move |_| {
-            // TODO: validate all fields
-            if transaction_type_state.is_none() {
-                transaction_type_error_state.set(Some("Please select a transaction type"));
-            } else if transaction_institution_state.is_none() {
-                transaction_institution_error_state.set(Some("Please select an institution"));
-            } else if transaction_category_state.is_none() {
-                transaction_category_error_state.set(Some("Please select a category"));
-            } else {
-                create_transaction.run();
-            }
-        }
-    };
+    let create_click = move |_| create_transaction.run();
 
     let fetch_subcategories = move |_| {
         get_subcategories.run();
@@ -218,11 +210,13 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                     label="Name"
                     required={true}
                     on_submit={create_click.clone()}
+                    error={(*transaction_name_error_state).clone()}
                 />
                 <TextArea
                     state={transaction_description_state}
                     label="Description"
                     required={false}
+                    error={(*transaction_description_error_state).clone()}
                 />
                 <NumberInput<f64>
                     state={transaction_amount_state}
@@ -233,11 +227,13 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                     state={transaction_type_state}
                     label="Type"
                     required={true}
+                    error={(*transaction_type_error_state).clone()}
                 />
                 <SelectNullable
                     state={transaction_institution_state}
                     label="Institution"
                     required={true}
+                    error={(*transaction_institution_error_state).clone()}
                 >
                     // TODO: render institution options
                 </SelectNullable>
@@ -245,12 +241,14 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                     state={transaction_date_state}
                     label="Date"
                     required={true}
+                    error={(*transaction_date_error_state).clone()}
                 />
                 <SelectNullable
                     state={transaction_category_state}
                     on_change={fetch_subcategories}
                     label="Category"
                     required={true}
+                    error={(*transaction_category_error_state).clone()}
                 >
                     // TODO: render category options
                 </SelectNullable>
@@ -258,6 +256,7 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                     state={transaction_subcategory_state}
                     label="Subcategory"
                     required={false}
+                    error={(*transaction_subcategory_error_state).clone()}
                 >
                     // TODO: render subcategory options
                 </SelectNullable>

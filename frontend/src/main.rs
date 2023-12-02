@@ -8,6 +8,7 @@ mod components;
 mod hooks;
 mod subview;
 mod util;
+mod validation;
 mod view;
 
 use components::App;
