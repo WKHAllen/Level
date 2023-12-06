@@ -55,28 +55,72 @@ where
     }
 }
 
+/// Like `validate`, but accepts a static value.
+pub fn validate_static<V, I, O, F, E>(
+    value: V,
+    error_state: UseStateHandle<Option<String>>,
+    validator: F,
+) -> Option<O>
+where
+    F: FnOnce(&I) -> Result<O, E>,
+    V: Borrow<I>,
+    I: ?Sized,
+    E: Display,
+{
+    match validator(value.borrow()) {
+        Ok(value) => {
+            error_state.set(None);
+            Some(value)
+        }
+        Err(err) => {
+            error_state.set(Some(err.to_string()));
+            None
+        }
+    }
+}
+
+/// Like `validate_static`, but accepts a value to be passed to the validator
+/// function.
+pub fn validate_static_with<V, I, O, F, E, T>(
+    value: V,
+    error_state: UseStateHandle<Option<String>>,
+    validator: F,
+    with: T,
+) -> Option<O>
+where
+    F: FnOnce(&I, T) -> Result<O, E>,
+    V: Borrow<I>,
+    I: ?Sized,
+    E: Display,
+{
+    match validator(value.borrow(), with) {
+        Ok(value) => {
+            error_state.set(None);
+            Some(value)
+        }
+        Err(err) => {
+            error_state.set(Some(err.to_string()));
+            None
+        }
+    }
+}
+
 /// Performs validation on a variable number of stateful values and collapses
 /// the resulting `Option`s into a single `Option`.
 macro_rules! validate_all {
-    // Generate the `validate` function call
-    ( @validator_call $value_state:ident, $error_state:ident, $validator:ident ) => {
-        $crate::validation::validate($value_state, $error_state, $validator)
-    };
-
-    // Generate the `validate_with` function call
-    ( @validator_call $value_state:ident, $error_state:ident, $validator:ident with $with:expr ) => {
-        $crate::validation::validate_with($value_state, $error_state, $validator, $with)
-    };
-
-    // Generate code to call all validators and collapse all `Option`s
-    ( $( $value_state:ident, $error_state:ident, $validator:ident $( with $with:expr )? ; )* ) => {
-        match ( $( $crate::validation::validate_all!( @validator_call $value_state, $error_state, $validator $( with $with )? ) ),* ) {
-            #[allow(unused_parens)]
-            ( $( Some($value_state) ),* ) => Some(( $( $value_state ),* )),
-            #[allow(unreachable_patterns)]
-            _ => None,
-        }
-    };
+    ( $( $value:expr ),* $(,)? ) => {{
+        let value = 'block: {
+            Some((
+                $(
+                    match $value {
+                        Some(value) => value,
+                        None => { break 'block None; }
+                    }
+                ),*
+            ))
+        };
+        value
+    }};
 }
 
 pub(crate) use validate_all;

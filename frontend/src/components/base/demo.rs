@@ -101,6 +101,9 @@ pub fn Demo() -> Html {
     let switch_value = *switch_state;
     let radio_state = use_state(|| None);
     let radio_value = *radio_state;
+    let radio_options = (0..3)
+        .map(|index| format!("Option {}", index + 1))
+        .collect::<Vec<_>>();
     let slider_int_state = use_state(|| 3u8);
     let slider_int_value = *slider_int_state;
     let slider_float_state = use_state(|| 1.6f32);
@@ -112,6 +115,9 @@ pub fn Demo() -> Html {
     let icon_button_value = *icon_button_state;
     let select_state = use_state(|| 0);
     let select_value = *select_state;
+    let select_options = (0..15)
+        .map(|index| format!("Option {}", index + 1))
+        .collect::<Vec<_>>();
     let select_with_null_state = use_state(|| None);
     let select_with_null_value = *select_with_null_state;
     let select_enum_state = use_state(|| DemoSelectEnum::One);
@@ -145,13 +151,7 @@ pub fn Demo() -> Html {
     let card_state = use_state(|| None);
     let card_interactive_state = card_state.clone();
     let card_not_interactive_state = card_state.clone();
-    let chips_state = use_state(|| {
-        vec!["Java", "Go", "Rust"]
-            .into_iter()
-            .map(|s| s.to_owned())
-            .collect::<Vec<_>>()
-    });
-    let chips_value = (*chips_state).clone();
+    let chips_state = use_state(|| vec![3, 6, 7]);
     let chip_options = vec![
         "C",
         "C++",
@@ -165,6 +165,10 @@ pub fn Demo() -> Html {
     .into_iter()
     .map(|s| s.to_owned())
     .collect::<Vec<_>>();
+    let chips_value = chips_state
+        .iter()
+        .map(|index| chip_options[*index].clone())
+        .collect::<Vec<_>>();
     let datepicker_state = use_state(DatePickerState::new);
     let datepicker_value = **datepicker_state;
     let date_min = NaiveDate::from_ymd_opt(2023, 3, 21).unwrap();
@@ -403,25 +407,20 @@ pub fn Demo() -> Html {
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Radio group"}</span>
-                <RadioGroup state={radio_state.clone()}>
-                    <RadioButton>{"Option 1"}</RadioButton>
-                    <RadioButton>{"Option 2"}</RadioButton>
-                    <RadioButton>{"Option 3"}</RadioButton>
-                    <RadioButton disabled={true}>{"Option 4"}</RadioButton>
-                </RadioGroup>
+                <RadioGroup
+                    state={radio_state.clone()}
+                    options={radio_options.clone()}
+                />
                 <span>
                     {"Value: "}
                     {radio_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
                 </span>
                 <RadioGroup
                     state={radio_state}
+                    options={radio_options}
                     orientation={RadioGroupOrientation::Horizontal}
                     disabled={true}
-                >
-                    <RadioButton>{"Option 1"}</RadioButton>
-                    <RadioButton>{"Option 2"}</RadioButton>
-                    <RadioButton>{"Option 3"}</RadioButton>
-                </RadioGroup>
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Slider"}</span>
@@ -505,65 +504,39 @@ pub fn Demo() -> Html {
                 <span class="base-demo-item-label">{"Select"}</span>
                 <Select
                     state={select_state.clone()}
+                    options={select_options.clone()}
                     label="Select label"
                     required={true}
-                    error={(select_value == 3).then_some("This option isn't available for the disabled select box below")}
-                >
-                    <SelectOption>{"Option 1"}</SelectOption>
-                    <SelectOption>{"Option 2"}</SelectOption>
-                    <SelectOption>{"Option 3"}</SelectOption>
-                    <SelectOption>{"Option 4"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 5 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 6 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 7 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 8 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 9 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 10 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 11 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 12 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 13 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 14 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 15 (disabled)"}</SelectOption>
-                </Select>
+                    error={(select_value == 2).then_some("Please select something other than 3")}
+                />
                 <span>{"Value: "}{select_value.to_string()}</span>
                 <Select
                     state={select_state}
+                    options={select_options.clone()}
                     label="Disabled select label"
                     disabled={true}
-                >
-                    <SelectOption>{"Option 1"}</SelectOption>
-                    <SelectOption>{"Option 2"}</SelectOption>
-                    <SelectOption>{"Option 3"}</SelectOption>
-                </Select>
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Select nullable"}</span>
                 <SelectNullable
                     state={select_with_null_state.clone()}
+                    options={select_options.clone()}
                     label="Select nullable label"
                     null_label="Select an option..."
                     required={true}
                     error={select_with_null_value.is_none().then_some("Please select a value")}
-                >
-                    <SelectOption>{"Option 1"}</SelectOption>
-                    <SelectOption>{"Option 2"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 3 (disabled)"}</SelectOption>
-                    <SelectOption disabled={true}>{"Option 4 (disabled)"}</SelectOption>
-                    <SelectOption>{"Option 5"}</SelectOption>
-                </SelectNullable>
+                />
                 <span>
                     {"Value: "}
                     {select_with_null_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
                 </span>
                 <SelectNullable
                     state={select_with_null_state}
+                    options={select_options.clone()}
                     label="Disabled select nullable label"
                     disabled={true}
-                >
-                    <SelectOption>{"Option 1"}</SelectOption>
-                    <SelectOption>{"Option 2"}</SelectOption>
-                    <SelectOption>{"Option 3"}</SelectOption>
-                </SelectNullable>
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Select enum"}</span>
@@ -671,14 +644,9 @@ pub fn Demo() -> Html {
                     <p>{"A large dialog with spaced actions."}</p>
                     <Select
                         state={dialog_select_state}
+                        options={select_options}
                         label="Dialog select label"
-                    >
-                        <SelectOption>{"Option 1"}</SelectOption>
-                        <SelectOption>{"Option 2"}</SelectOption>
-                        <SelectOption>{"Option 3"}</SelectOption>
-                        <SelectOption>{"Option 4"}</SelectOption>
-                        <SelectOption>{"Option 5"}</SelectOption>
-                    </Select>
+                    />
                 </Dialog>
                 <Button
                     text="Open max dialog"

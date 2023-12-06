@@ -44,11 +44,26 @@ pub fn CreateAccount(props: &CreateAccountProps) -> Html {
             );
             |backend| async move {
                 if let Some((account_type, name, description)) = validate_all!(
-                    account_type_state, account_type_error_state, validate_account_type;
-                    account_name_state, account_name_error_state, validate_account_name;
-                    account_description_state, account_description_error_state, validate_account_description;
+                    validate(
+                        account_type_state,
+                        account_type_error_state,
+                        validate_account_type
+                    ),
+                    validate(
+                        account_name_state,
+                        account_name_error_state,
+                        validate_account_name
+                    ),
+                    validate(
+                        account_description_state,
+                        account_description_error_state,
+                        validate_account_description
+                    )
                 ) {
-                    backend.create_account(account_type, name, description).await.map(Some)
+                    backend
+                        .create_account(account_type, name, description)
+                        .await
+                        .map(Some)
                 } else {
                     Ok(None)
                 }

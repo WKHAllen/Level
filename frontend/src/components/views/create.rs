@@ -46,9 +46,18 @@ pub fn Create() -> Html {
             );
             |backend| async move {
                 if let Some((name, description, password)) = validate_all!(
-                    save_name_state, save_name_error_state, validate_save_name;
-                    save_description_state, save_description_error_state, validate_save_description;
-                    save_password_state, save_password_error_state, validate_save_password with &*save_password_confirm_state;
+                    validate(save_name_state, save_name_error_state, validate_save_name),
+                    validate(
+                        save_description_state,
+                        save_description_error_state,
+                        validate_save_description
+                    ),
+                    validate_with(
+                        save_password_state,
+                        save_password_error_state,
+                        validate_save_password,
+                        &*save_password_confirm_state
+                    )
                 ) {
                     backend
                         .create_save_file(name, description, password)

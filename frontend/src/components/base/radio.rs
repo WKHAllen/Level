@@ -2,32 +2,6 @@ use crate::hooks::use_id;
 use crate::util::*;
 use yew::prelude::*;
 
-/// Radio button properties.
-#[derive(Properties, PartialEq, Clone)]
-pub struct RadioButtonProps {
-    /// Whether the radio button is disabled.
-    #[prop_or(false)]
-    pub disabled: bool,
-    /// The radio button input node ref.
-    #[prop_or_default]
-    pub node: NodeRef,
-    /// Child elements.
-    #[prop_or_default]
-    pub children: Children,
-}
-
-/// A radio button component.
-#[function_component]
-pub fn RadioButton(props: &RadioButtonProps) -> Html {
-    let RadioButtonProps { children, .. } = props.clone();
-
-    html! {
-        <>
-            {children}
-        </>
-    }
-}
-
 /// The orientation of a radio group.
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
@@ -57,6 +31,8 @@ pub struct RadioGroupProps {
     /// The callback called when the state changes.
     #[prop_or_default]
     pub on_change: Callback<Option<usize>>,
+    /// The list of radio options.
+    pub options: Vec<String>,
     /// The orientation of the radio group.
     #[prop_or_default]
     pub orientation: RadioGroupOrientation,
@@ -66,9 +42,6 @@ pub struct RadioGroupProps {
     /// Whether the radio group is disabled.
     #[prop_or(false)]
     pub disabled: bool,
-    /// Child elements.
-    #[prop_or_default]
-    pub children: ChildrenWithProps<RadioButton>,
 }
 
 /// A radio group component.
@@ -77,10 +50,10 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
     let RadioGroupProps {
         state,
         on_change,
+        options,
         orientation,
         required,
         disabled,
-        children,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
@@ -88,7 +61,7 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
     let name_state = use_id();
     let name = (*name_state).clone();
     let id_states = use_state(|| {
-        vec![false; children.len()]
+        vec![false; options.len()]
             .into_iter()
             .map(|_| new_id())
             .collect::<Vec<_>>()
@@ -96,19 +69,12 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
     let ids = (*id_states).clone();
     let orientation_class = format!("base-radio-group-{}", orientation.orientation_name());
 
-    let new_children = children
+    let radio_options = options
         .iter()
         .enumerate()
-        .map(|(index, child)| {
-            let RadioButtonProps {
-                disabled: child_disabled,
-                node: child_node,
-                children: child_children,
-            } = (*child.props).clone();
-
+        .map(|(index, option)| {
             let id = ids[index].clone();
             let checked = state.filter(|value| *value == index).is_some();
-            let this_disabled = disabled || child_disabled;
             let oninput = {
                 let state = state.clone();
                 move |_| {
@@ -117,7 +83,7 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
             };
 
             html! {
-                <div class={classes!("base-radio-option", this_disabled.then_some("base-radio-option-disabled"))}>
+                <div class={classes!("base-radio-option", disabled.then_some("base-radio-option-disabled"))}>
                     <input
                         type="radio"
                         id={id.clone()}
@@ -126,11 +92,10 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
                         {oninput}
                         {checked}
                         {required}
-                        disabled={this_disabled}
+                        {disabled}
                         class="base-radio-input"
-                        ref={child_node}
                     />
-                    <label for={id} class="base-radio-label">{child_children}</label>
+                    <label for={id} class="base-radio-label">{option}</label>
                 </div>
             }
         })
@@ -138,7 +103,7 @@ pub fn RadioGroup(props: &RadioGroupProps) -> Html {
 
     html! {
         <div class={classes!("base-radio-group", orientation_class)}>
-            {new_children}
+            {radio_options}
         </div>
     }
 }

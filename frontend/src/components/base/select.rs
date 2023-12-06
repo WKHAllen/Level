@@ -5,29 +5,6 @@ use yew_hooks::use_click_away;
 
 pub use common::SelectOptions;
 
-/// Select option properties.
-#[derive(Properties, PartialEq, Clone)]
-pub struct SelectOptionProps {
-    /// Whether the select option is disabled.
-    #[prop_or(false)]
-    pub disabled: bool,
-    /// Child elements.
-    #[prop_or_default]
-    pub children: Children,
-}
-
-/// A select option component.
-#[function_component]
-pub fn SelectOption(props: &SelectOptionProps) -> Html {
-    let SelectOptionProps { children, .. } = props.clone();
-
-    html! {
-        <>
-            {children}
-        </>
-    }
-}
-
 /// Select properties.
 #[derive(Properties, PartialEq, Clone)]
 pub struct SelectProps {
@@ -36,6 +13,8 @@ pub struct SelectProps {
     /// The callback called when the state changes.
     #[prop_or_default]
     pub on_change: Callback<usize>,
+    /// The list of select options.
+    pub options: Vec<String>,
     /// The selection label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -51,9 +30,6 @@ pub struct SelectProps {
     /// The select button node ref.
     #[prop_or_default]
     pub node: NodeRef,
-    /// Child elements.
-    #[prop_or_default]
-    pub children: ChildrenWithProps<SelectOption>,
 }
 
 /// A select component.
@@ -62,12 +38,12 @@ pub fn Select(props: &SelectProps) -> Html {
     let SelectProps {
         state,
         on_change,
+        options,
         label,
         required,
         error,
         disabled,
         node,
-        children,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
@@ -93,37 +69,27 @@ pub fn Select(props: &SelectProps) -> Html {
         }
     });
 
-    let selected_child = if *state < children.len() {
-        children.iter().nth(*state).unwrap().into()
-    } else {
-        html! {
-            <SelectOption>{"Select..."}</SelectOption>
-        }
+    let selected_option = match options.get(*state) {
+        Some(selected) => html! { <>{selected}</> },
+        None => html! { <>{"Select..."}</> },
     };
 
-    let new_children = children
+    let option_selections = options
         .iter()
         .enumerate()
-        .map(|(index, child)| {
-            let SelectOptionProps {
-                disabled: child_disabled,
-                children: child_children,
-            } = (*child.props).clone();
-
-            let on_child_click = {
+        .map(|(index, option)| {
+            let on_option_click = {
                 let state = state.clone();
                 let dropdown_open = dropdown_open.clone();
                 move |_| {
-                    if !child_disabled {
-                        state.set(index);
-                        dropdown_open.set(false);
-                    }
+                    state.set(index);
+                    dropdown_open.set(false);
                 }
             };
 
             html! {
-                <div onclick={on_child_click} class={classes!("base-select-option", child_disabled.then_some("base-select-option-disabled"))}>
-                    {child_children}
+                <div onclick={on_option_click} class="base-select-option">
+                    {option}
                 </div>
             }
         })
@@ -147,13 +113,13 @@ pub fn Select(props: &SelectProps) -> Html {
                     ref={node}
                 >
                     <div class="base-select-button-selection">
-                        {selected_child}
+                        {selected_option}
                     </div>
                     <Icon name="angle-down-solid" {disabled} class="base-select-button-icon" />
                 </button>
                 <div class="base-select-dropdown">
                     <div ref={popup_node} class="base-select-popup">
-                        {new_children}
+                        {option_selections}
                     </div>
                 </div>
             </div>
@@ -170,6 +136,8 @@ pub struct SelectNullableProps {
     /// The callback called when the state changes.
     #[prop_or_default]
     pub on_change: Callback<Option<usize>>,
+    /// The list of select options.
+    pub options: Vec<String>,
     /// The selection label.
     #[prop_or_default]
     pub label: AttrValue,
@@ -188,9 +156,6 @@ pub struct SelectNullableProps {
     /// The select button node ref.
     #[prop_or_default]
     pub node: NodeRef,
-    /// Child elements.
-    #[prop_or_default]
-    pub children: ChildrenWithProps<SelectOption>,
 }
 
 /// A select component with a null option.
@@ -199,13 +164,13 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
     let SelectNullableProps {
         state,
         on_change,
+        options,
         label,
         null_label,
         required,
         error,
         disabled,
         node,
-        children,
     } = props.clone();
 
     use_effect_with(state.clone(), move |new_state| on_change.emit(**new_state));
@@ -231,43 +196,33 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         }
     });
 
-    let selected_child = if let Some(state_value) = *state {
-        if state_value < children.len() {
-            children.iter().nth(state_value).unwrap().into()
-        } else {
-            html! {
-                <SelectOption>{null_label.clone()}</SelectOption>
-            }
+    let selected_option = if let Some(state_value) = *state {
+        match options.get(state_value) {
+            Some(selected) => html! { <>{selected}</> },
+            None => html! { <>{null_label.clone()}</> },
         }
     } else {
         html! {
-            <SelectOption>{null_label.clone()}</SelectOption>
+            <>{null_label.clone()}</>
         }
     };
 
-    let new_children = children
+    let option_selections = options
         .iter()
         .enumerate()
-        .map(|(index, child)| {
-            let SelectOptionProps {
-                disabled: child_disabled,
-                children: child_children,
-            } = (*child.props).clone();
-
-            let on_child_click = {
+        .map(|(index, option)| {
+            let on_option_click = {
                 let state = state.clone();
                 let dropdown_open = dropdown_open.clone();
                 move |_| {
-                    if !child_disabled {
-                        state.set(Some(index));
-                        dropdown_open.set(false);
-                    }
+                    state.set(Some(index));
+                    dropdown_open.set(false);
                 }
             };
 
             html! {
-                <div onclick={on_child_click} class={classes!("base-select-option", child_disabled.then_some("base-select-option-disabled"))}>
-                    {child_children}
+                <div onclick={on_option_click} class="base-select-option">
+                    {option}
                 </div>
             }
         })
@@ -299,16 +254,16 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
                     ref={node}
                 >
                     <div class="base-select-button-selection">
-                        {selected_child}
+                        {selected_option}
                     </div>
                     <Icon name="angle-down-solid" {disabled} class="base-select-button-icon" />
                 </button>
                 <div class="base-select-dropdown">
                     <div ref={popup_node} class="base-select-popup">
                         <div onclick={on_null_click} class="base-select-option">
-                            <SelectOption>{null_label}</SelectOption>
+                            <>{null_label}</>
                         </div>
-                        {new_children}
+                        {option_selections}
                     </div>
                 </div>
             </div>
@@ -378,15 +333,15 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         }
     });
 
-    let selected_child = html! {
-        <SelectOption>{(*state).to_string()}</SelectOption>
+    let selected_option = html! {
+        <>{(*state).to_string()}</>
     };
 
-    let new_children = T::options()
+    let option_selections = T::options()
         .into_iter()
         .enumerate()
         .map(|(index, option)| {
-            let on_child_click = {
+            let on_option_click = {
                 let state = state.clone();
                 let dropdown_open = dropdown_open.clone();
                 move |_| {
@@ -396,7 +351,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
             };
 
             html! {
-                <div onclick={on_child_click} class="base-select-option">
+                <div onclick={on_option_click} class="base-select-option">
                     {option}
                 </div>
             }
@@ -421,13 +376,13 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
                     ref={node}
                 >
                     <div class="base-select-button-selection">
-                        {selected_child}
+                        {selected_option}
                     </div>
                     <Icon name="angle-down-solid" {disabled} class="base-select-button-icon" />
                 </button>
                 <div class="base-select-dropdown">
                     <div ref={popup_node} class="base-select-popup">
-                        {new_children}
+                        {option_selections}
                     </div>
                 </div>
             </div>
@@ -501,21 +456,21 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         }
     });
 
-    let selected_child = if let Some(state_value) = *state {
+    let selected_option = if let Some(state_value) = *state {
         html! {
-            <SelectOption>{state_value.to_string()}</SelectOption>
+            <>{state_value.to_string()}</>
         }
     } else {
         html! {
-            <SelectOption>{null_label.clone()}</SelectOption>
+            <>{null_label.clone()}</>
         }
     };
 
-    let new_children = T::options()
+    let option_selections = T::options()
         .into_iter()
         .enumerate()
         .map(|(index, option)| {
-            let on_child_click = {
+            let on_option_click = {
                 let state = state.clone();
                 let dropdown_open = dropdown_open.clone();
                 move |_| {
@@ -525,7 +480,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
             };
 
             html! {
-                <div onclick={on_child_click} class="base-select-option">
+                <div onclick={on_option_click} class="base-select-option">
                     {option}
                 </div>
             }
@@ -558,16 +513,16 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
                     ref={node}
                 >
                     <div class="base-select-button-selection">
-                        {selected_child}
+                        {selected_option}
                     </div>
                     <Icon name="angle-down-solid" {disabled} class="base-select-button-icon" />
                 </button>
                 <div class="base-select-dropdown">
                     <div ref={popup_node} class="base-select-popup">
                         <div onclick={on_null_click} class="base-select-option">
-                            <SelectOption>{null_label}</SelectOption>
+                            <>{null_label}</>
                         </div>
-                        {new_children}
+                        {option_selections}
                     </div>
                 </div>
             </div>

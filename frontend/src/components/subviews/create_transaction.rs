@@ -36,13 +36,13 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
     let transaction_amount_state = use_state(|| NumberState::new(0.0).decimals(2));
     let transaction_type_state = use_state(|| None);
     let transaction_type_error_state = use_state(|| None::<String>);
-    let transaction_institution_state = use_state(|| None);
+    let transaction_institution_state = use_state(|| None::<usize>);
     let transaction_institution_error_state = use_state(|| None::<String>);
     let transaction_date_state = use_state(DatePickerState::new_today);
     let transaction_date_error_state = use_state(|| None::<String>);
-    let transaction_category_state = use_state(|| None);
+    let transaction_category_state = use_state(|| None::<usize>);
     let transaction_category_error_state = use_state(|| None::<String>);
-    let transaction_subcategory_state = use_state(|| None);
+    let transaction_subcategory_state = use_state(|| None::<usize>);
     let transaction_subcategory_error_state = use_state(|| None::<String>);
     let transaction_tags_state = use_state(Vec::new);
 
@@ -78,7 +78,7 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
             |backend| async move {
                 match *transaction_category_state {
                     Some(category_index) => match categories_state.get(category_index) {
-                        Some::<&Category>(category) => {
+                        Some(category) => {
                             let subcategories =
                                 backend.subcategories_within(category.clone()).await?;
                             subcategories_state.set(subcategories);
@@ -125,40 +125,93 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                 transaction_category_error_state,
                 transaction_subcategory_state,
                 transaction_subcategory_error_state,
-                transaction_tags_state
+                transaction_tags_state,
+                institutions_state,
+                categories_state,
+                subcategories_state,
+                tags_state,
             );
             |backend| async move {
-                // if let Some((name, description, transaction_type, institution, date, category, subcategory)) = validate_all!(
-                //     transaction_name_state, transaction_name_error_state, validate_transaction_name;
-                //     transaction_description_state, transaction_description_error_state, validate_transaction_description;
-                //     transaction_type_state, transaction_type_error_state, validate_transaction_type;
-                //     transaction_institution_state, transaction_institution_error_state, validate_transaction_institution;
-                //     transaction_date_state, transaction_date_error_state, validate_transaction_date;
-                //     transaction_category_state, transaction_category_error_state, validate_transaction_category;
-                //     transaction_subcategory_state, transaction_subcategory_error_state, validate_transaction_subcategory with &*transaction_category_state;
-                // ) {
-                //     let amount = **transaction_amount_state;
-                //     let tags = (*transaction_tags_state).clone();
-                //     backend.create_transaction(account, name, description, amount, transaction_type, institution, date, category, subcategory, tags).await.map(Some)
-                // } else {
-                //     Ok(None)
-                // }
-                Ok(Some(AccountTransaction {
-                    id: "".to_owned(),
-                    account_id: "".to_owned(),
-                    name: "".to_owned(),
-                    description: None,
-                    amount: 0.0,
-                    transaction_type: "".to_owned(),
-                    institution_id: "".to_owned(),
-                    transaction_date: chrono::NaiveDateTime::MIN,
-                    category_id: "".to_owned(),
-                    subcategory_id: None,
-                    reconciled: false,
-                    created_at: chrono::NaiveDateTime::MIN,
-                    edited_at: None,
-                    reconciled_at: None,
-                }))
+                let transaction_institution = transaction_institution_state
+                    .and_then(|index| institutions_state.get(index).cloned());
+                let transaction_category = transaction_category_state
+                    .and_then(|index| categories_state.get(index).cloned());
+                let transaction_category2 = transaction_category.clone();
+                let transaction_subcategory = transaction_subcategory_state
+                    .and_then(|index| subcategories_state.get(index).cloned());
+                let tags = transaction_tags_state
+                    .iter()
+                    .map(|index| {
+                        let tag: &Tag = &tags_state[*index];
+                        tag.clone()
+                    })
+                    .collect::<Vec<_>>();
+
+                if let Some((
+                    name,
+                    description,
+                    transaction_type,
+                    institution,
+                    date,
+                    category,
+                    subcategory,
+                )) = validate_all!(
+                    validate(
+                        transaction_name_state,
+                        transaction_name_error_state,
+                        validate_transaction_name
+                    ),
+                    validate(
+                        transaction_description_state,
+                        transaction_description_error_state,
+                        validate_transaction_description
+                    ),
+                    validate(
+                        transaction_type_state,
+                        transaction_type_error_state,
+                        validate_transaction_type
+                    ),
+                    validate_static(
+                        transaction_institution,
+                        transaction_institution_error_state,
+                        validate_transaction_institution
+                    ),
+                    validate(
+                        transaction_date_state,
+                        transaction_date_error_state,
+                        validate_transaction_date
+                    ),
+                    validate_static(
+                        transaction_category,
+                        transaction_category_error_state,
+                        validate_transaction_category
+                    ),
+                    validate_static_with(
+                        transaction_subcategory,
+                        transaction_subcategory_error_state,
+                        validate_transaction_subcategory,
+                        &transaction_category2
+                    )
+                ) {
+                    let amount = **transaction_amount_state;
+                    backend
+                        .create_transaction(
+                            account,
+                            name,
+                            description,
+                            amount,
+                            transaction_type,
+                            institution,
+                            date,
+                            category,
+                            subcategory,
+                            tags,
+                        )
+                        .await
+                        .map(Some)
+                } else {
+                    Ok(None)
+                }
             }
         })
         .run_on_init(false)
@@ -193,7 +246,19 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
         get_subcategories.run();
     };
 
-    let tag_options = tags_state
+    let institution_names = institutions_state
+        .iter()
+        .map(|institution| institution.name.clone())
+        .collect::<Vec<_>>();
+    let category_names = categories_state
+        .iter()
+        .map(|category| category.name.clone())
+        .collect::<Vec<_>>();
+    let subcategory_names = subcategories_state
+        .iter()
+        .map(|subcategory| subcategory.name.clone())
+        .collect::<Vec<_>>();
+    let tag_names = tags_state
         .iter()
         .map(|tag| tag.name.clone())
         .collect::<Vec<_>>();
@@ -231,12 +296,11 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                 />
                 <SelectNullable
                     state={transaction_institution_state}
+                    options={institution_names}
                     label="Institution"
                     required={true}
                     error={(*transaction_institution_error_state).clone()}
-                >
-                    // TODO: render institution options
-                </SelectNullable>
+                />
                 <DatePicker
                     state={transaction_date_state}
                     label="Date"
@@ -246,23 +310,21 @@ pub fn CreateTransaction(props: &CreateTransactionProps) -> Html {
                 <SelectNullable
                     state={transaction_category_state}
                     on_change={fetch_subcategories}
+                    options={category_names}
                     label="Category"
                     required={true}
                     error={(*transaction_category_error_state).clone()}
-                >
-                    // TODO: render category options
-                </SelectNullable>
+                />
                 <SelectNullable
                     state={transaction_subcategory_state}
+                    options={subcategory_names}
                     label="Subcategory"
                     required={false}
                     error={(*transaction_subcategory_error_state).clone()}
-                >
-                    // TODO: render subcategory options
-                </SelectNullable>
+                />
                 <Chips
                     state={transaction_tags_state}
-                    options={tag_options}
+                    options={tag_names}
                     label="Tags"
                 />
             </div>

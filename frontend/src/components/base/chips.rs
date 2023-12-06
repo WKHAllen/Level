@@ -43,7 +43,7 @@ fn option_match(option: &str, value: &str) -> Option<usize> {
 }
 
 /// Limits the number of options.
-fn limit_options<T: Clone>(options: &[T], display_limit: Option<usize>) -> Vec<T> {
+fn limit_options<T>(options: &[T], display_limit: Option<usize>) -> &[T] {
     let limit_index = if let Some(display_limit) = display_limit {
         if options.len() > display_limit {
             display_limit
@@ -54,7 +54,7 @@ fn limit_options<T: Clone>(options: &[T], display_limit: Option<usize>) -> Vec<T
         options.len()
     };
 
-    (options[..limit_index]).to_owned()
+    &options[..limit_index]
 }
 
 /// Returns a list of possible options, taking into account the complete list
@@ -62,49 +62,49 @@ fn limit_options<T: Clone>(options: &[T], display_limit: Option<usize>) -> Vec<T
 /// begun to type out.
 fn get_possible_options(
     all_options: &[String],
-    selected_options: &[String],
+    selected_options_indices: &[usize],
     next_option: &str,
     display_limit: Option<usize>,
     max_selections: Option<usize>,
-) -> Vec<String> {
+) -> Vec<usize> {
     if let Some(max_selections) = max_selections {
-        if selected_options.len() >= max_selections {
+        if selected_options_indices.len() >= max_selections {
             return Vec::new();
         }
     }
 
-    let unselected_options = all_options
-        .iter()
-        .filter_map(|option| (!selected_options.contains(option)).then_some(option.to_owned()))
+    let unselected_options_indices = (0..all_options.len())
+        .filter(|index| (!selected_options_indices.contains(index)))
         .collect::<Vec<_>>();
 
     if next_option.is_empty() {
-        return limit_options(&unselected_options, display_limit);
+        return limit_options(&unselected_options_indices, display_limit).to_owned();
     }
 
-    let mut matches = unselected_options
+    let mut matches = unselected_options_indices
         .into_iter()
-        .filter_map(|option| option_match(&option, next_option).map(|score| (option, score)))
+        .filter_map(|index| {
+            all_options
+                .get(index)
+                .and_then(|option| option_match(option, next_option).map(|score| (index, score)))
+        })
         .collect::<Vec<_>>();
 
     matches.sort_by(|(_, score1), (_, score2)| score1.cmp(score2));
 
     let limited_matches = limit_options(&matches, display_limit);
 
-    limited_matches
-        .into_iter()
-        .map(|(option, _)| option)
-        .collect()
+    limited_matches.iter().map(|(option, _)| *option).collect()
 }
 
 /// Chips properties.
 #[derive(Properties, PartialEq, Clone)]
 pub struct ChipsProps {
     /// The state of the currently selected chips.
-    pub state: UseStateHandle<Vec<String>>,
+    pub state: UseStateHandle<Vec<usize>>,
     /// The callback called when the state changes.
     #[prop_or_default]
-    pub on_change: Callback<Vec<String>>,
+    pub on_change: Callback<Vec<usize>>,
     /// The list of chip options.
     pub options: Vec<String>,
     /// The maximum number of options to display in the dropdown.
@@ -180,15 +180,15 @@ pub fn Chips(props: &ChipsProps) -> Html {
         }
     };
     let onkeydown = {
-        let first_option = possible_options.first().map(|option| option.to_owned());
+        let first_option_index = possible_options.first().copied();
         let state = state.clone();
         let next_chip_state = next_chip_state.clone();
         move |event: KeyboardEvent| match event.key_code() {
             13 => {
                 // enter
-                if let Some(ref option) = first_option {
+                if let Some(option_index) = first_option_index {
                     let mut chips = (*state).clone();
-                    chips.push(option.to_owned());
+                    chips.push(option_index);
                     state.set(chips);
                     next_chip_state.set(String::new());
                 }
@@ -208,7 +208,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
     let chip_list = (*state)
         .iter()
         .enumerate()
-        .map(|(index, this_chip)| {
+        .map(|(index, this_chip_index)| {
             let on_click = {
                 let state = state.clone();
                 move |_| {
@@ -217,6 +217,8 @@ pub fn Chips(props: &ChipsProps) -> Html {
                     state.set(current_chips_without_this);
                 }
             };
+
+            let this_chip = options.get(*this_chip_index).cloned().unwrap_or_default();
 
             html! {
                 <div class="base-chips-chip">
@@ -253,21 +255,21 @@ pub fn Chips(props: &ChipsProps) -> Html {
 
     let chip_options = possible_options
         .iter()
-        .map(|this_option| {
-            let this_option = this_option.clone();
-            let this_option_html = this_option.clone();
+        .map(|this_option_index| {
+            let this_option_index = *this_option_index;
+            let this_option = options.get(this_option_index).cloned().unwrap_or_default();
             let state = state.clone();
             let next_chip_state = next_chip_state.clone();
             let on_option_click = move |_| {
                 let mut option_chips = (*state).clone();
-                option_chips.push(this_option.clone());
+                option_chips.push(this_option_index);
                 state.set(option_chips);
                 next_chip_state.set(String::new());
             };
 
             html! {
                 <div onclick={on_option_click} class={classes!("base-chips-option")}>
-                    {this_option_html}
+                    {this_option}
                 </div>
             }
         })
