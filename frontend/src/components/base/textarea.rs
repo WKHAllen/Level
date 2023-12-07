@@ -56,6 +56,9 @@ pub struct TextAreaProps {
     /// In what way the textarea can be resized.
     #[prop_or_default]
     pub resize: TextAreaResize,
+    /// Whether to compact the element into a smaller space.
+    #[prop_or(false)]
+    pub compact: bool,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -79,6 +82,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
         required,
         rows,
         resize,
+        compact,
         error,
         disabled,
         node,
@@ -98,7 +102,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
     };
 
     html! {
-        <div class={classes!("base-textarea-container", disabled.then_some("base-textarea-container-disabled"))}>
+        <div class={classes!("base-textarea-container", compact.then_some("base-textarea-container-compact"), disabled.then_some("base-textarea-container-disabled"))}>
             <label for={id.clone()} class="base-textarea-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
@@ -115,7 +119,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
                 class={classes!("base-textarea", resize_class, error.as_ref().map(|_| "base-textarea-invalid"))}
                 ref={node}
             />
-            <Error message={error} size={ErrorSize::Small} />
+            <Error message={error} size={ErrorSize::Small} class="base-textarea-error" />
         </div>
     }
 }

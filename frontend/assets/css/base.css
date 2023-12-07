@@ -265,6 +265,14 @@
 
   --base-standard-label-size: 0.9em;
 
+  --base-compact-padding: 4px;
+  --base-compact-gap: 2px;
+  --base-compact-label-color: var(--base-text-color-disabled);
+  --base-compact-label-size: 0.67rem;
+  --base-compact-text-size: 0.8rem;
+  --base-compact-error-size: var(--base-compact-label-size);
+  --base-compact-chip-label-size: 0.67rem;
+
   /*             */
   /*    INPUT    */
   /*             */
@@ -816,6 +824,41 @@ body {
   color: var(--base-text-color-disabled);
 }
 
+.base-input-container-compact {
+  padding: var(--base-compact-padding) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-compact-gap);
+  background-color: var(--base-input-background-color);
+  color: var(--base-input-text-color);
+}
+
+.base-input-container-compact > * {
+  margin: 0 var(--base-compact-padding);
+}
+
+.base-input-container-compact .base-input-label {
+  color: var(--base-compact-label-color);
+  font-size: var(--base-compact-label-size);
+}
+
+.base-input-container-compact .base-input {
+  padding: 0;
+  font-size: var(--base-compact-text-size);
+  border: none;
+  border-radius: 0;
+}
+
+.base-input-container-compact .base-input:focus,
+.base-input-container-compact .base-input-invalid,
+.base-input-container-compact .base-input-invalid:focus {
+  border: none;
+}
+
+.base-input-container-compact .base-input-error {
+  font-size: var(--base-compact-error-size);
+}
+
 /*                */
 /*    TEXTAREA    */
 /*                */
@@ -873,6 +916,44 @@ body {
 
 .base-textarea-container-disabled .base-textarea-label {
   color: var(--base-text-color-disabled);
+}
+
+.base-textarea-container-compact {
+  padding: var(--base-compact-padding) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-compact-gap);
+  background-color: var(--base-textarea-background-color);
+  color: var(--base-textarea-text-color);
+}
+
+.base-textarea-container-compact > * {
+  margin: 0 var(--base-compact-padding);
+}
+
+.base-textarea-container-compact .base-textarea-label {
+  color: var(--base-compact-label-color);
+  font-size: var(--base-compact-label-size);
+}
+
+.base-textarea-container-compact .base-textarea {
+  padding: 0;
+  font-size: var(--base-compact-text-size);
+  border: none;
+  border-radius: 0;
+}
+
+.base-textarea-container-compact .base-textarea:focus {
+  border: none;
+}
+
+.base-textarea-container-compact .base-textarea-invalid,
+.base-textarea-container-compact .base-textarea-invalid:focus {
+  border: none;
+}
+
+.base-textarea-container-compact .base-textarea-error {
+  font-size: var(--base-compact-error-size);
 }
 
 /*              */
@@ -1484,6 +1565,50 @@ body {
   background-color: inherit;
 }
 
+.base-select-container-compact {
+  padding: var(--base-compact-padding) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-compact-gap);
+  background-color: var(--base-select-button-background-color);
+  color: var(--base-select-button-text-color);
+}
+
+.base-select-container-compact > * {
+  margin: 0 var(--base-compact-padding);
+}
+
+.base-select-container-compact .base-select {
+  margin: 0;
+}
+
+.base-select-container-compact .base-select-label {
+  color: var(--base-compact-label-color);
+  font-size: var(--base-compact-label-size);
+}
+
+.base-select-container-compact .base-select-button {
+  padding: 0;
+  font-size: var(--base-compact-text-size);
+  border: none;
+  border-radius: 0;
+  margin: 0 var(--base-compact-padding);
+}
+
+.base-select-container-compact .base-select-popup {
+  margin-top: var(--base-compact-padding);
+}
+
+.base-select-container-compact .base-select-button:focus,
+.base-select-container-compact .base-select-button-invalid,
+.base-select-container-compact .base-select-button-invalid:focus {
+  border: none;
+}
+
+.base-select-container-compact .base-select-error {
+  font-size: var(--base-compact-error-size);
+}
+
 /*              */
 /*    DIALOG    */
 /*              */
@@ -1882,6 +2007,57 @@ body {
   background-color: var(--base-chips-popup-background-color-active);
 }
 
+.base-chips-container-compact {
+  padding: var(--base-compact-padding) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-compact-gap);
+  background-color: var(--base-input-background-color);
+  color: var(--base-input-text-color);
+}
+
+.base-chips-container-compact > * {
+  margin: 0 var(--base-compact-padding);
+}
+
+.base-chips-container-compact .base-chips {
+  margin: 0;
+}
+
+.base-chips-container-compact .base-chips-label {
+  color: var(--base-compact-label-color);
+  font-size: var(--base-compact-label-size);
+}
+
+.base-chips-container-compact .base-chips-inner {
+  padding: 0;
+  font-size: var(--base-compact-text-size);
+  border: none;
+  border-radius: 0;
+  margin: 0 var(--base-compact-padding);
+}
+
+.base-chips-container-compact .base-chips-chip-list {
+  gap: var(--base-compact-gap);
+}
+
+.base-chips-container-compact .base-chips-chip-label {
+  font-size: var(--base-compact-chip-label-size);
+}
+
+.base-chips-container-compact .base-chips-options-popup {
+  margin-top: var(--base-compact-padding);
+}
+
+.base-chips-container-compact .base-chips-inner,
+.base-chips-container-compact .base-chips-inner:focus-within {
+  border: none;
+}
+
+.base-chips-container-compact .base-chips-error {
+  font-size: var(--base-compact-error-size);
+}
+
 /*               */
 /*    TOOLTIP    */
 /*               */
@@ -2138,6 +2314,52 @@ body {
   color: var(--base-date-picker-day-text-color-disabled);
   background-color: initial;
   cursor: default;
+}
+
+.base-date-picker-container-compact {
+  padding: var(--base-compact-padding) 0;
+  gap: var(--base-compact-gap);
+  background-color: var(--base-input-background-color);
+  color: var(--base-date-picker-text-color);
+}
+
+.base-date-picker-container-compact > * {
+  margin: 0 var(--base-compact-padding);
+}
+
+.base-date-picker-container-compact .base-date-picker-outer {
+  margin: 0;
+}
+
+.base-date-picker-container-compact .base-date-picker-label {
+  color: var(--base-compact-label-color);
+  font-size: var(--base-compact-label-size);
+}
+
+.base-date-picker-container-compact .base-date-picker {
+  padding: 0;
+  font-size: var(--base-compact-text-size);
+  border: none;
+  border-radius: 0;
+  margin: 0 var(--base-compact-padding);
+}
+
+.base-date-picker-container-compact .base-date-picker-input {
+  font-size: var(--base-compact-text-size);
+}
+
+.base-date-picker-container-compact .base-date-picker-popup {
+  margin-top: var(--base-compact-padding);
+}
+
+.base-date-picker-container-compact .base-date-picker:focus-within,
+.base-date-picker-container-compact .base-date-picker-invalid,
+.base-date-picker-container-compact .base-date-picker-invalid:focus-within {
+  border: none;
+}
+
+.base-date-picker-container-compact .base-date-picker-error {
+  font-size: var(--base-compact-error-size);
 }
 
 /*               */

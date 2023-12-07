@@ -341,6 +341,9 @@ pub struct DatePickerProps {
     /// Whether a date must be picked.
     #[prop_or(false)]
     pub required: bool,
+    /// Whether to compact the element into a smaller space.
+    #[prop_or(false)]
+    pub compact: bool,
     /// An optional error message. This may not show at times, as it will be
     /// overridden by a different error message if validation fails.
     #[prop_or_default]
@@ -369,6 +372,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         min,
         max,
         required,
+        compact,
         error,
         disabled,
         year_node,
@@ -552,7 +556,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         .collect::<Html>();
 
     html! {
-        <div class={classes!("base-date-picker-container", disabled.then_some("base-date-picker-container-disabled"))}>
+        <div class={classes!("base-date-picker-container", compact.then_some("base-date-picker-container-compact"), disabled.then_some("base-date-picker-container-disabled"))}>
             <label for={year_id.clone()} class="base-date-picker-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
@@ -627,7 +631,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
                     </div>
                 </div>
             </div>
-            <Error message={error_msg} size={ErrorSize::Small} />
+            <Error message={error_msg} size={ErrorSize::Small} class="base-date-picker-error" />
         </div>
     }
 }

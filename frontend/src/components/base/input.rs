@@ -59,6 +59,9 @@ pub struct InputProps {
     /// Whether the input is required to be filled out.
     #[prop_or(false)]
     pub required: bool,
+    /// Whether to compact the element into a smaller space.
+    #[prop_or(false)]
+    pub compact: bool,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -82,6 +85,7 @@ pub fn Input(props: &InputProps) -> Html {
         max_length,
         on_submit,
         required,
+        compact,
         error,
         disabled,
         node,
@@ -107,7 +111,7 @@ pub fn Input(props: &InputProps) -> Html {
     };
 
     html! {
-        <div class={classes!("base-input-container", disabled.then_some("base-input-container-disabled"))}>
+        <div class={classes!("base-input-container", compact.then_some("base-input-container-compact"), disabled.then_some("base-input-container-disabled"))}>
             <label for={id.clone()} class="base-input-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
@@ -125,7 +129,7 @@ pub fn Input(props: &InputProps) -> Html {
                 class={classes!("base-input", error.as_ref().map(|_| "base-input-invalid"))}
                 ref={node}
             />
-            <Error message={error} size={ErrorSize::Small} />
+            <Error message={error} size={ErrorSize::Small} class="base-input-error" />
         </div>
     }
 }

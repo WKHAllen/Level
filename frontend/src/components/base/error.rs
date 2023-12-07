@@ -38,16 +38,26 @@ pub struct ErrorProps {
     /// The size of the error message.
     #[prop_or_default]
     pub size: ErrorSize,
+    /// A class to apply to the error message.
+    #[prop_or_default]
+    pub class: Classes,
 }
 
 /// An error element.
 #[function_component]
 pub fn Error(props: &ErrorProps) -> Html {
-    let ErrorProps { message, size } = props.clone();
+    let ErrorProps {
+        message,
+        size,
+        class,
+    } = props.clone();
 
     let size_class = format!("base-text-{}", size.size_name());
 
-    html! {
-        <span class={classes!("base-error", size_class)}>{message.unwrap_or_default()}</span>
+    match message {
+        Some(message) => html! {
+            <span class={classes!("base-error", size_class, class)}>{message}</span>
+        },
+        None => html! {},
     }
 }

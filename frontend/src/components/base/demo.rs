@@ -270,16 +270,22 @@ pub fn Demo() -> Html {
                 />
                 <span>
                     {"Value: "}
-                    {input_value}
+                    {input_value.clone()}
                 </span>
                 <span>
                     {"Submitted value: "}
                     {input_submitted_value.unwrap_or("None".to_owned())}
                 </span>
                 <Input
-                    state={input_state}
+                    state={input_state.clone()}
                     label="Disabled input"
                     disabled={true}
+                />
+                <Input
+                    state={input_state}
+                    label="Compact input"
+                    compact={true}
+                    error={input_value.is_empty().then_some("Please enter a value")}
                 />
             </div>
             <div class="base-demo-item">
@@ -293,10 +299,10 @@ pub fn Demo() -> Html {
                 />
                 <span>
                     {"Value: "}
-                    {textarea_value}
+                    {textarea_value.clone()}
                 </span>
                 <TextArea
-                    state={textarea_state}
+                    state={textarea_state.clone()}
                     label="Disabled textarea"
                     disabled={true}
                     resize={TextAreaResize::Horizontal}
@@ -310,6 +316,12 @@ pub fn Demo() -> Html {
                     state={textarea_state2}
                     label="Full resize"
                     resize={TextAreaResize::Both}
+                />
+                <TextArea
+                    state={textarea_state}
+                    label="Compact textarea"
+                    compact={true}
+                    error={textarea_value.is_empty().then_some("Please enter a value")}
                 />
             </div>
             <div class="base-demo-item">
@@ -337,9 +349,15 @@ pub fn Demo() -> Html {
                     {numberinput_float_value}
                 </span>
                 <NumberInput<u16>
-                    state={numberinput_int_state}
+                    state={numberinput_int_state.clone()}
                     label="Disabled number input"
                     disabled={true}
+                />
+                <NumberInput<u16>
+                    state={numberinput_int_state}
+                    label="Compact number input"
+                    compact={true}
+                    error={(numberinput_int_value == 3).then_some("How about something other than 3")}
                 />
             </div>
             <div class="base-demo-item">
@@ -511,10 +529,17 @@ pub fn Demo() -> Html {
                 />
                 <span>{"Value: "}{select_value.to_string()}</span>
                 <Select
-                    state={select_state}
+                    state={select_state.clone()}
                     options={select_options.clone()}
                     label="Disabled select label"
                     disabled={true}
+                />
+                <Select
+                    state={select_state}
+                    options={select_options.clone()}
+                    label="Compact select"
+                    compact={true}
+                    error={(select_value == 2).then_some("Please select something other than 3")}
                 />
             </div>
             <div class="base-demo-item">
@@ -532,10 +557,17 @@ pub fn Demo() -> Html {
                     {select_with_null_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
                 </span>
                 <SelectNullable
-                    state={select_with_null_state}
+                    state={select_with_null_state.clone()}
                     options={select_options.clone()}
                     label="Disabled select nullable label"
                     disabled={true}
+                />
+                <SelectNullable
+                    state={select_with_null_state}
+                    options={select_options.clone()}
+                    label="Compact select nullable"
+                    compact={true}
+                    error={select_with_null_value.is_none().then_some("Please select a value")}
                 />
             </div>
             <div class="base-demo-item">
@@ -548,9 +580,15 @@ pub fn Demo() -> Html {
                 />
                 <span>{"Value: "}{select_enum_value.to_string()}</span>
                 <SelectEnum<DemoSelectEnum>
-                    state={select_enum_state}
+                    state={select_enum_state.clone()}
                     label="Disabled select enum label"
                     disabled={true}
+                />
+                <SelectEnum<DemoSelectEnum>
+                    state={select_enum_state}
+                    label="Compact select enum"
+                    compact={true}
+                    error={(select_enum_value == DemoSelectEnum::Three).then_some("Please pick something other than three")}
                 />
             </div>
             <div class="base-demo-item">
@@ -567,9 +605,15 @@ pub fn Demo() -> Html {
                     {select_with_null_enum_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
                 </span>
                 <SelectNullableEnum<DemoSelectEnum>
-                    state={select_with_null_enum_state}
+                    state={select_with_null_enum_state.clone()}
                     label="Disabled select nullable enum label"
                     disabled={true}
+                />
+                <SelectNullableEnum<DemoSelectEnum>
+                    state={select_with_null_enum_state}
+                    label="Compact select nullable enum"
+                    compact={true}
+                    error={select_with_null_enum_value.is_none().then_some("Please select a value")}
                 />
             </div>
             <div class="base-demo-item">
@@ -768,16 +812,23 @@ pub fn Demo() -> Html {
                     placeholder="Placeholder!"
                     error={chips_value.is_empty().then_some("Please select at least one language")}
                 />
+                <span>
+                    {"Selected: "}
+                    {chips_value.clone().join(", ")}
+                </span>
                 <Chips
-                    state={chips_state}
-                    options={chip_options}
+                    state={chips_state.clone()}
+                    options={chip_options.clone()}
                     label="Disabled chips label"
                     disabled={true}
                 />
-                <span>
-                    {"Selected: "}
-                    {chips_value.join(", ")}
-                </span>
+                <Chips
+                    state={chips_state}
+                    options={chip_options}
+                    label="Compact chips"
+                    compact={true}
+                    error={chips_value.is_empty().then_some("Please select at least one language")}
+                />
             </div>
             <div class="base-demo-item">
                 <span class="base-demo-item-label">{"Tooltip"}</span>
@@ -823,16 +874,22 @@ pub fn Demo() -> Html {
                     min={date_min}
                     max={date_max}
                     required={true}
-                    error={date_error}
+                    error={date_error.clone()}
                 />
                 <span>
                     {"Selected date: "}
                     {datepicker_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
                 </span>
                 <DatePicker
-                    state={datepicker_state}
+                    state={datepicker_state.clone()}
                     label="Disabled date picker label"
                     disabled={true}
+                />
+                <DatePicker
+                    state={datepicker_state}
+                    label="Compact date picker"
+                    compact={true}
+                    error={date_error}
                 />
             </div>
             <div class="base-demo-item">

@@ -122,6 +122,9 @@ pub struct ChipsProps {
     /// The maximum number of characters allowed in the chip input.
     #[prop_or(524288)]
     pub max_length: usize,
+    /// Whether to compact the element into a smaller space.
+    #[prop_or(false)]
+    pub compact: bool,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -145,6 +148,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
         label,
         placeholder,
         max_length,
+        compact,
         error,
         disabled,
         node,
@@ -291,7 +295,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
     };
 
     html! {
-        <div class={classes!("base-chips-container", disabled.then_some("base-chips-container-disabled"), (*dropdown_open).then_some("base-chips-container-open"), error.as_ref().map(|_| "base-chips-container-invalid"))}>
+        <div class={classes!("base-chips-container", compact.then_some("base-chips-container-compact"), disabled.then_some("base-chips-container-disabled"), (*dropdown_open).then_some("base-chips-container-open"), error.as_ref().map(|_| "base-chips-container-invalid"))}>
             <label for={id.clone()} class="base-chips-label">{label}</label>
             <div ref={chips_node} class="base-chips">
                 <div class="base-chips-inner">
@@ -312,7 +316,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
                 </div>
                 {conditional_chip_options}
             </div>
-            <Error message={error} size={ErrorSize::Small} />
+            <Error message={error} size={ErrorSize::Small} class="base-chips-error" />
         </div>
     }
 }

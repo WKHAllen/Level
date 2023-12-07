@@ -21,6 +21,9 @@ pub struct SelectProps {
     /// Whether a selection is required.
     #[prop_or(false)]
     pub required: bool,
+    /// Whether to compact the element into a smaller space.
+    #[prop_or(false)]
+    pub compact: bool,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -41,6 +44,7 @@ pub fn Select(props: &SelectProps) -> Html {
         options,
         label,
         required,
+        compact,
         error,
         disabled,
         node,
@@ -99,7 +103,7 @@ pub fn Select(props: &SelectProps) -> Html {
     use_popup(popup_node.clone());
 
     html! {
-        <div class={classes!("base-select-container", disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
+        <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
             <label for={id.clone()} class="base-select-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
@@ -123,7 +127,7 @@ pub fn Select(props: &SelectProps) -> Html {
                     </div>
                 </div>
             </div>
-            <Error message={error} size={ErrorSize::Small} />
+            <Error message={error} size={ErrorSize::Small} class="base-select-error" />
         </div>
     }
 }
@@ -147,6 +151,9 @@ pub struct SelectNullableProps {
     /// Whether the selection is required to be in a non-null state.
     #[prop_or(false)]
     pub required: bool,
+    /// Whether to compact the element into a smaller space.
+    #[prop_or(false)]
+    pub compact: bool,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -168,6 +175,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         label,
         null_label,
         required,
+        compact,
         error,
         disabled,
         node,
@@ -240,7 +248,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
     use_popup(popup_node.clone());
 
     html! {
-        <div class={classes!("base-select-container", disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
+        <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
             <label for={id.clone()} class="base-select-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
@@ -267,7 +275,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
                     </div>
                 </div>
             </div>
-            <Error message={error} size={ErrorSize::Small} />
+            <Error message={error} size={ErrorSize::Small} class="base-select-error" />
         </div>
     }
 }
@@ -286,6 +294,9 @@ pub struct SelectEnumProps<T: SelectOptions> {
     /// Whether a selection is required.
     #[prop_or(false)]
     pub required: bool,
+    /// Whether to compact the element into a smaller space.
+    #[prop_or(false)]
+    pub compact: bool,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -305,6 +316,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         on_change,
         label,
         required,
+        compact,
         error,
         disabled,
         node,
@@ -362,7 +374,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
     use_popup(popup_node.clone());
 
     html! {
-        <div class={classes!("base-select-container", disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
+        <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
             <label for={id.clone()} class="base-select-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
@@ -386,7 +398,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
                     </div>
                 </div>
             </div>
-            <Error message={error} size={ErrorSize::Small} />
+            <Error message={error} size={ErrorSize::Small} class="base-select-error" />
         </div>
     }
 }
@@ -408,6 +420,9 @@ pub struct SelectNullableEnumProps<T: SelectOptions> {
     /// Whether the selection is required to be in a non-null state.
     #[prop_or(false)]
     pub required: bool,
+    /// Whether to compact the element into a smaller space.
+    #[prop_or(false)]
+    pub compact: bool,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -428,6 +443,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         label,
         null_label,
         required,
+        compact,
         error,
         disabled,
         node,
@@ -499,7 +515,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
     use_popup(popup_node.clone());
 
     html! {
-        <div class={classes!("base-select-container", disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
+        <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
             <label for={id.clone()} class="base-select-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
@@ -526,7 +542,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
                     </div>
                 </div>
             </div>
-            <Error message={error} size={ErrorSize::Small} />
+            <Error message={error} size={ErrorSize::Small} class="base-select-error" />
         </div>
     }
 }
