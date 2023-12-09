@@ -5,6 +5,26 @@ use yew_hooks::use_click_away;
 
 pub use common::SelectOptions;
 
+/// Position of a select popup.
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub enum SelectPopupPosition {
+    /// Position the popup above.
+    Above,
+    /// Position the popup below.
+    #[default]
+    Below,
+}
+
+impl SelectPopupPosition {
+    /// Gets the name of the position.
+    pub fn position_name(&self) -> &'static str {
+        match *self {
+            Self::Above => "above",
+            Self::Below => "below",
+        }
+    }
+}
+
 /// Select properties.
 #[derive(Properties, PartialEq, Clone)]
 pub struct SelectProps {
@@ -18,6 +38,9 @@ pub struct SelectProps {
     /// The selection label.
     #[prop_or_default]
     pub label: AttrValue,
+    /// The positioning of the popup.
+    #[prop_or_default]
+    pub position: SelectPopupPosition,
     /// Whether a selection is required.
     #[prop_or(false)]
     pub required: bool,
@@ -43,6 +66,7 @@ pub fn Select(props: &SelectProps) -> Html {
         on_change,
         options,
         label,
+        position,
         required,
         compact,
         error,
@@ -99,6 +123,8 @@ pub fn Select(props: &SelectProps) -> Html {
         })
         .collect::<Html>();
 
+    let position_class = format!("base-select-{}", position.position_name());
+
     let popup_node = use_node_ref();
     use_popup(popup_node.clone());
 
@@ -108,7 +134,7 @@ pub fn Select(props: &SelectProps) -> Html {
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
             </label>
-            <div ref={select_node} class="base-select">
+            <div ref={select_node} class={classes!("base-select", position_class)}>
                 <button
                     {id}
                     onclick={on_button_click}
@@ -148,6 +174,9 @@ pub struct SelectNullableProps {
     /// The null option label.
     #[prop_or("Select...".into())]
     pub null_label: AttrValue,
+    /// The positioning of the popup.
+    #[prop_or_default]
+    pub position: SelectPopupPosition,
     /// Whether the selection is required to be in a non-null state.
     #[prop_or(false)]
     pub required: bool,
@@ -174,6 +203,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         options,
         label,
         null_label,
+        position,
         required,
         compact,
         error,
@@ -244,6 +274,8 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         }
     };
 
+    let position_class = format!("base-select-{}", position.position_name());
+
     let popup_node = use_node_ref();
     use_popup(popup_node.clone());
 
@@ -253,7 +285,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
             </label>
-            <div ref={select_node} class="base-select">
+            <div ref={select_node} class={classes!("base-select", position_class)}>
                 <button
                     {id}
                     onclick={on_button_click}
@@ -291,6 +323,9 @@ pub struct SelectEnumProps<T: SelectOptions> {
     /// The selection label.
     #[prop_or_default]
     pub label: AttrValue,
+    /// The positioning of the popup.
+    #[prop_or_default]
+    pub position: SelectPopupPosition,
     /// Whether a selection is required.
     #[prop_or(false)]
     pub required: bool,
@@ -315,6 +350,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         state,
         on_change,
         label,
+        position,
         required,
         compact,
         error,
@@ -370,6 +406,8 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         })
         .collect::<Html>();
 
+    let position_class = format!("base-select-{}", position.position_name());
+
     let popup_node = use_node_ref();
     use_popup(popup_node.clone());
 
@@ -379,7 +417,7 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
             </label>
-            <div ref={select_node} class="base-select">
+            <div ref={select_node} class={classes!("base-select", position_class)}>
                 <button
                     {id}
                     onclick={on_button_click}
@@ -417,6 +455,9 @@ pub struct SelectNullableEnumProps<T: SelectOptions> {
     /// The null option label.
     #[prop_or("Select...".into())]
     pub null_label: AttrValue,
+    /// The positioning of the popup.
+    #[prop_or_default]
+    pub position: SelectPopupPosition,
     /// Whether the selection is required to be in a non-null state.
     #[prop_or(false)]
     pub required: bool,
@@ -442,6 +483,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         on_change,
         label,
         null_label,
+        position,
         required,
         compact,
         error,
@@ -511,6 +553,8 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         }
     };
 
+    let position_class = format!("base-select-{}", position.position_name());
+
     let popup_node = use_node_ref();
     use_popup(popup_node.clone());
 
@@ -520,7 +564,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
             </label>
-            <div ref={select_node} class="base-select">
+            <div ref={select_node} class={classes!("base-select", position_class)}>
                 <button
                     {id}
                     onclick={on_button_click}

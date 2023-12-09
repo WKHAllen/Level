@@ -321,6 +321,26 @@ impl Default for DatePickerState {
     }
 }
 
+/// Position of a date picker popup.
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub enum DatePickerPopupPosition {
+    /// Position the popup above.
+    Above,
+    /// Position the popup below.
+    #[default]
+    Below,
+}
+
+impl DatePickerPopupPosition {
+    /// Gets the name of the position.
+    pub fn position_name(&self) -> &'static str {
+        match *self {
+            Self::Above => "above",
+            Self::Below => "below",
+        }
+    }
+}
+
 /// Date picker properties.
 #[derive(Properties, PartialEq, Clone)]
 pub struct DatePickerProps {
@@ -338,6 +358,9 @@ pub struct DatePickerProps {
     /// The latest date to allow.
     #[prop_or(NaiveDate::from_ymd_opt(9999, 12, 31).unwrap())]
     pub max: NaiveDate,
+    /// The positioning of the popup.
+    #[prop_or_default]
+    pub position: DatePickerPopupPosition,
     /// Whether a date must be picked.
     #[prop_or(false)]
     pub required: bool,
@@ -371,6 +394,7 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         label,
         min,
         max,
+        position,
         required,
         compact,
         error,
@@ -555,13 +579,15 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         })
         .collect::<Html>();
 
+    let position_class = format!("base-date-picker-{}", position.position_name());
+
     html! {
         <div class={classes!("base-date-picker-container", compact.then_some("base-date-picker-container-compact"), disabled.then_some("base-date-picker-container-disabled"))}>
             <label for={year_id.clone()} class="base-date-picker-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
             </label>
-            <div class="base-date-picker-outer">
+            <div class={classes!("base-date-picker-outer", position_class)}>
                 <div class={classes!("base-date-picker", error_msg.as_ref().map(|_| "base-date-picker-invalid"))}>
                     <div class="base-date-picker-section">
                         <span
@@ -595,37 +621,39 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
                         <IconButton name="calendar-days-solid" size={IconButtonSize::Medium} {disabled} on_click={on_calendar_button_click} />
                     </div>
                 </div>
-                <div class={classes!("base-date-picker-popup-container", (*calendar_open).then_some("base-date-picker-popup-container-open"))}>
-                    <div ref={popup_node} class="base-date-picker-popup">
-                        <div class="base-date-picker-calendar">
-                            <div class="base-date-picker-calendar-month-controls">
-                                <IconButton
-                                    name="angle-left-solid"
-                                    size={IconButtonSize::Medium}
-                                    on_click={on_prev_month_click}
-                                    disabled={prev_month_disabled}
-                                />
-                                <span class="base-date-picker-calendar-month">{viewing_calendar_month_name}</span>
-                                <IconButton
-                                    name="angle-right-solid"
-                                    size={IconButtonSize::Medium}
-                                    on_click={on_next_month_click}
-                                    disabled={next_month_disabled}
-                                />
-                            </div>
-                            <div class="base-date-picker-calendar-days-of-week">
-                                <span>{"Su"}</span>
-                                <span>{"Mo"}</span>
-                                <span>{"Tu"}</span>
-                                <span>{"We"}</span>
-                                <span>{"Th"}</span>
-                                <span>{"Fr"}</span>
-                                <span>{"Sa"}</span>
-                            </div>
-                            <div class="base-date-picker-calendar-view">
-                                {calendar_days_prev}
-                                {calendar_days_current}
-                                {calendar_days_next}
+                <div class={classes!("base-date-picker-popup-container-outer", (*calendar_open).then_some("base-date-picker-popup-container-open"))}>
+                    <div class="base-date-picker-popup-container-inner">
+                        <div ref={popup_node} class="base-date-picker-popup">
+                            <div class="base-date-picker-calendar">
+                                <div class="base-date-picker-calendar-month-controls">
+                                    <IconButton
+                                        name="angle-left-solid"
+                                        size={IconButtonSize::Medium}
+                                        on_click={on_prev_month_click}
+                                        disabled={prev_month_disabled}
+                                    />
+                                    <span class="base-date-picker-calendar-month">{viewing_calendar_month_name}</span>
+                                    <IconButton
+                                        name="angle-right-solid"
+                                        size={IconButtonSize::Medium}
+                                        on_click={on_next_month_click}
+                                        disabled={next_month_disabled}
+                                    />
+                                </div>
+                                <div class="base-date-picker-calendar-days-of-week">
+                                    <span>{"Su"}</span>
+                                    <span>{"Mo"}</span>
+                                    <span>{"Tu"}</span>
+                                    <span>{"We"}</span>
+                                    <span>{"Th"}</span>
+                                    <span>{"Fr"}</span>
+                                    <span>{"Sa"}</span>
+                                </div>
+                                <div class="base-date-picker-calendar-view">
+                                    {calendar_days_prev}
+                                    {calendar_days_current}
+                                    {calendar_days_next}
+                                </div>
                             </div>
                         </div>
                     </div>

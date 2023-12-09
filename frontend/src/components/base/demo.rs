@@ -535,6 +535,13 @@ pub fn Demo() -> Html {
                     disabled={true}
                 />
                 <Select
+                    state={select_state.clone()}
+                    options={select_options.clone()}
+                    label="Select above"
+                    position={SelectPopupPosition::Above}
+                    error={(select_value == 2).then_some("Please select something other than 3")}
+                />
+                <Select
                     state={select_state}
                     options={select_options.clone()}
                     label="Compact select"
@@ -563,6 +570,13 @@ pub fn Demo() -> Html {
                     disabled={true}
                 />
                 <SelectNullable
+                    state={select_with_null_state.clone()}
+                    options={select_options.clone()}
+                    label="Select nullable above"
+                    position={SelectPopupPosition::Above}
+                    error={select_with_null_value.is_none().then_some("Please select a value")}
+                />
+                <SelectNullable
                     state={select_with_null_state}
                     options={select_options.clone()}
                     label="Compact select nullable"
@@ -583,6 +597,12 @@ pub fn Demo() -> Html {
                     state={select_enum_state.clone()}
                     label="Disabled select enum label"
                     disabled={true}
+                />
+                <SelectEnum<DemoSelectEnum>
+                    state={select_enum_state.clone()}
+                    label="Select enum above"
+                    position={SelectPopupPosition::Above}
+                    error={(select_enum_value == DemoSelectEnum::Three).then_some("Please pick something other than three")}
                 />
                 <SelectEnum<DemoSelectEnum>
                     state={select_enum_state}
@@ -608,6 +628,12 @@ pub fn Demo() -> Html {
                     state={select_with_null_enum_state.clone()}
                     label="Disabled select nullable enum label"
                     disabled={true}
+                />
+                <SelectNullableEnum<DemoSelectEnum>
+                    state={select_with_null_enum_state.clone()}
+                    label="Select nullable enum above"
+                    position={SelectPopupPosition::Above}
+                    error={select_with_null_enum_value.is_none().then_some("Please select a value")}
                 />
                 <SelectNullableEnum<DemoSelectEnum>
                     state={select_with_null_enum_state}
@@ -823,6 +849,13 @@ pub fn Demo() -> Html {
                     disabled={true}
                 />
                 <Chips
+                    state={chips_state.clone()}
+                    options={chip_options.clone()}
+                    label="Chips above"
+                    position={ChipsPopupPosition::Above}
+                    error={chips_value.is_empty().then_some("Please select at least one language")}
+                />
+                <Chips
                     state={chips_state}
                     options={chip_options}
                     label="Compact chips"
@@ -884,6 +917,12 @@ pub fn Demo() -> Html {
                     state={datepicker_state.clone()}
                     label="Disabled date picker label"
                     disabled={true}
+                />
+                <DatePicker
+                    state={datepicker_state.clone()}
+                    label="Date picker above"
+                    position={DatePickerPopupPosition::Above}
+                    error={date_error.clone()}
                 />
                 <DatePicker
                     state={datepicker_state}

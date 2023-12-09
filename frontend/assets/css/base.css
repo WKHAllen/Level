@@ -1467,6 +1467,14 @@ body {
   flex-direction: column;
 }
 
+.base-select-above {
+  flex-direction: column-reverse;
+}
+
+.base-select-below {
+  flex-direction: column;
+}
+
 .base-select-button {
   background-color: var(--base-select-button-background-color);
   color: var(--base-select-button-text-color);
@@ -1529,6 +1537,14 @@ body {
   border-radius: var(--base-select-popup-border-radius);
   box-shadow: var(--base-standard-box-shadow);
   padding: 4px 0;
+}
+
+.base-select-above .base-select-popup {
+  bottom: 0;
+}
+
+.base-select-below .base-select-popup {
+  top: 0;
 }
 
 .base-select-container-open .base-select-popup {
@@ -1903,6 +1919,19 @@ body {
   font-size: var(--base-standard-label-size);
 }
 
+.base-chips {
+  display: flex;
+  flex-direction: column;
+}
+
+.base-chips-above {
+  flex-direction: column-reverse;
+}
+
+.base-chips-below {
+  flex-direction: column;
+}
+
 .base-chips-inner {
   background-color: var(--base-input-background-color);
   color: var(--base-input-text-color);
@@ -1984,6 +2013,14 @@ body {
   border-radius: var(--base-chips-popup-border-radius);
   box-shadow: var(--base-standard-box-shadow);
   padding: 4px 0;
+}
+
+.base-chips-above .base-chips-options-popup {
+  bottom: 0;
+}
+
+.base-chips-below .base-chips-options-popup {
+  top: 0;
 }
 
 .base-chips-container-open .base-chips-options-popup {
@@ -2169,6 +2206,14 @@ body {
   flex-direction: column;
 }
 
+.base-date-picker-above {
+  flex-direction: column-reverse;
+}
+
+.base-date-picker-below {
+  flex-direction: column;
+}
+
 .base-date-picker {
   background-color: var(--base-input-background-color);
   color: var(--base-date-picker-text-color);
@@ -2209,17 +2254,34 @@ body {
   font-size: var(--base-date-picker-input-font-size);
 }
 
-.base-date-picker-popup-container {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
+.base-date-picker-popup-container-outer {
+  position: relative;
+}
+
+.base-date-picker-popup-container-inner {
+  position: absolute;
+  right: 0;
+  width: max-content;
+  z-index: -1;
+  transition: z-index 0s linear 0.5s;
+}
+
+.base-date-picker-above .base-date-picker-popup-container-inner {
+  bottom: 0;
+}
+
+.base-date-picker-below .base-date-picker-popup-container-inner {
+  top: 0;
+}
+
+.base-date-picker-popup-container-open .base-date-picker-popup-container-inner {
+  z-index: 1;
+  transition: z-index 0s linear 0s;
 }
 
 .base-date-picker-popup {
-  position: absolute;
   visibility: hidden;
   opacity: 0;
-  z-index: 1;
   transition: visibility 0.5s, opacity 0.2s linear 0.125s;
   background-color: var(--base-date-picker-popup-background-color);
   border-radius: var(--base-date-picker-popup-border-radius);

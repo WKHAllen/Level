@@ -97,6 +97,26 @@ fn get_possible_options(
     limited_matches.iter().map(|(option, _)| *option).collect()
 }
 
+/// Position of a chips popup.
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub enum ChipsPopupPosition {
+    /// Position the popup above.
+    Above,
+    /// Position the popup below.
+    #[default]
+    Below,
+}
+
+impl ChipsPopupPosition {
+    /// Gets the name of the position.
+    pub fn position_name(&self) -> &'static str {
+        match *self {
+            Self::Above => "above",
+            Self::Below => "below",
+        }
+    }
+}
+
 /// Chips properties.
 #[derive(Properties, PartialEq, Clone)]
 pub struct ChipsProps {
@@ -119,6 +139,9 @@ pub struct ChipsProps {
     /// Chips input placeholder text.
     #[prop_or_default]
     pub placeholder: AttrValue,
+    /// The positioning of the popup.
+    #[prop_or_default]
+    pub position: ChipsPopupPosition,
     /// The maximum number of characters allowed in the chip input.
     #[prop_or(524288)]
     pub max_length: usize,
@@ -147,6 +170,7 @@ pub fn Chips(props: &ChipsProps) -> Html {
         max_selections,
         label,
         placeholder,
+        position,
         max_length,
         compact,
         error,
@@ -294,10 +318,12 @@ pub fn Chips(props: &ChipsProps) -> Html {
         }
     };
 
+    let position_class = format!("base-chips-{}", position.position_name());
+
     html! {
         <div class={classes!("base-chips-container", compact.then_some("base-chips-container-compact"), disabled.then_some("base-chips-container-disabled"), (*dropdown_open).then_some("base-chips-container-open"), error.as_ref().map(|_| "base-chips-container-invalid"))}>
             <label for={id.clone()} class="base-chips-label">{label}</label>
-            <div ref={chips_node} class="base-chips">
+            <div ref={chips_node} class={classes!("base-chips", position_class)}>
                 <div class="base-chips-inner">
                     {conditional_chip_list}
                     <input
