@@ -326,19 +326,21 @@ pub fn Chips(props: &ChipsProps) -> Html {
             <div ref={chips_node} class={classes!("base-chips", position_class)}>
                 <div class="base-chips-inner">
                     {conditional_chip_list}
-                    <input
-                        type="text"
-                        value={next_chip}
-                        {id}
-                        {oninput}
-                        {onfocusin}
-                        {onkeydown}
-                        {placeholder}
-                        {disabled}
-                        maxlength={max_length.to_string()}
-                        class="base-chips-input"
-                        ref={node}
-                    />
+                    <div class="base-chips-input-box-container">
+                        <input
+                            type="text"
+                            value={next_chip}
+                            {id}
+                            {oninput}
+                            {onfocusin}
+                            {onkeydown}
+                            {placeholder}
+                            {disabled}
+                            maxlength={max_length.to_string()}
+                            class="base-chips-input"
+                            ref={node}
+                        />
+                    </div>
                 </div>
                 {conditional_chip_options}
             </div>

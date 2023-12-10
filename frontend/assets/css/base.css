@@ -792,9 +792,18 @@ body {
   gap: var(--base-padding-small);
 }
 
+.base-input-label-container {
+  display: flex;
+}
+
+.base-input-box-container {
+  display: flex;
+}
+
 .base-input {
   background-color: var(--base-input-background-color);
   color: var(--base-input-text-color);
+  width: 100%;
   padding: 6px 7px;
   border: var(--base-standard-border);
   border-radius: var(--base-input-border-radius);
@@ -870,9 +879,18 @@ body {
   gap: var(--base-padding-small);
 }
 
+.base-textarea-label-container {
+  display: flex;
+}
+
+.base-textarea-box-container {
+  display: flex;
+}
+
 .base-textarea {
   background-color: var(--base-textarea-background-color);
   color: var(--base-textarea-text-color);
+  width: 100%;
   padding: 6px 7px;
   border: var(--base-standard-border);
   border-radius: var(--base-textarea-border-radius);
@@ -1988,7 +2006,12 @@ body {
   font-size: var(--base-chips-chip-label-size);
 }
 
+.base-chips-input-box-container {
+  display: flex;
+}
+
 .base-chips-input {
+  width: 100%;
   background-color: inherit;
   color: inherit;
   border: none;

@@ -112,23 +112,27 @@ pub fn Input(props: &InputProps) -> Html {
 
     html! {
         <div class={classes!("base-input-container", compact.then_some("base-input-container-compact"), disabled.then_some("base-input-container-disabled"))}>
-            <label for={id.clone()} class="base-input-label">
-                {label}
-                <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
-            </label>
-            <input
-                type={html_input_type}
-                {value}
-                {id}
-                {oninput}
-                {onkeydown}
-                {placeholder}
-                {required}
-                {disabled}
-                maxlength={max_length.to_string()}
-                class={classes!("base-input", error.as_ref().map(|_| "base-input-invalid"))}
-                ref={node}
-            />
+            <div class="base-input-label-container">
+                <label for={id.clone()} class="base-input-label">
+                    {label}
+                    <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
+                </label>
+            </div>
+            <div class="base-input-box-container">
+                <input
+                    type={html_input_type}
+                    {value}
+                    {id}
+                    {oninput}
+                    {onkeydown}
+                    {placeholder}
+                    {required}
+                    {disabled}
+                    maxlength={max_length.to_string()}
+                    class={classes!("base-input", error.as_ref().map(|_| "base-input-invalid"))}
+                    ref={node}
+                />
+            </div>
             <Error message={error} size={ErrorSize::Small} class="base-input-error" />
         </div>
     }

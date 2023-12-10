@@ -211,6 +211,36 @@ img {
   flex-grow: 1;
 }
 
+.account-transactions-new {
+  display: grid;
+  grid-template-columns:
+    minmax(100px, 2fr) minmax(120px, 3fr) minmax(100px, 1fr)
+    minmax(100px, 1fr) minmax(150px, 2fr) minmax(120px, 2fr) minmax(150px, 2fr)
+    minmax(150px, 2fr) minmax(150px, 2fr) 25px;
+  gap: 1px;
+  border-top: 1px solid #7f7f7f3f;
+  background-color: #7f7f7f3f;
+}
+
+.account-transactions-new .account-transactions-new-input {
+  display: flex;
+}
+
+.account-transactions-new .account-transactions-new-input > * {
+  flex-grow: 1;
+}
+
+.account-transaction-create-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--base-background-color-1);
+  border: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
 .account-transaction {
 }
 
