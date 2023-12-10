@@ -280,7 +280,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
     use_popup(popup_node.clone());
 
     html! {
-        <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
+        <div class={classes!("base-select-container", "base-select-nullable", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
             <label for={id.clone()} class="base-select-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
@@ -559,7 +559,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
     use_popup(popup_node.clone());
 
     html! {
-        <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
+        <div class={classes!("base-select-container", "base-select-nullable", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
             <label for={id.clone()} class="base-select-label">
                 {label}
                 <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>

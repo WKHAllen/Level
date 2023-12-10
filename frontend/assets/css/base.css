@@ -1578,6 +1578,10 @@ body {
   transition: background-color 0.1s linear;
 }
 
+.base-select-nullable .base-select-option:first-child {
+  color: var(--base-select-option-color-disabled);
+}
+
 .base-select-container-open .base-select-option:hover {
   background-color: var(--base-select-popup-background-color-hover);
 }
