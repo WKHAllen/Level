@@ -4,6 +4,8 @@ use std::borrow::Borrow;
 use std::fmt::Display;
 use yew::prelude::*;
 
+pub use frontend_common::validate_all;
+
 /// Performs validation on a stateful value using a validator function. This
 /// will automatically set the error state.
 pub fn validate<V, I, O, F, E>(
@@ -105,47 +107,20 @@ where
     }
 }
 
-/// Performs validation on a variable number of stateful values and collapses
-/// the resulting `Option`s into a single `Option`.
-macro_rules! validate_all {
-    ( $( $value:expr ),* $(,)? ) => {{
-        let value = 'block: {
-            Some((
-                $(
-                    match $value {
-                        Some(value) => value,
-                        None => { break 'block None; }
-                    }
-                ),*
-            ))
-        };
-        value
-    }};
-}
-
-pub(crate) use validate_all;
-
-const STANDARD_NAME_MIN_LENGTH: usize = 1;
 const STANDARD_NAME_MAX_LENGTH: usize = 255;
 const STANDARD_DESCRIPTION_MAX_LENGTH: usize = 1023;
-const SAVE_NAME_MIN_LENGTH: usize = STANDARD_NAME_MIN_LENGTH;
 const SAVE_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
 const SAVE_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
 const SAVE_PASSWORD_MIN_LENGTH: usize = 8;
 const SAVE_PASSWORD_MAX_LENGTH: usize = 255;
-const ACCOUNT_NAME_MIN_LENGTH: usize = STANDARD_NAME_MIN_LENGTH;
 const ACCOUNT_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
 const ACCOUNT_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
-const TRANSACTION_NAME_MIN_LENGTH: usize = STANDARD_NAME_MIN_LENGTH;
 const TRANSACTION_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
 const TRANSACTION_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
 
 pub fn validate_save_name(name: &str) -> Result<String, String> {
-    if name.len() < SAVE_NAME_MIN_LENGTH {
-        Err(format!(
-            "Save name must be at least {} characters long",
-            SAVE_NAME_MIN_LENGTH
-        ))
+    if name.is_empty() {
+        Err("Save name cannot be empty".to_owned())
     } else if name.len() > SAVE_NAME_MAX_LENGTH {
         Err(format!(
             "Save name must be at most {} characters long",
@@ -195,11 +170,8 @@ pub fn validate_account_type(
 }
 
 pub fn validate_account_name(name: &str) -> Result<String, String> {
-    if name.len() < ACCOUNT_NAME_MIN_LENGTH {
-        Err(format!(
-            "Account name must be at least {} characters long",
-            ACCOUNT_NAME_MIN_LENGTH
-        ))
+    if name.is_empty() {
+        Err("Account name cannot be empty".to_owned())
     } else if name.len() > ACCOUNT_NAME_MAX_LENGTH {
         Err(format!(
             "Account name must be at most {} characters long",
@@ -222,11 +194,8 @@ pub fn validate_account_description(description: &str) -> Result<String, String>
 }
 
 pub fn validate_transaction_name(name: &str) -> Result<String, String> {
-    if name.len() < TRANSACTION_NAME_MIN_LENGTH {
-        Err(format!(
-            "Transaction name must be at least {} characters long",
-            TRANSACTION_NAME_MIN_LENGTH
-        ))
+    if name.is_empty() {
+        Err("Transaction name cannot be empty".to_owned())
     } else if name.len() > TRANSACTION_NAME_MAX_LENGTH {
         Err(format!(
             "Transaction name must be at most {} characters long",

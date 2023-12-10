@@ -5,10 +5,10 @@
 
 use commands::FRONTENDCOMMANDS_METHODS;
 use proc_macro::TokenStream;
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::token::Comma;
-use syn::{parse_macro_input, FnArg, ItemStruct, Signature};
+use syn::{parse_macro_input, Expr, FnArg, ItemStruct, Signature};
 
 /// Implement application command methods for the frontend.
 #[proc_macro_derive(FrontendCommands)]
@@ -67,6 +67,35 @@ pub fn derive_frontend_commands(item: TokenStream) -> TokenStream {
         #[::async_trait::async_trait(?Send)]
         impl ::commands::FrontendCommands for #ident {
             #(#methods)*
+        }
+    }
+    .into()
+}
+
+/// Performs validation on a variable number of stateful values and collapses
+/// the resulting `Option`s into a single `Option`, where the final `Option`
+/// is `Some` if and only if all values in the original tuple of `Option`s are
+/// also `Some`.
+///
+/// In other words, this runs all validator functions and converts the
+/// resulting `(Option<T1>, Option<T2>, Option<T3>, ...)` into
+/// `Option<(T1, T2, T3, ...)>`.
+#[proc_macro]
+pub fn validate_all(item: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(item with Punctuated::<Expr, Comma>::parse_terminated);
+
+    let value_idents = input
+        .iter()
+        .enumerate()
+        .map(|(index, _)| format_ident!("value{}", index))
+        .collect::<Vec<_>>();
+
+    let some_values = value_idents.iter().map(|ident| quote! { Some(#ident) });
+
+    quote! {
+        match (#input) {
+            (#(#some_values),*) => Some((#(#value_idents),*)),
+            _ => None,
         }
     }
     .into()
