@@ -58,7 +58,8 @@ pub fn Open() -> Html {
     let save_password = (*save_password_state).clone();
     let unlock_save_error = (*unlock_save_error_state).clone();
 
-    let password_input_focus = use_focus();
+    let password_input_node = use_node_ref();
+    let password_input_focus = use_focus(password_input_node);
 
     let default_timestamp = NaiveDate::from_ymd_opt(0000, 1, 1)
         .unwrap()

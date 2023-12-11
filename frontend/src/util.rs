@@ -60,6 +60,13 @@ pub fn focus_element(node: &NodeRef) {
     }
 }
 
+/// Unfocuses an element in the DOM.
+pub fn unfocus_element(node: &NodeRef) {
+    if let Some(node) = node.get() {
+        node.dyn_ref::<HtmlElement>().unwrap().blur().unwrap();
+    }
+}
+
 /// Selects the content of an element in the DOM.
 pub fn select_element_content(node: &NodeRef) {
     if let Some(node) = node.get() {

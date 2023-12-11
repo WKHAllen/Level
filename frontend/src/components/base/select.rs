@@ -1,7 +1,7 @@
 use super::*;
 use crate::hooks::*;
 use yew::prelude::*;
-use yew_hooks::use_click_away;
+use yew_hooks::{use_click_away, use_event_with_window};
 
 pub use common::SelectOptions;
 
@@ -79,6 +79,17 @@ pub fn Select(props: &SelectProps) -> Html {
     let id_state = use_id();
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
+    let selecting = use_state(|| None);
+    let selecting_value = *selecting;
+
+    use_effect_with(dropdown_open.clone(), {
+        let selecting = selecting.clone();
+        move |open| {
+            if !**open {
+                selecting.set(None);
+            }
+        }
+    });
 
     let on_button_click = {
         let dropdown_open = dropdown_open.clone();
@@ -115,8 +126,10 @@ pub fn Select(props: &SelectProps) -> Html {
                 }
             };
 
+            let selecting_this = selecting_value == Some(index);
+
             html! {
-                <div onclick={on_option_click} class="base-select-option">
+                <div onclick={on_option_click} class={classes!("base-select-option", selecting_this.then_some("base-select-option-selecting"))}>
                     {option}
                 </div>
             }
@@ -127,6 +140,48 @@ pub fn Select(props: &SelectProps) -> Html {
 
     let popup_node = use_node_ref();
     use_popup(popup_node.clone());
+
+    use_event_with_window("keydown", {
+        let dropdown_open = dropdown_open.clone();
+        let selecting = selecting.clone();
+        move |event: KeyboardEvent| {
+            if *dropdown_open {
+                if event.key_code() == 38 {
+                    // up arrow
+                    if !options.is_empty() {
+                        selecting.set(Some(
+                            selecting
+                                .map(|value| (value + options.len() - 1) % options.len())
+                                .unwrap_or(options.len() - 1),
+                        ));
+                    }
+
+                    event.prevent_default();
+                } else if event.key_code() == 40 {
+                    // down arrow
+                    if !options.is_empty() {
+                        selecting.set(Some(
+                            selecting
+                                .map(|value| (value + 1) % options.len())
+                                .unwrap_or(0),
+                        ));
+                    }
+
+                    event.prevent_default();
+                } else if event.key_code() == 32 || event.key_code() == 13 {
+                    // space/enter
+                    if let Some(selecting_index) = *selecting {
+                        state.set(selecting_index);
+                        dropdown_open.set(false);
+                        event.prevent_default();
+                    }
+                } else if event.key_code() == 27 || event.key_code() == 8 {
+                    // escape/backspace
+                    dropdown_open.set(false);
+                }
+            }
+        }
+    });
 
     html! {
         <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
@@ -216,6 +271,17 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
     let id_state = use_id();
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
+    let selecting = use_state(|| None);
+    let selecting_value = *selecting;
+
+    use_effect_with(dropdown_open.clone(), {
+        let selecting = selecting.clone();
+        move |open| {
+            if !**open {
+                selecting.set(None);
+            }
+        }
+    });
 
     let on_button_click = {
         let dropdown_open = dropdown_open.clone();
@@ -258,8 +324,10 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
                 }
             };
 
+            let selecting_this = selecting_value == Some(index);
+
             html! {
-                <div onclick={on_option_click} class="base-select-option">
+                <div onclick={on_option_click} class={classes!("base-select-option", selecting_this.then_some("base-select-option-selecting"))}>
                     {option}
                 </div>
             }
@@ -267,6 +335,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         .collect::<Html>();
 
     let on_null_click = {
+        let state = state.clone();
         let dropdown_open = dropdown_open.clone();
         move |_| {
             state.set(None);
@@ -278,6 +347,54 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
 
     let popup_node = use_node_ref();
     use_popup(popup_node.clone());
+
+    let selecting_null = selecting_value == Some(options.len());
+
+    use_event_with_window("keydown", {
+        let dropdown_open = dropdown_open.clone();
+        let selecting = selecting.clone();
+        move |event: KeyboardEvent| {
+            if *dropdown_open {
+                if event.key_code() == 38 {
+                    // up arrow
+                    selecting.set(Some(
+                        selecting
+                            .map(|value| (value + options.len()) % (options.len() + 1))
+                            .unwrap_or(if !options.is_empty() {
+                                options.len() - 1
+                            } else {
+                                0
+                            }),
+                    ));
+                    event.prevent_default();
+                } else if event.key_code() == 40 {
+                    // down arrow
+                    selecting.set(Some(
+                        selecting
+                            .map(|value| (value + 1) % (options.len() + 1))
+                            .unwrap_or(options.len()),
+                    ));
+                    event.prevent_default();
+                } else if event.key_code() == 32 || event.key_code() == 13 {
+                    // space/enter
+                    if let Some(selecting_index) = *selecting {
+                        if selecting_index < options.len() {
+                            state.set(Some(selecting_index));
+                            dropdown_open.set(false);
+                        } else {
+                            state.set(None);
+                            dropdown_open.set(false);
+                        }
+
+                        event.prevent_default();
+                    }
+                } else if event.key_code() == 27 || event.key_code() == 8 {
+                    // escape/backspace
+                    dropdown_open.set(false);
+                }
+            }
+        }
+    });
 
     html! {
         <div class={classes!("base-select-container", "base-select-nullable", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
@@ -300,7 +417,7 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
                 </button>
                 <div class="base-select-dropdown">
                     <div ref={popup_node} class="base-select-popup">
-                        <div onclick={on_null_click} class="base-select-option">
+                        <div onclick={on_null_click} class={classes!("base-select-option", selecting_null.then_some("base-select-option-selecting"))}>
                             <>{null_label}</>
                         </div>
                         {option_selections}
@@ -363,6 +480,17 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
     let id_state = use_id();
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
+    let selecting = use_state(|| None);
+    let selecting_value = *selecting;
+
+    use_effect_with(dropdown_open.clone(), {
+        let selecting = selecting.clone();
+        move |open| {
+            if !**open {
+                selecting.set(None);
+            }
+        }
+    });
 
     let on_button_click = {
         let dropdown_open = dropdown_open.clone();
@@ -398,8 +526,10 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
                 }
             };
 
+            let selecting_this = selecting_value == Some(index);
+
             html! {
-                <div onclick={on_option_click} class="base-select-option">
+                <div onclick={on_option_click} class={classes!("base-select-option", selecting_this.then_some("base-select-option-selecting"))}>
                     {option}
                 </div>
             }
@@ -410,6 +540,48 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
 
     let popup_node = use_node_ref();
     use_popup(popup_node.clone());
+
+    use_event_with_window("keydown", {
+        let dropdown_open = dropdown_open.clone();
+        let selecting = selecting.clone();
+        move |event: KeyboardEvent| {
+            if *dropdown_open {
+                if event.key_code() == 38 {
+                    // up arrow
+                    if T::NUM_OPTIONS != 0 {
+                        selecting.set(Some(
+                            selecting
+                                .map(|value| (value + T::NUM_OPTIONS - 1) % T::NUM_OPTIONS)
+                                .unwrap_or(T::NUM_OPTIONS - 1),
+                        ));
+                    }
+
+                    event.prevent_default();
+                } else if event.key_code() == 40 {
+                    // down arrow
+                    if T::NUM_OPTIONS != 0 {
+                        selecting.set(Some(
+                            selecting
+                                .map(|value| (value + 1) % T::NUM_OPTIONS)
+                                .unwrap_or(0),
+                        ));
+                    }
+
+                    event.prevent_default();
+                } else if event.key_code() == 32 || event.key_code() == 13 {
+                    // space/enter
+                    if let Some(selecting_index) = *selecting {
+                        state.set(T::from_index(selecting_index));
+                        dropdown_open.set(false);
+                        event.prevent_default();
+                    }
+                } else if event.key_code() == 27 || event.key_code() == 8 {
+                    // escape/backspace
+                    dropdown_open.set(false);
+                }
+            }
+        }
+    });
 
     html! {
         <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
@@ -496,6 +668,17 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
     let id_state = use_id();
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
+    let selecting = use_state(|| None);
+    let selecting_value = *selecting;
+
+    use_effect_with(dropdown_open.clone(), {
+        let selecting = selecting.clone();
+        move |open| {
+            if !**open {
+                selecting.set(None);
+            }
+        }
+    });
 
     let on_button_click = {
         let dropdown_open = dropdown_open.clone();
@@ -537,8 +720,10 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
                 }
             };
 
+            let selecting_this = selecting_value == Some(index);
+
             html! {
-                <div onclick={on_option_click} class="base-select-option">
+                <div onclick={on_option_click} class={classes!("base-select-option", selecting_this.then_some("base-select-option-selecting"))}>
                     {option}
                 </div>
             }
@@ -546,6 +731,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         .collect::<Html>();
 
     let on_null_click = {
+        let state = state.clone();
         let dropdown_open = dropdown_open.clone();
         move |_| {
             state.set(None);
@@ -557,6 +743,54 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
 
     let popup_node = use_node_ref();
     use_popup(popup_node.clone());
+
+    let selecting_null = selecting_value == Some(T::NUM_OPTIONS);
+
+    use_event_with_window("keydown", {
+        let dropdown_open = dropdown_open.clone();
+        let selecting = selecting.clone();
+        move |event: KeyboardEvent| {
+            if *dropdown_open {
+                if event.key_code() == 38 {
+                    // up arrow
+                    selecting.set(Some(
+                        selecting
+                            .map(|value| (value + T::NUM_OPTIONS) % (T::NUM_OPTIONS + 1))
+                            .unwrap_or(if T::NUM_OPTIONS != 0 {
+                                T::NUM_OPTIONS - 1
+                            } else {
+                                0
+                            }),
+                    ));
+                    event.prevent_default();
+                } else if event.key_code() == 40 {
+                    // down arrow
+                    selecting.set(Some(
+                        selecting
+                            .map(|value| (value + 1) % (T::NUM_OPTIONS + 1))
+                            .unwrap_or(T::NUM_OPTIONS),
+                    ));
+                    event.prevent_default();
+                } else if event.key_code() == 32 || event.key_code() == 13 {
+                    // space/enter
+                    if let Some(selecting_index) = *selecting {
+                        if selecting_index < T::NUM_OPTIONS {
+                            state.set(Some(T::from_index(selecting_index)));
+                            dropdown_open.set(false);
+                        } else {
+                            state.set(None);
+                            dropdown_open.set(false);
+                        }
+
+                        event.prevent_default();
+                    }
+                } else if event.key_code() == 27 || event.key_code() == 8 {
+                    // escape/backspace
+                    dropdown_open.set(false);
+                }
+            }
+        }
+    });
 
     html! {
         <div class={classes!("base-select-container", "base-select-nullable", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
@@ -579,7 +813,7 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
                 </button>
                 <div class="base-select-dropdown">
                     <div ref={popup_node} class="base-select-popup">
-                        <div onclick={on_null_click} class="base-select-option">
+                        <div onclick={on_null_click} class={classes!("base-select-option", selecting_null.then_some("base-select-option-selecting"))}>
                             <>{null_label}</>
                         </div>
                         {option_selections}

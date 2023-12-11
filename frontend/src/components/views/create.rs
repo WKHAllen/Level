@@ -23,7 +23,8 @@ pub fn Create() -> Html {
     let create_save_error_state = use_state(|| None);
     let loading_overlay_state = use_state(|| false);
 
-    let save_name_focus = use_focus();
+    let save_name_node = use_node_ref();
+    let save_name_focus = use_focus(save_name_node);
     use_mount({
         let save_name_focus = save_name_focus.clone();
         move || {

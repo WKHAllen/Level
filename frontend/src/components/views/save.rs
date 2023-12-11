@@ -309,6 +309,7 @@ pub fn Save() -> Html {
                         let mut loaded_transactions = (*loaded_transactions_state).clone();
                         loaded_transactions.push(transaction.clone());
                         loaded_transactions_state.set(loaded_transactions);
+                        // TODO: clear all new transaction input error states
                     }
                 }
             }

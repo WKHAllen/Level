@@ -40,12 +40,17 @@ impl UseFocusHandle {
         })
         .forget();
     }
+
+    /// Unfocuses the element.
+    pub fn unfocus(&self) {
+        if let Some(node) = self.node.get() {
+            node.dyn_ref::<HtmlElement>().unwrap().blur().unwrap();
+        }
+    }
 }
 
 /// Focus an element.
 #[hook]
-pub fn use_focus() -> UseFocusHandle {
-    let node = use_node_ref();
-
+pub fn use_focus(node: NodeRef) -> UseFocusHandle {
     UseFocusHandle { node }
 }

@@ -1500,7 +1500,6 @@ body {
   padding: 6px 12px;
   border: var(--base-standard-border);
   border-radius: var(--base-select-button-border-radius);
-  outline: none;
   transition: border 0.1s ease;
   display: flex;
   flex-direction: row;
@@ -1588,6 +1587,10 @@ body {
 
 .base-select-container-open .base-select-option:active {
   background-color: var(--base-select-popup-background-color-active);
+}
+
+.base-select-container-open .base-select-option-selecting {
+  background-color: var(--base-select-popup-background-color-hover);
 }
 
 .base-select-container-disabled .base-select-label {
