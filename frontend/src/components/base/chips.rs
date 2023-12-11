@@ -2,7 +2,7 @@ use super::*;
 use crate::hooks::*;
 use crate::util::*;
 use yew::prelude::*;
-use yew_hooks::use_click_away;
+use yew_hooks::{use_click_away, use_event_with_window};
 
 /// Compares an option to a typed out value, returning a score indicating the
 /// strength of the match, or `None` if the strings do not match.
@@ -187,6 +187,18 @@ pub fn Chips(props: &ChipsProps) -> Html {
     let id_state = use_id();
     let id = (*id_state).clone();
     let dropdown_open = use_state(|| false);
+    let selecting = use_state(|| None);
+    let selecting_value = *selecting;
+
+    use_effect_with(dropdown_open.clone(), {
+        let selecting = selecting.clone();
+        move |open| {
+            if !**open {
+                selecting.set(None);
+            }
+        }
+    });
+
     let possible_options = get_possible_options(
         &options,
         &state,
@@ -205,31 +217,6 @@ pub fn Chips(props: &ChipsProps) -> Html {
         let dropdown_open = dropdown_open.clone();
         move |_| {
             dropdown_open.set(true);
-        }
-    };
-    let onkeydown = {
-        let first_option_index = possible_options.first().copied();
-        let state = state.clone();
-        let next_chip_state = next_chip_state.clone();
-        move |event: KeyboardEvent| match event.key_code() {
-            13 => {
-                // enter
-                if let Some(option_index) = first_option_index {
-                    let mut chips = (*state).clone();
-                    chips.push(option_index);
-                    state.set(chips);
-                    next_chip_state.set(String::new());
-                }
-            }
-            8 => {
-                // backspace
-                if next_chip_state.is_empty() && !state.is_empty() {
-                    let mut chips = (*state).clone();
-                    chips.remove(chips.len() - 1);
-                    state.set(chips);
-                }
-            }
-            _ => {}
         }
     };
 
@@ -295,8 +282,10 @@ pub fn Chips(props: &ChipsProps) -> Html {
                 next_chip_state.set(String::new());
             };
 
+            let selecting_this = selecting_value.and_then(|value| possible_options.get(value).copied()) == Some(this_option_index);
+
             html! {
-                <div onclick={on_option_click} class={classes!("base-chips-option")}>
+                <div onclick={on_option_click} class={classes!("base-chips-option", selecting_this.then_some("base-chips-option-selecting"))}>
                     {this_option}
                 </div>
             }
@@ -320,6 +309,82 @@ pub fn Chips(props: &ChipsProps) -> Html {
 
     let position_class = format!("base-chips-{}", position.position_name());
 
+    if let Some(selecting_index) = *selecting {
+        if selecting_index >= possible_options.len() {
+            selecting.set(None);
+        }
+    }
+
+    use_event_with_window("keydown", {
+        let state = state.clone();
+        let dropdown_open = dropdown_open.clone();
+        let selecting = selecting.clone();
+        move |event: KeyboardEvent| {
+            if *dropdown_open {
+                match event.key_code() {
+                    38 => {
+                        // up arrow
+                        if !possible_options.is_empty() {
+                            selecting.set(Some(
+                                selecting
+                                    .map(|value| {
+                                        (value + possible_options.len() - 1)
+                                            % possible_options.len()
+                                    })
+                                    .unwrap_or(possible_options.len() - 1),
+                            ));
+                        }
+
+                        event.prevent_default();
+                    }
+                    40 => {
+                        // down arrow
+                        if !possible_options.is_empty() {
+                            selecting.set(Some(
+                                selecting
+                                    .map(|value| (value + 1) % possible_options.len())
+                                    .unwrap_or(0),
+                            ));
+                        }
+
+                        event.prevent_default();
+                    }
+                    32 | 13 => {
+                        // space/enter
+                        if let Some(selecting_index) = *selecting {
+                            let this_option_index = possible_options[selecting_index];
+                            let mut option_chips = (*state).clone();
+                            option_chips.push(this_option_index);
+                            state.set(option_chips);
+                            next_chip_state.set(String::new());
+                            selecting.set(None);
+                            event.prevent_default();
+                        } else if let Some(first_option_index) = possible_options.first().copied() {
+                            let mut option_chips = (*state).clone();
+                            option_chips.push(first_option_index);
+                            state.set(option_chips);
+                            next_chip_state.set(String::new());
+                            event.prevent_default();
+                        }
+                    }
+                    27 => {
+                        // escape
+                        dropdown_open.set(false);
+                    }
+                    8 => {
+                        // backspace
+                        if next_chip_state.is_empty() && !state.is_empty() {
+                            let mut chips = (*state).clone();
+                            chips.remove(chips.len() - 1);
+                            state.set(chips);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    });
+
     html! {
         <div class={classes!("base-chips-container", compact.then_some("base-chips-container-compact"), disabled.then_some("base-chips-container-disabled"), (*dropdown_open).then_some("base-chips-container-open"), error.as_ref().map(|_| "base-chips-container-invalid"))}>
             <label for={id.clone()} class="base-chips-label">{label}</label>
@@ -333,7 +398,6 @@ pub fn Chips(props: &ChipsProps) -> Html {
                             {id}
                             {oninput}
                             {onfocusin}
-                            {onkeydown}
                             {placeholder}
                             {disabled}
                             maxlength={max_length.to_string()}

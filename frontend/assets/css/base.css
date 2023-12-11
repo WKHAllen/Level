@@ -2074,6 +2074,10 @@ body {
   background-color: var(--base-chips-popup-background-color-active);
 }
 
+.base-chips-container-open .base-chips-option-selecting {
+  background-color: var(--base-chips-popup-background-color-hover);
+}
+
 .base-chips-container-compact {
   padding: var(--base-compact-padding) 0;
   display: flex;

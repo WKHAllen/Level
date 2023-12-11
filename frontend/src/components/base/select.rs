@@ -146,38 +146,44 @@ pub fn Select(props: &SelectProps) -> Html {
         let selecting = selecting.clone();
         move |event: KeyboardEvent| {
             if *dropdown_open {
-                if event.key_code() == 38 {
-                    // up arrow
-                    if !options.is_empty() {
-                        selecting.set(Some(
-                            selecting
-                                .map(|value| (value + options.len() - 1) % options.len())
-                                .unwrap_or(options.len() - 1),
-                        ));
-                    }
+                match event.key_code() {
+                    38 => {
+                        // up arrow
+                        if !options.is_empty() {
+                            selecting.set(Some(
+                                selecting
+                                    .map(|value| (value + options.len() - 1) % options.len())
+                                    .unwrap_or(options.len() - 1),
+                            ));
+                        }
 
-                    event.prevent_default();
-                } else if event.key_code() == 40 {
-                    // down arrow
-                    if !options.is_empty() {
-                        selecting.set(Some(
-                            selecting
-                                .map(|value| (value + 1) % options.len())
-                                .unwrap_or(0),
-                        ));
-                    }
-
-                    event.prevent_default();
-                } else if event.key_code() == 32 || event.key_code() == 13 {
-                    // space/enter
-                    if let Some(selecting_index) = *selecting {
-                        state.set(selecting_index);
-                        dropdown_open.set(false);
                         event.prevent_default();
                     }
-                } else if event.key_code() == 27 || event.key_code() == 8 {
-                    // escape/backspace
-                    dropdown_open.set(false);
+                    40 => {
+                        // down arrow
+                        if !options.is_empty() {
+                            selecting.set(Some(
+                                selecting
+                                    .map(|value| (value + 1) % options.len())
+                                    .unwrap_or(0),
+                            ));
+                        }
+
+                        event.prevent_default();
+                    }
+                    32 | 13 => {
+                        // space/enter
+                        if let Some(selecting_index) = *selecting {
+                            state.set(selecting_index);
+                            dropdown_open.set(false);
+                            event.prevent_default();
+                        }
+                    }
+                    27 | 8 => {
+                        // escape/backspace
+                        dropdown_open.set(false);
+                    }
+                    _ => {}
                 }
             }
         }
@@ -355,42 +361,48 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         let selecting = selecting.clone();
         move |event: KeyboardEvent| {
             if *dropdown_open {
-                if event.key_code() == 38 {
-                    // up arrow
-                    selecting.set(Some(
-                        selecting
-                            .map(|value| (value + options.len()) % (options.len() + 1))
-                            .unwrap_or(if !options.is_empty() {
-                                options.len() - 1
-                            } else {
-                                0
-                            }),
-                    ));
-                    event.prevent_default();
-                } else if event.key_code() == 40 {
-                    // down arrow
-                    selecting.set(Some(
-                        selecting
-                            .map(|value| (value + 1) % (options.len() + 1))
-                            .unwrap_or(options.len()),
-                    ));
-                    event.prevent_default();
-                } else if event.key_code() == 32 || event.key_code() == 13 {
-                    // space/enter
-                    if let Some(selecting_index) = *selecting {
-                        if selecting_index < options.len() {
-                            state.set(Some(selecting_index));
-                            dropdown_open.set(false);
-                        } else {
-                            state.set(None);
-                            dropdown_open.set(false);
-                        }
-
+                match event.key_code() {
+                    38 => {
+                        // up arrow
+                        selecting.set(Some(
+                            selecting
+                                .map(|value| (value + options.len()) % (options.len() + 1))
+                                .unwrap_or(if !options.is_empty() {
+                                    options.len() - 1
+                                } else {
+                                    0
+                                }),
+                        ));
                         event.prevent_default();
                     }
-                } else if event.key_code() == 27 || event.key_code() == 8 {
-                    // escape/backspace
-                    dropdown_open.set(false);
+                    40 => {
+                        // down arrow
+                        selecting.set(Some(
+                            selecting
+                                .map(|value| (value + 1) % (options.len() + 1))
+                                .unwrap_or(options.len()),
+                        ));
+                        event.prevent_default();
+                    }
+                    32 | 13 => {
+                        // space/enter
+                        if let Some(selecting_index) = *selecting {
+                            if selecting_index < options.len() {
+                                state.set(Some(selecting_index));
+                                dropdown_open.set(false);
+                            } else {
+                                state.set(None);
+                                dropdown_open.set(false);
+                            }
+
+                            event.prevent_default();
+                        }
+                    }
+                    27 | 8 => {
+                        // escape/backspace
+                        dropdown_open.set(false);
+                    }
+                    _ => {}
                 }
             }
         }
@@ -546,38 +558,44 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         let selecting = selecting.clone();
         move |event: KeyboardEvent| {
             if *dropdown_open {
-                if event.key_code() == 38 {
-                    // up arrow
-                    if T::NUM_OPTIONS != 0 {
-                        selecting.set(Some(
-                            selecting
-                                .map(|value| (value + T::NUM_OPTIONS - 1) % T::NUM_OPTIONS)
-                                .unwrap_or(T::NUM_OPTIONS - 1),
-                        ));
-                    }
+                match event.key_code() {
+                    38 => {
+                        // up arrow
+                        if T::NUM_OPTIONS != 0 {
+                            selecting.set(Some(
+                                selecting
+                                    .map(|value| (value + T::NUM_OPTIONS - 1) % T::NUM_OPTIONS)
+                                    .unwrap_or(T::NUM_OPTIONS - 1),
+                            ));
+                        }
 
-                    event.prevent_default();
-                } else if event.key_code() == 40 {
-                    // down arrow
-                    if T::NUM_OPTIONS != 0 {
-                        selecting.set(Some(
-                            selecting
-                                .map(|value| (value + 1) % T::NUM_OPTIONS)
-                                .unwrap_or(0),
-                        ));
-                    }
-
-                    event.prevent_default();
-                } else if event.key_code() == 32 || event.key_code() == 13 {
-                    // space/enter
-                    if let Some(selecting_index) = *selecting {
-                        state.set(T::from_index(selecting_index));
-                        dropdown_open.set(false);
                         event.prevent_default();
                     }
-                } else if event.key_code() == 27 || event.key_code() == 8 {
-                    // escape/backspace
-                    dropdown_open.set(false);
+                    40 => {
+                        // down arrow
+                        if T::NUM_OPTIONS != 0 {
+                            selecting.set(Some(
+                                selecting
+                                    .map(|value| (value + 1) % T::NUM_OPTIONS)
+                                    .unwrap_or(0),
+                            ));
+                        }
+
+                        event.prevent_default();
+                    }
+                    32 | 13 => {
+                        // space/enter
+                        if let Some(selecting_index) = *selecting {
+                            state.set(T::from_index(selecting_index));
+                            dropdown_open.set(false);
+                            event.prevent_default();
+                        }
+                    }
+                    27 | 8 => {
+                        // escape/backspace
+                        dropdown_open.set(false);
+                    }
+                    _ => {}
                 }
             }
         }
@@ -751,42 +769,48 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         let selecting = selecting.clone();
         move |event: KeyboardEvent| {
             if *dropdown_open {
-                if event.key_code() == 38 {
-                    // up arrow
-                    selecting.set(Some(
-                        selecting
-                            .map(|value| (value + T::NUM_OPTIONS) % (T::NUM_OPTIONS + 1))
-                            .unwrap_or(if T::NUM_OPTIONS != 0 {
-                                T::NUM_OPTIONS - 1
-                            } else {
-                                0
-                            }),
-                    ));
-                    event.prevent_default();
-                } else if event.key_code() == 40 {
-                    // down arrow
-                    selecting.set(Some(
-                        selecting
-                            .map(|value| (value + 1) % (T::NUM_OPTIONS + 1))
-                            .unwrap_or(T::NUM_OPTIONS),
-                    ));
-                    event.prevent_default();
-                } else if event.key_code() == 32 || event.key_code() == 13 {
-                    // space/enter
-                    if let Some(selecting_index) = *selecting {
-                        if selecting_index < T::NUM_OPTIONS {
-                            state.set(Some(T::from_index(selecting_index)));
-                            dropdown_open.set(false);
-                        } else {
-                            state.set(None);
-                            dropdown_open.set(false);
-                        }
-
+                match event.key_code() {
+                    38 => {
+                        // up arrow
+                        selecting.set(Some(
+                            selecting
+                                .map(|value| (value + T::NUM_OPTIONS) % (T::NUM_OPTIONS + 1))
+                                .unwrap_or(if T::NUM_OPTIONS != 0 {
+                                    T::NUM_OPTIONS - 1
+                                } else {
+                                    0
+                                }),
+                        ));
                         event.prevent_default();
                     }
-                } else if event.key_code() == 27 || event.key_code() == 8 {
-                    // escape/backspace
-                    dropdown_open.set(false);
+                    40 => {
+                        // down arrow
+                        selecting.set(Some(
+                            selecting
+                                .map(|value| (value + 1) % (T::NUM_OPTIONS + 1))
+                                .unwrap_or(T::NUM_OPTIONS),
+                        ));
+                        event.prevent_default();
+                    }
+                    32 | 13 => {
+                        // space/enter
+                        if let Some(selecting_index) = *selecting {
+                            if selecting_index < T::NUM_OPTIONS {
+                                state.set(Some(T::from_index(selecting_index)));
+                                dropdown_open.set(false);
+                            } else {
+                                state.set(None);
+                                dropdown_open.set(false);
+                            }
+
+                            event.prevent_default();
+                        }
+                    }
+                    27 | 8 => {
+                        // escape/backspace
+                        dropdown_open.set(false);
+                    }
+                    _ => {}
                 }
             }
         }
