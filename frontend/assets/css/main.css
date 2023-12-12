@@ -270,7 +270,10 @@ img {
   gap: 8px;
 }
 
-.create-transaction {
+.edit-institutions,
+.edit-categories,
+.edit-subcategories,
+.edit-tags {
   max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
@@ -279,13 +282,55 @@ img {
   gap: 8px;
 }
 
-.create-transaction .create-transaction-title {
+.edit-institutions .edit-institutions-title,
+.edit-categories .edit-categories-title,
+.edit-subcategories .edit-subcategories-title,
+.edit-tags .edit-tags-title {
   margin-bottom: 8px;
-}
-
-.create-transaction .create-transaction-actions {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-institutions .edit-institutions-form,
+.edit-categories .edit-categories-form,
+.edit-subcategories .edit-subcategories-form,
+.edit-tags .edit-tags-form {
+}
+
+.edit-institutions .edit-institutions-create,
+.edit-categories .edit-categories-create,
+.edit-subcategories .edit-subcategories-create,
+.edit-tags .edit-tags-create {
+}
+
+.edit-institutions .edit-institutions-create-actions,
+.edit-categories .edit-categories-create-actions,
+.edit-subcategories .edit-subcategories-create-actions,
+.edit-tags .edit-tags-create-actions {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.edit-institutions .edit-institutions-edit,
+.edit-categories .edit-categories-edit,
+.edit-subcategories .edit-subcategories-edit,
+.edit-tags .edit-tags-edit {
+}
+
+.edit-institutions .edit-institutions-edit-actions,
+.edit-categories .edit-categories-edit-actions,
+.edit-subcategories .edit-subcategories-edit-actions,
+.edit-tags .edit-tags-edit-actions {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   gap: 8px;
 }
 

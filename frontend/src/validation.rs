@@ -117,6 +117,14 @@ const ACCOUNT_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
 const ACCOUNT_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
 const TRANSACTION_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
 const TRANSACTION_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
+const INSTITUTION_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
+const INSTITUTION_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
+const CATEGORY_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
+const CATEGORY_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
+const SUBCATEGORY_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
+const SUBCATEGORY_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
+const TAG_NAME_MAX_LENGTH: usize = STANDARD_NAME_MAX_LENGTH;
+const TAG_DESCRIPTION_MAX_LENGTH: usize = STANDARD_DESCRIPTION_MAX_LENGTH;
 
 pub fn validate_save_name(name: &str) -> Result<String, String> {
     if name.is_empty() {
@@ -265,5 +273,101 @@ pub fn validate_transaction_subcategory(
         }
         (None, Some(_)) => Err("Invalid subcategory selected".to_owned()),
         (_, None) => Ok(None),
+    }
+}
+
+pub fn validate_institution_name(name: &str) -> Result<String, String> {
+    if name.is_empty() {
+        Err("Institution name cannot be empty".to_owned())
+    } else if name.len() > INSTITUTION_NAME_MAX_LENGTH {
+        Err(format!(
+            "Institution name must be at most {} characters long",
+            INSTITUTION_NAME_MAX_LENGTH
+        ))
+    } else {
+        Ok(name.to_owned())
+    }
+}
+
+pub fn validate_institution_description(description: &str) -> Result<String, String> {
+    if description.len() > INSTITUTION_DESCRIPTION_MAX_LENGTH {
+        Err(format!(
+            "Institution description must be at most {} characters long",
+            INSTITUTION_DESCRIPTION_MAX_LENGTH
+        ))
+    } else {
+        Ok(description.to_owned())
+    }
+}
+
+pub fn validate_category_name(name: &str) -> Result<String, String> {
+    if name.is_empty() {
+        Err("Category name cannot be empty".to_owned())
+    } else if name.len() > CATEGORY_NAME_MAX_LENGTH {
+        Err(format!(
+            "Category name must be at most {} characters long",
+            CATEGORY_NAME_MAX_LENGTH
+        ))
+    } else {
+        Ok(name.to_owned())
+    }
+}
+
+pub fn validate_category_description(description: &str) -> Result<String, String> {
+    if description.len() > CATEGORY_DESCRIPTION_MAX_LENGTH {
+        Err(format!(
+            "Category description must be at most {} characters long",
+            CATEGORY_DESCRIPTION_MAX_LENGTH
+        ))
+    } else {
+        Ok(description.to_owned())
+    }
+}
+
+pub fn validate_subcategory_name(name: &str) -> Result<String, String> {
+    if name.is_empty() {
+        Err("Subcategory name cannot be empty".to_owned())
+    } else if name.len() > SUBCATEGORY_NAME_MAX_LENGTH {
+        Err(format!(
+            "Subcategory name must be at most {} characters long",
+            SUBCATEGORY_NAME_MAX_LENGTH
+        ))
+    } else {
+        Ok(name.to_owned())
+    }
+}
+
+pub fn validate_subcategory_description(description: &str) -> Result<String, String> {
+    if description.len() > SUBCATEGORY_DESCRIPTION_MAX_LENGTH {
+        Err(format!(
+            "Subcategory description must be at most {} characters long",
+            SUBCATEGORY_DESCRIPTION_MAX_LENGTH
+        ))
+    } else {
+        Ok(description.to_owned())
+    }
+}
+
+pub fn validate_tag_name(name: &str) -> Result<String, String> {
+    if name.is_empty() {
+        Err("Tag name cannot be empty".to_owned())
+    } else if name.len() > TAG_NAME_MAX_LENGTH {
+        Err(format!(
+            "Tag name must be at most {} characters long",
+            TAG_NAME_MAX_LENGTH
+        ))
+    } else {
+        Ok(name.to_owned())
+    }
+}
+
+pub fn validate_tag_description(description: &str) -> Result<String, String> {
+    if description.len() > TAG_DESCRIPTION_MAX_LENGTH {
+        Err(format!(
+            "Tag description must be at most {} characters long",
+            TAG_DESCRIPTION_MAX_LENGTH
+        ))
+    } else {
+        Ok(description.to_owned())
     }
 }

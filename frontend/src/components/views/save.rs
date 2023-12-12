@@ -113,7 +113,7 @@ pub fn Save() -> Html {
         .run_on_init(false),
     );
 
-    let _get_institutions = use_command(UseCommand::new({
+    let get_institutions = use_command(UseCommand::new({
         clone_states!(institutions_state);
         |backend| async move {
             let institutions = backend.institutions().await?;
@@ -122,7 +122,7 @@ pub fn Save() -> Html {
         }
     }));
 
-    let _get_categories = use_command(UseCommand::new({
+    let get_categories = use_command(UseCommand::new({
         clone_states!(categories_state);
         |backend| async move {
             let categories = backend.categories().await?;
@@ -161,7 +161,7 @@ pub fn Save() -> Html {
         .run_on_init(false),
     );
 
-    let _get_tags = use_command(UseCommand::new({
+    let get_tags = use_command(UseCommand::new({
         clone_states!(tags_state);
         |backend| async move {
             let tags = backend.tags().await?;
@@ -318,8 +318,11 @@ pub fn Save() -> Html {
 
     let run_create_transaction = move |_| create_transaction.run();
 
-    let fetch_subcategories = move |_| {
-        get_subcategories.run();
+    let fetch_subcategories = {
+        clone_states!(get_subcategories);
+        move |_| {
+            get_subcategories.run();
+        }
     };
 
     let institution_names = institutions_state
@@ -421,6 +424,55 @@ pub fn Save() -> Html {
                 })
                 .collect::<Html>();
 
+            let configure_institutions = {
+                clone_states!(subview, get_institutions);
+                move |_| {
+                    let on_exit = {
+                        clone_states!(get_institutions);
+                        move |_| get_institutions.run()
+                    };
+                    subview.push(html! {
+                        <EditInstitutions {on_exit} />
+                    });
+                }
+            };
+            let configure_categories = {
+                clone_states!(subview, get_categories);
+                move |_| {
+                    let on_exit = {
+                        clone_states!(get_categories);
+                        move |_| get_categories.run()
+                    };
+                    subview.push(html! {
+                        <EditCategories {on_exit} />
+                    });
+                }
+            };
+            let configure_subcategories = {
+                clone_states!(subview, get_subcategories);
+                move |_| {
+                    let on_exit = {
+                        clone_states!(get_subcategories);
+                        move |_| get_subcategories.run()
+                    };
+                    subview.push(html! {
+                        <EditSubcategories {on_exit} />
+                    });
+                }
+            };
+            let configure_tags = {
+                clone_states!(subview, get_tags);
+                move |_| {
+                    let on_exit = {
+                        clone_states!(get_tags);
+                        move |_| get_tags.run()
+                    };
+                    subview.push(html! {
+                        <EditTags {on_exit} />
+                    });
+                }
+            };
+
             html! {
                 <div class="view save">
                     <div class="save-header bg-4">
@@ -518,6 +570,8 @@ pub fn Save() -> Html {
                                             required={true}
                                             compact={true}
                                             position={SelectPopupPosition::Above}
+                                            action_icon="ellipsis-solid"
+                                            on_action={configure_institutions}
                                             error={(*transaction_institution_error_state).clone()}
                                         />
                                     </div>
@@ -540,6 +594,8 @@ pub fn Save() -> Html {
                                             required={true}
                                             compact={true}
                                             position={SelectPopupPosition::Above}
+                                            action_icon="ellipsis-solid"
+                                            on_action={configure_categories}
                                             error={(*transaction_category_error_state).clone()}
                                         />
                                     </div>
@@ -551,6 +607,8 @@ pub fn Save() -> Html {
                                             required={false}
                                             compact={true}
                                             position={SelectPopupPosition::Above}
+                                            action_icon="ellipsis-solid"
+                                            on_action={configure_subcategories}
                                             error={(*transaction_subcategory_error_state).clone()}
                                         />
                                     </div>
@@ -561,6 +619,8 @@ pub fn Save() -> Html {
                                             label="Tags"
                                             compact={true}
                                             position={ChipsPopupPosition::Above}
+                                            action_icon="ellipsis-solid"
+                                            on_action={configure_tags}
                                         />
                                     </div>
                                     <div class="account-transactions-new-input">

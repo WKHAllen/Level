@@ -71,12 +71,72 @@ pub trait Commands {
     /// Retrieves the institutions within the save file.
     async fn institutions(&self) -> CommandResult<Vec<Institution>>;
 
+    /// Creates a new institution.
+    async fn create_institution(
+        &self,
+        name: String,
+        description: String,
+    ) -> CommandResult<Institution>;
+
+    /// Updates the institution details.
+    async fn update_institution(
+        &self,
+        institution: Institution,
+        name: String,
+        description: String,
+    ) -> CommandResult<()>;
+
+    /// Deletes the institution.
+    async fn delete_institution(&self, institution: Institution) -> CommandResult<()>;
+
     /// Retrieves the categories within the save file.
     async fn categories(&self) -> CommandResult<Vec<Category>>;
+
+    /// Creates a new category.
+    async fn create_category(&self, name: String, description: String) -> CommandResult<Category>;
+
+    /// Updates the category details.
+    async fn update_category(
+        &self,
+        category: Category,
+        name: String,
+        description: String,
+    ) -> CommandResult<()>;
+
+    /// Deletes the category.
+    async fn delete_category(&self, category: Category) -> CommandResult<()>;
 
     /// Retrieves the subcategories that fall under a category.
     async fn subcategories_within(&self, category: Category) -> CommandResult<Vec<Subcategory>>;
 
+    /// Creates a new subcategory within the given category.
+    async fn create_subcategory_within(
+        &self,
+        category: Category,
+        name: String,
+        description: String,
+    ) -> CommandResult<Subcategory>;
+
+    /// Updates the subcategory details.
+    async fn update_subcategory(
+        &self,
+        subcategory: Subcategory,
+        name: String,
+        description: String,
+    ) -> CommandResult<()>;
+
+    /// Deletes the subcategory.
+    async fn delete_subcategory(&self, subcategory: Subcategory) -> CommandResult<()>;
+
     /// Retrieves the tags within the save file.
     async fn tags(&self) -> CommandResult<Vec<Tag>>;
+
+    /// Creates a new tag.
+    async fn create_tag(&self, name: String, description: String) -> CommandResult<Tag>;
+
+    /// Updates the tag details.
+    async fn update_tag(&self, tag: Tag, name: String, description: String) -> CommandResult<()>;
+
+    /// Deletes the tag.
+    async fn delete_tag(&self, tag: Tag) -> CommandResult<()>;
 }

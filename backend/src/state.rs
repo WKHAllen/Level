@@ -315,8 +315,62 @@ impl BackendCommands for State {
         self.with(|db| Institution::list(db)).await
     }
 
+    async fn create_institution(
+        &self,
+        name: String,
+        description: String,
+    ) -> CommandResult<Institution> {
+        self.with(|db| Box::pin(async move { Institution::create(db, &name, &description).await }))
+            .await
+    }
+
+    async fn update_institution(
+        &self,
+        mut institution: Institution,
+        name: String,
+        description: String,
+    ) -> CommandResult<()> {
+        self.with(|db| {
+            Box::pin(async move {
+                institution.set_name(db, &name).await?;
+                institution.set_description(db, &description).await?;
+                Ok(())
+            })
+        })
+        .await
+    }
+
+    async fn delete_institution(&self, institution: Institution) -> CommandResult<()> {
+        self.with(|db| institution.delete(db)).await
+    }
+
     async fn categories(&self) -> CommandResult<Vec<Category>> {
         self.with(|db| Category::list(db)).await
+    }
+
+    async fn create_category(&self, name: String, description: String) -> CommandResult<Category> {
+        self.with(|db| Box::pin(async move { Category::create(db, &name, &description).await }))
+            .await
+    }
+
+    async fn update_category(
+        &self,
+        mut category: Category,
+        name: String,
+        description: String,
+    ) -> CommandResult<()> {
+        self.with(|db| {
+            Box::pin(async move {
+                category.set_name(db, &name).await?;
+                category.set_description(db, &description).await?;
+                Ok(())
+            })
+        })
+        .await
+    }
+
+    async fn delete_category(&self, category: Category) -> CommandResult<()> {
+        self.with(|db| category.delete(db)).await
     }
 
     async fn subcategories_within(&self, category: Category) -> CommandResult<Vec<Subcategory>> {
@@ -324,7 +378,64 @@ impl BackendCommands for State {
             .await
     }
 
+    async fn create_subcategory_within(
+        &self,
+        category: Category,
+        name: String,
+        description: String,
+    ) -> CommandResult<Subcategory> {
+        self.with(|db| {
+            Box::pin(async move { Subcategory::create(db, &category, &name, &description).await })
+        })
+        .await
+    }
+
+    async fn update_subcategory(
+        &self,
+        mut subcategory: Subcategory,
+        name: String,
+        description: String,
+    ) -> CommandResult<()> {
+        self.with(|db| {
+            Box::pin(async move {
+                subcategory.set_name(db, &name).await?;
+                subcategory.set_description(db, &description).await?;
+                Ok(())
+            })
+        })
+        .await
+    }
+
+    async fn delete_subcategory(&self, subcategory: Subcategory) -> CommandResult<()> {
+        self.with(|db| subcategory.delete(db)).await
+    }
+
     async fn tags(&self) -> CommandResult<Vec<Tag>> {
         self.with(|db| Tag::list(db)).await
+    }
+
+    async fn create_tag(&self, name: String, description: String) -> CommandResult<Tag> {
+        self.with(|db| Box::pin(async move { Tag::create(db, &name, &description).await }))
+            .await
+    }
+
+    async fn update_tag(
+        &self,
+        mut tag: Tag,
+        name: String,
+        description: String,
+    ) -> CommandResult<()> {
+        self.with(|db| {
+            Box::pin(async move {
+                tag.set_name(db, &name).await?;
+                tag.set_description(db, &description).await?;
+                Ok(())
+            })
+        })
+        .await
+    }
+
+    async fn delete_tag(&self, tag: Tag) -> CommandResult<()> {
+        self.with(|db| tag.delete(db)).await
     }
 }

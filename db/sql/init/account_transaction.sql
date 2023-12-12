@@ -28,5 +28,4 @@ CREATE TABLE account_transaction (
 
   FOREIGN KEY (subcategory_id)
     REFERENCES subcategory (id)
-      ON DELETE SET NULL
 );
