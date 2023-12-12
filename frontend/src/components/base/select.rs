@@ -47,6 +47,12 @@ pub struct SelectProps {
     /// Whether to compact the element into a smaller space.
     #[prop_or(false)]
     pub compact: bool,
+    /// The icon to use for the optional action button.
+    #[prop_or_default]
+    pub action_icon: Option<AttrValue>,
+    /// The action button callback.
+    #[prop_or_default]
+    pub on_action: Callback<()>,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -69,6 +75,8 @@ pub fn Select(props: &SelectProps) -> Html {
         position,
         required,
         compact,
+        action_icon,
+        on_action,
         error,
         disabled,
         node,
@@ -189,12 +197,26 @@ pub fn Select(props: &SelectProps) -> Html {
         }
     });
 
+    let optional_action = match action_icon {
+        Some(action_icon) => html! {
+            <IconButton
+                name={action_icon}
+                size={IconButtonSize::Small}
+                on_click={on_action}
+            />
+        },
+        None => html! {},
+    };
+
     html! {
         <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
-            <label for={id.clone()} class="base-select-label">
-                {label}
-                <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
-            </label>
+            <div class="base-select-label-container">
+                <label for={id.clone()} class="base-select-label">
+                    {label}
+                    <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
+                </label>
+                {optional_action}
+            </div>
             <div ref={select_node} class={classes!("base-select", position_class)}>
                 <button
                     {id}
@@ -244,6 +266,12 @@ pub struct SelectNullableProps {
     /// Whether to compact the element into a smaller space.
     #[prop_or(false)]
     pub compact: bool,
+    /// The icon to use for the optional action button.
+    #[prop_or_default]
+    pub action_icon: Option<AttrValue>,
+    /// The action button callback.
+    #[prop_or_default]
+    pub on_action: Callback<()>,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -267,6 +295,8 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         position,
         required,
         compact,
+        action_icon,
+        on_action,
         error,
         disabled,
         node,
@@ -408,12 +438,26 @@ pub fn SelectNullable(props: &SelectNullableProps) -> Html {
         }
     });
 
+    let optional_action = match action_icon {
+        Some(action_icon) => html! {
+            <IconButton
+                name={action_icon}
+                size={IconButtonSize::Small}
+                on_click={on_action}
+            />
+        },
+        None => html! {},
+    };
+
     html! {
         <div class={classes!("base-select-container", "base-select-nullable", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
-            <label for={id.clone()} class="base-select-label">
-                {label}
-                <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
-            </label>
+            <div class="base-select-label-container">
+                <label for={id.clone()} class="base-select-label">
+                    {label}
+                    <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
+                </label>
+                {optional_action}
+            </div>
             <div ref={select_node} class={classes!("base-select", position_class)}>
                 <button
                     {id}
@@ -461,6 +505,12 @@ pub struct SelectEnumProps<T: SelectOptions> {
     /// Whether to compact the element into a smaller space.
     #[prop_or(false)]
     pub compact: bool,
+    /// The icon to use for the optional action button.
+    #[prop_or_default]
+    pub action_icon: Option<AttrValue>,
+    /// The action button callback.
+    #[prop_or_default]
+    pub on_action: Callback<()>,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -482,6 +532,8 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         position,
         required,
         compact,
+        action_icon,
+        on_action,
         error,
         disabled,
         node,
@@ -601,12 +653,26 @@ pub fn SelectEnum<T: SelectOptions + 'static>(props: &SelectEnumProps<T>) -> Htm
         }
     });
 
+    let optional_action = match action_icon {
+        Some(action_icon) => html! {
+            <IconButton
+                name={action_icon}
+                size={IconButtonSize::Small}
+                on_click={on_action}
+            />
+        },
+        None => html! {},
+    };
+
     html! {
         <div class={classes!("base-select-container", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
-            <label for={id.clone()} class="base-select-label">
-                {label}
-                <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
-            </label>
+            <div class="base-select-label-container">
+                <label for={id.clone()} class="base-select-label">
+                    {label}
+                    <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
+                </label>
+                {optional_action}
+            </div>
             <div ref={select_node} class={classes!("base-select", position_class)}>
                 <button
                     {id}
@@ -654,6 +720,12 @@ pub struct SelectNullableEnumProps<T: SelectOptions> {
     /// Whether to compact the element into a smaller space.
     #[prop_or(false)]
     pub compact: bool,
+    /// The icon to use for the optional action button.
+    #[prop_or_default]
+    pub action_icon: Option<AttrValue>,
+    /// The action button callback.
+    #[prop_or_default]
+    pub on_action: Callback<()>,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -676,6 +748,8 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         position,
         required,
         compact,
+        action_icon,
+        on_action,
         error,
         disabled,
         node,
@@ -816,12 +890,26 @@ pub fn SelectNullableEnum<T: SelectOptions + 'static>(props: &SelectNullableEnum
         }
     });
 
+    let optional_action = match action_icon {
+        Some(action_icon) => html! {
+            <IconButton
+                name={action_icon}
+                size={IconButtonSize::Small}
+                on_click={on_action}
+            />
+        },
+        None => html! {},
+    };
+
     html! {
         <div class={classes!("base-select-container", "base-select-nullable", compact.then_some("base-select-container-compact"), disabled.then_some("base-select-container-disabled"), (*dropdown_open).then_some("base-select-container-open"))}>
-            <label for={id.clone()} class="base-select-label">
-                {label}
-                <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
-            </label>
+            <div class="base-select-label-container">
+                <label for={id.clone()} class="base-select-label">
+                    {label}
+                    <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
+                </label>
+                {optional_action}
+            </div>
             <div ref={select_node} class={classes!("base-select", position_class)}>
                 <button
                     {id}

@@ -198,6 +198,12 @@ pub struct NumberInputProps<N: Number> {
     /// Whether to compact the element into a smaller space.
     #[prop_or(false)]
     pub compact: bool,
+    /// The icon to use for the optional action button.
+    #[prop_or_default]
+    pub action_icon: Option<AttrValue>,
+    /// The action button callback.
+    #[prop_or_default]
+    pub on_action: Callback<()>,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -219,6 +225,8 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
         placeholder,
         required,
         compact,
+        action_icon,
+        on_action,
         error,
         disabled,
         node,
@@ -239,6 +247,17 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
         trigger.force_update(); // necessary in case the state has not changed
     };
 
+    let optional_action = match action_icon {
+        Some(action_icon) => html! {
+            <IconButton
+                name={action_icon}
+                size={IconButtonSize::Small}
+                on_click={on_action}
+            />
+        },
+        None => html! {},
+    };
+
     html! {
         <div class={classes!("base-input-container", compact.then_some("base-input-container-compact"), disabled.then_some("base-input-container-disabled"))}>
             <div class="base-input-label-container">
@@ -246,6 +265,7 @@ pub fn NumberInput<N: Number + 'static>(props: &NumberInputProps<N>) -> Html {
                     {label}
                     <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
                 </label>
+                {optional_action}
             </div>
             <div class="base-input-box-container">
                 <input

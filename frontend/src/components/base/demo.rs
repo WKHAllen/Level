@@ -80,15 +80,21 @@ pub fn Demo() -> Html {
     let input_value1 = input_value.clone();
     let input_submitted_state = use_state(|| None);
     let input_submitted_value = (*input_submitted_state).clone();
+    let input_action_state = use_state(|| 0usize);
+    let input_action_value = *input_action_state;
     let textarea_state = use_state(|| "Textarea value".to_owned());
     let textarea_value = (*textarea_state).clone();
     let textarea_state1 = use_state(String::new);
     let textarea_state2 = use_state(String::new);
+    let textarea_action_state = use_state(|| 0usize);
+    let textarea_action_value = *textarea_action_state;
     let numberinput_int_state = use_state(|| NumberState::new(3u16).min(0).max(100));
     let numberinput_int_value = **numberinput_int_state;
     let numberinput_float_state =
         use_state(|| NumberState::new(1.618f64).min(-5.0).max(5.0).decimals(5));
     let numberinput_float_value = **numberinput_float_state;
+    let numberinput_action_state = use_state(|| 0usize);
+    let numberinput_action_value = *numberinput_action_state;
     let button_state = use_state(|| ButtonStyle::Primary);
     let button_state_primary = button_state.clone();
     let button_state_secondary = button_state.clone();
@@ -118,12 +124,20 @@ pub fn Demo() -> Html {
     let select_options = (0..15)
         .map(|index| format!("Option {}", index + 1))
         .collect::<Vec<_>>();
+    let select_action_state = use_state(|| 0usize);
+    let select_action_value = *select_action_state;
     let select_with_null_state = use_state(|| None);
     let select_with_null_value = *select_with_null_state;
+    let select_with_null_action_state = use_state(|| 0usize);
+    let select_with_null_action_value = *select_with_null_action_state;
     let select_enum_state = use_state(|| DemoSelectEnum::One);
     let select_enum_value = *select_enum_state;
+    let select_enum_action_state = use_state(|| 0usize);
+    let select_enum_action_value = *select_enum_action_state;
     let select_with_null_enum_state = use_state(|| None);
     let select_with_null_enum_value = *select_with_null_enum_state;
+    let select_with_null_enum_action_state = use_state(|| 0usize);
+    let select_with_null_enum_action_value = *select_with_null_enum_action_state;
     let dialog_close_state = use_state(|| None);
     let dialog_small_state = use_state(|| false);
     let dialog_small_button_state = dialog_small_state.clone();
@@ -169,6 +183,8 @@ pub fn Demo() -> Html {
         .iter()
         .map(|index| chip_options[*index].clone())
         .collect::<Vec<_>>();
+    let chips_action_state = use_state(|| 0usize);
+    let chips_action_value = *chips_action_state;
     let datepicker_state = use_state(DatePickerState::new);
     let datepicker_value = **datepicker_state;
     let date_min = NaiveDate::from_ymd_opt(2023, 3, 21).unwrap();
@@ -176,6 +192,8 @@ pub fn Demo() -> Html {
     let date_error = (*datepicker_state).as_ref().and_then(|date: &NaiveDate| {
         (date.month() == 2).then_some("Please pick a month other than February".to_owned())
     });
+    let datepicker_action_state = use_state(|| 0usize);
+    let datepicker_action_value = *datepicker_action_state;
     let stepper_state = use_state(StepperState::default);
     let stepper_first_name_state = use_state(String::new);
     let stepper_first_name_value = (*stepper_first_name_state).clone();
@@ -266,6 +284,8 @@ pub fn Demo() -> Html {
                     placeholder="Placeholder!"
                     on_submit={move |_| input_submitted_state.set(Some(input_value1.clone()))}
                     required={true}
+                    action_icon="plus-solid"
+                    on_action={move |_| input_action_state.set(input_action_value + 1)}
                     error={input_value.is_empty().then_some("Please enter a value")}
                 />
                 <span>
@@ -276,6 +296,11 @@ pub fn Demo() -> Html {
                     {"Submitted value: "}
                     {input_submitted_value.unwrap_or("None".to_owned())}
                 </span>
+                <span>
+                    {"Action clicked "}
+                    {input_action_value}
+                    {" times"}
+                </span>
                 <Input
                     state={input_state.clone()}
                     label="Disabled input"
@@ -285,6 +310,7 @@ pub fn Demo() -> Html {
                     state={input_state}
                     label="Compact input"
                     compact={true}
+                    action_icon="check-solid"
                     error={input_value.is_empty().then_some("Please enter a value")}
                 />
             </div>
@@ -295,11 +321,18 @@ pub fn Demo() -> Html {
                     label="Textarea label"
                     placeholder="Placeholder!"
                     required={true}
+                    action_icon="plus-solid"
+                    on_action={move |_| textarea_action_state.set(textarea_action_value + 1)}
                     error={textarea_value.is_empty().then_some("Please enter a value")}
                 />
                 <span>
                     {"Value: "}
                     {textarea_value.clone()}
+                </span>
+                <span>
+                    {"Action clicked "}
+                    {textarea_action_value}
+                    {" times"}
                 </span>
                 <TextArea
                     state={textarea_state.clone()}
@@ -321,6 +354,7 @@ pub fn Demo() -> Html {
                     state={textarea_state}
                     label="Compact textarea"
                     compact={true}
+                    action_icon="check-solid"
                     error={textarea_value.is_empty().then_some("Please enter a value")}
                 />
             </div>
@@ -331,11 +365,18 @@ pub fn Demo() -> Html {
                     label="Int number input label"
                     placeholder="Placeholder!"
                     required={true}
+                    action_icon="plus-solid"
+                    on_action={move |_| numberinput_action_state.set(numberinput_action_value + 1)}
                     error={(numberinput_int_value == 3).then_some("How about something other than 3")}
                 />
                 <span>
                     {"Value: "}
                     {numberinput_int_value}
+                </span>
+                <span>
+                    {"Action clicked "}
+                    {numberinput_action_value}
+                    {" times"}
                 </span>
                 <NumberInput<f64>
                     state={numberinput_float_state}
@@ -357,6 +398,7 @@ pub fn Demo() -> Html {
                     state={numberinput_int_state}
                     label="Compact number input"
                     compact={true}
+                    action_icon="check-solid"
                     error={(numberinput_int_value == 3).then_some("How about something other than 3")}
                 />
             </div>
@@ -525,9 +567,16 @@ pub fn Demo() -> Html {
                     options={select_options.clone()}
                     label="Select label"
                     required={true}
+                    action_icon="plus-solid"
+                    on_action={move |_| select_action_state.set(select_action_value + 1)}
                     error={(select_value == 2).then_some("Please select something other than 3")}
                 />
                 <span>{"Value: "}{select_value.to_string()}</span>
+                <span>
+                    {"Action clicked "}
+                    {select_action_value}
+                    {" times"}
+                </span>
                 <Select
                     state={select_state.clone()}
                     options={select_options.clone()}
@@ -546,6 +595,7 @@ pub fn Demo() -> Html {
                     options={select_options.clone()}
                     label="Compact select"
                     compact={true}
+                    action_icon="check-solid"
                     error={(select_value == 2).then_some("Please select something other than 3")}
                 />
             </div>
@@ -557,11 +607,18 @@ pub fn Demo() -> Html {
                     label="Select nullable label"
                     null_label="Select an option..."
                     required={true}
+                    action_icon="plus-solid"
+                    on_action={move |_| select_with_null_action_state.set(select_with_null_action_value + 1)}
                     error={select_with_null_value.is_none().then_some("Please select a value")}
                 />
                 <span>
                     {"Value: "}
                     {select_with_null_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
+                <span>
+                    {"Action clicked "}
+                    {select_with_null_action_value}
+                    {" times"}
                 </span>
                 <SelectNullable
                     state={select_with_null_state.clone()}
@@ -581,6 +638,7 @@ pub fn Demo() -> Html {
                     options={select_options.clone()}
                     label="Compact select nullable"
                     compact={true}
+                    action_icon="check-solid"
                     error={select_with_null_value.is_none().then_some("Please select a value")}
                 />
             </div>
@@ -590,9 +648,16 @@ pub fn Demo() -> Html {
                     state={select_enum_state.clone()}
                     label="Select enum label"
                     required={true}
+                    action_icon="plus-solid"
+                    on_action={move |_| select_enum_action_state.set(select_enum_action_value + 1)}
                     error={(select_enum_value == DemoSelectEnum::Three).then_some("Please pick something other than three")}
                 />
                 <span>{"Value: "}{select_enum_value.to_string()}</span>
+                <span>
+                    {"Action clicked "}
+                    {select_enum_action_value}
+                    {" times"}
+                </span>
                 <SelectEnum<DemoSelectEnum>
                     state={select_enum_state.clone()}
                     label="Disabled select enum label"
@@ -608,6 +673,7 @@ pub fn Demo() -> Html {
                     state={select_enum_state}
                     label="Compact select enum"
                     compact={true}
+                    action_icon="check-solid"
                     error={(select_enum_value == DemoSelectEnum::Three).then_some("Please pick something other than three")}
                 />
             </div>
@@ -618,11 +684,18 @@ pub fn Demo() -> Html {
                     label="Select nullable enum label"
                     null_label="Select an option..."
                     required={true}
+                    action_icon="plus-solid"
+                    on_action={move |_| select_with_null_enum_action_state.set(select_with_null_enum_action_value + 1)}
                     error={select_with_null_enum_value.is_none().then_some("Please select a value")}
                 />
                 <span>
                     {"Value: "}
                     {select_with_null_enum_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
+                <span>
+                    {"Action clicked "}
+                    {select_with_null_enum_action_value}
+                    {" times"}
                 </span>
                 <SelectNullableEnum<DemoSelectEnum>
                     state={select_with_null_enum_state.clone()}
@@ -639,6 +712,7 @@ pub fn Demo() -> Html {
                     state={select_with_null_enum_state}
                     label="Compact select nullable enum"
                     compact={true}
+                    action_icon="check-solid"
                     error={select_with_null_enum_value.is_none().then_some("Please select a value")}
                 />
             </div>
@@ -836,11 +910,18 @@ pub fn Demo() -> Html {
                     max_selections={6}
                     label="Chips label"
                     placeholder="Placeholder!"
+                    action_icon="plus-solid"
+                    on_action={move |_| chips_action_state.set(chips_action_value + 1)}
                     error={chips_value.is_empty().then_some("Please select at least one language")}
                 />
                 <span>
                     {"Selected: "}
                     {chips_value.clone().join(", ")}
+                </span>
+                <span>
+                    {"Action clicked "}
+                    {chips_action_value}
+                    {" times"}
                 </span>
                 <Chips
                     state={chips_state.clone()}
@@ -860,6 +941,7 @@ pub fn Demo() -> Html {
                     options={chip_options}
                     label="Compact chips"
                     compact={true}
+                    action_icon="check-solid"
                     error={chips_value.is_empty().then_some("Please select at least one language")}
                 />
             </div>
@@ -907,11 +989,18 @@ pub fn Demo() -> Html {
                     min={date_min}
                     max={date_max}
                     required={true}
+                    action_icon="plus-solid"
+                    on_action={move |_| datepicker_action_state.set(datepicker_action_value + 1)}
                     error={date_error.clone()}
                 />
                 <span>
                     {"Selected date: "}
                     {datepicker_value.map(|x| x.to_string()).unwrap_or("None".to_owned())}
+                </span>
+                <span>
+                    {"Action clicked "}
+                    {datepicker_action_value}
+                    {" times"}
                 </span>
                 <DatePicker
                     state={datepicker_state.clone()}
@@ -928,6 +1017,7 @@ pub fn Demo() -> Html {
                     state={datepicker_state}
                     label="Compact date picker"
                     compact={true}
+                    action_icon="check-solid"
                     error={date_error}
                 />
             </div>

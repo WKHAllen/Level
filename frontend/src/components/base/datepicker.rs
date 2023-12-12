@@ -367,6 +367,12 @@ pub struct DatePickerProps {
     /// Whether to compact the element into a smaller space.
     #[prop_or(false)]
     pub compact: bool,
+    /// The icon to use for the optional action button.
+    #[prop_or_default]
+    pub action_icon: Option<AttrValue>,
+    /// The action button callback.
+    #[prop_or_default]
+    pub on_action: Callback<()>,
     /// An optional error message. This may not show at times, as it will be
     /// overridden by a different error message if validation fails.
     #[prop_or_default]
@@ -397,6 +403,8 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
         position,
         required,
         compact,
+        action_icon,
+        on_action,
         error,
         disabled,
         year_node,
@@ -581,12 +589,26 @@ pub fn DatePicker(props: &DatePickerProps) -> Html {
 
     let position_class = format!("base-date-picker-{}", position.position_name());
 
+    let optional_action = match action_icon {
+        Some(action_icon) => html! {
+            <IconButton
+                name={action_icon}
+                size={IconButtonSize::Small}
+                on_click={on_action}
+            />
+        },
+        None => html! {},
+    };
+
     html! {
         <div class={classes!("base-date-picker-container", compact.then_some("base-date-picker-container-compact"), disabled.then_some("base-date-picker-container-disabled"))}>
-            <label for={year_id.clone()} class="base-date-picker-label">
-                {label}
-                <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
-            </label>
+            <div class="base-date-picker-label-container">
+                <label for={year_id.clone()} class="base-date-picker-label">
+                    {label}
+                    <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
+                </label>
+                {optional_action}
+            </div>
             <div class={classes!("base-date-picker-outer", position_class)}>
                 <div class={classes!("base-date-picker", error_msg.as_ref().map(|_| "base-date-picker-invalid"))}>
                     <div class="base-date-picker-section">

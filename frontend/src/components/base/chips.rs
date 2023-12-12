@@ -148,6 +148,12 @@ pub struct ChipsProps {
     /// Whether to compact the element into a smaller space.
     #[prop_or(false)]
     pub compact: bool,
+    /// The icon to use for the optional action button.
+    #[prop_or_default]
+    pub action_icon: Option<AttrValue>,
+    /// The action button callback.
+    #[prop_or_default]
+    pub on_action: Callback<()>,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -173,6 +179,8 @@ pub fn Chips(props: &ChipsProps) -> Html {
         position,
         max_length,
         compact,
+        action_icon,
+        on_action,
         error,
         disabled,
         node,
@@ -385,9 +393,23 @@ pub fn Chips(props: &ChipsProps) -> Html {
         }
     });
 
+    let optional_action = match action_icon {
+        Some(action_icon) => html! {
+            <IconButton
+                name={action_icon}
+                size={IconButtonSize::Small}
+                on_click={on_action}
+            />
+        },
+        None => html! {},
+    };
+
     html! {
         <div class={classes!("base-chips-container", compact.then_some("base-chips-container-compact"), disabled.then_some("base-chips-container-disabled"), (*dropdown_open).then_some("base-chips-container-open"), error.as_ref().map(|_| "base-chips-container-invalid"))}>
-            <label for={id.clone()} class="base-chips-label">{label}</label>
+            <div class="base-chips-label-container">
+                <label for={id.clone()} class="base-chips-label">{label}</label>
+                {optional_action}
+            </div>
             <div ref={chips_node} class={classes!("base-chips", position_class)}>
                 <div class="base-chips-inner">
                     {conditional_chip_list}

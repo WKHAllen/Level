@@ -59,6 +59,12 @@ pub struct TextAreaProps {
     /// Whether to compact the element into a smaller space.
     #[prop_or(false)]
     pub compact: bool,
+    /// The icon to use for the optional action button.
+    #[prop_or_default]
+    pub action_icon: Option<AttrValue>,
+    /// The action button callback.
+    #[prop_or_default]
+    pub on_action: Callback<()>,
     /// An optional error message.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -83,6 +89,8 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
         rows,
         resize,
         compact,
+        action_icon,
+        on_action,
         error,
         disabled,
         node,
@@ -101,6 +109,17 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
         state.set(new_value);
     };
 
+    let optional_action = match action_icon {
+        Some(action_icon) => html! {
+            <IconButton
+                name={action_icon}
+                size={IconButtonSize::Small}
+                on_click={on_action}
+            />
+        },
+        None => html! {},
+    };
+
     html! {
         <div class={classes!("base-textarea-container", compact.then_some("base-textarea-container-compact"), disabled.then_some("base-textarea-container-disabled"))}>
             <div class="base-textarea-label-container">
@@ -108,6 +127,7 @@ pub fn TextArea(props: &TextAreaProps) -> Html {
                     {label}
                     <span class="base-required-mark">{required.then_some(" *").unwrap_or_default()}</span>
                 </label>
+                {optional_action}
             </div>
             <div class="base-textarea-box-container">
                 <textarea

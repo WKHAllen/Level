@@ -794,6 +794,10 @@ body {
 
 .base-input-label-container {
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
 }
 
 .base-input-box-container {
@@ -881,6 +885,10 @@ body {
 
 .base-textarea-label-container {
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
 }
 
 .base-textarea-box-container {
@@ -1476,6 +1484,14 @@ body {
   gap: var(--base-padding-small);
 }
 
+.base-select-label-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
 .base-select-label {
   font-size: var(--base-standard-label-size);
 }
@@ -1940,6 +1956,14 @@ body {
   gap: var(--base-padding-small);
 }
 
+.base-chips-label-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+}
+
 .base-chips-label {
   font-size: var(--base-standard-label-size);
 }
@@ -2224,6 +2248,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--base-padding-small);
+}
+
+.base-date-picker-label-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
 }
 
 .base-date-picker-label {
