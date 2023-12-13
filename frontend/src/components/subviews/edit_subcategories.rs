@@ -95,7 +95,7 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
                 subcategory_name_state,
                 subcategory_name_error_state,
                 subcategory_description_state,
-                subcategory_description_error_state,
+                subcategory_description_error_state
             );
             |backend| async move {
                 if let Some((name, description)) = validate_all!(
@@ -165,7 +165,7 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
                 subcategory_name_state,
                 subcategory_name_error_state,
                 subcategory_description_state,
-                subcategory_description_error_state,
+                subcategory_description_error_state
             );
             |backend| async move {
                 if let Some((name, description)) = validate_all!(
@@ -198,7 +198,7 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state);
+            clone_states!(loading_state, get_subcategories);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
@@ -206,6 +206,7 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
                 }
                 UseCommandState::Resolved(_) => {
                     loading_state.set(false);
+                    get_subcategories.run();
                 }
             }
         }),

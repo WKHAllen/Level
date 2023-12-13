@@ -60,7 +60,7 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
                 tag_name_state,
                 tag_name_error_state,
                 tag_description_state,
-                tag_description_error_state,
+                tag_description_error_state
             );
             |backend| async move {
                 if let Some((name, description)) = validate_all!(
@@ -115,7 +115,7 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
                 tag_name_state,
                 tag_name_error_state,
                 tag_description_state,
-                tag_description_error_state,
+                tag_description_error_state
             );
             |backend| async move {
                 if let Some((name, description)) = validate_all!(
@@ -142,7 +142,7 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state);
+            clone_states!(loading_state, get_tags);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
@@ -150,6 +150,7 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
                 }
                 UseCommandState::Resolved(_) => {
                     loading_state.set(false);
+                    get_tags.run();
                 }
             }
         }),

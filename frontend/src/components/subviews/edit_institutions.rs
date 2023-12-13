@@ -67,7 +67,7 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
                 institution_name_state,
                 institution_name_error_state,
                 institution_description_state,
-                institution_description_error_state,
+                institution_description_error_state
             );
             |backend| async move {
                 if let Some((name, description)) = validate_all!(
@@ -129,7 +129,7 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
                 institution_name_state,
                 institution_name_error_state,
                 institution_description_state,
-                institution_description_error_state,
+                institution_description_error_state
             );
             |backend| async move {
                 if let Some((name, description)) = validate_all!(
@@ -162,7 +162,7 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state);
+            clone_states!(loading_state, get_institutions);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
@@ -170,6 +170,7 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
                 }
                 UseCommandState::Resolved(_) => {
                     loading_state.set(false);
+                    get_institutions.run();
                 }
             }
         }),

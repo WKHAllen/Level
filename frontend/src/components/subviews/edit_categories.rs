@@ -63,7 +63,7 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
                 category_name_state,
                 category_name_error_state,
                 category_description_state,
-                category_description_error_state,
+                category_description_error_state
             );
             |backend| async move {
                 if let Some((name, description)) = validate_all!(
@@ -122,7 +122,7 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
                 category_name_state,
                 category_name_error_state,
                 category_description_state,
-                category_description_error_state,
+                category_description_error_state
             );
             |backend| async move {
                 if let Some((name, description)) = validate_all!(
@@ -155,7 +155,7 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state);
+            clone_states!(loading_state, get_categories);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
@@ -163,6 +163,7 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
                 }
                 UseCommandState::Resolved(_) => {
                     loading_state.set(false);
+                    get_categories.run();
                 }
             }
         }),
