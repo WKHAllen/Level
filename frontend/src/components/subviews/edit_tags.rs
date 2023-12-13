@@ -10,9 +10,10 @@ use yew::prelude::*;
 /// Tag configuration subview properties.
 #[derive(Clone, PartialEq, Properties)]
 pub struct EditTagsProps {
-    /// The callback called when the subview is exited.
+    /// The callback called when the subview is exited. The returned value
+    /// represents whether any changes were made to the tags.
     #[prop_or_default]
-    pub on_exit: Callback<()>,
+    pub on_exit: Callback<bool>,
 }
 
 /// The tag editing subview.
@@ -28,6 +29,7 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
     let tag_description_error_state = use_state(|| None::<String>);
     let new_tag_state = use_state(|| None::<Tag>);
     let loading_state = use_state(|| false);
+    let dirty_state = use_state(|| false);
 
     let subview = use_subview();
 
@@ -84,6 +86,7 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
                 tag_description_state,
                 new_tag_state,
                 loading_state,
+                dirty_state,
                 get_tags
             );
             move |value| match value {
@@ -99,6 +102,7 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
                         new_tag_state.set(Some(tag.clone()));
                         tag_name_state.set(String::new());
                         tag_description_state.set(String::new());
+                        dirty_state.set(true);
                     }
 
                     get_tags.run();
@@ -142,14 +146,21 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state, get_tags);
+            clone_states!(loading_state, dirty_state, get_tags);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
                     loading_state.set(true);
                 }
-                UseCommandState::Resolved(_) => {
+                UseCommandState::Resolved(res) => {
                     loading_state.set(false);
+
+                    // TODO: handle future expected errors, e.g. duplicate tag name
+                    #[allow(clippy::redundant_pattern_matching)]
+                    if let Ok(_) = res {
+                        dirty_state.set(true);
+                    }
+
                     get_tags.run();
                 }
             }
@@ -173,15 +184,22 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(tag_state, loading_state, get_tags);
+            clone_states!(tag_state, loading_state, dirty_state, get_tags);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
                     loading_state.set(true);
                 }
-                UseCommandState::Resolved(_) => {
+                UseCommandState::Resolved(res) => {
                     loading_state.set(false);
                     tag_state.set(None);
+
+                    // TODO: handle future expected errors, e.g. duplicate tag name
+                    #[allow(clippy::redundant_pattern_matching)]
+                    if let Ok(_) = res {
+                        dirty_state.set(true);
+                    }
+
                     get_tags.run();
                 }
             }
@@ -279,7 +297,7 @@ pub fn EditTags(props: &EditTagsProps) -> Html {
 
     let leave_click = move |_| {
         subview.pop();
-        on_exit.emit(());
+        on_exit.emit(*dirty_state);
     };
 
     html! {

@@ -10,9 +10,10 @@ use yew::prelude::*;
 /// Institution configuration subview properties.
 #[derive(Clone, PartialEq, Properties)]
 pub struct EditInstitutionsProps {
-    /// The callback called when the subview is exited.
+    /// The callback called when the subview is exited. The returned value
+    /// represents whether any changes were made to the institutions.
     #[prop_or_default]
-    pub on_exit: Callback<()>,
+    pub on_exit: Callback<bool>,
 }
 
 /// The institution editing subview.
@@ -28,6 +29,7 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
     let institution_description_error_state = use_state(|| None::<String>);
     let new_institution_state = use_state(|| None::<Institution>);
     let loading_state = use_state(|| false);
+    let dirty_state = use_state(|| false);
 
     let subview = use_subview();
 
@@ -98,6 +100,7 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
                 institution_description_state,
                 new_institution_state,
                 loading_state,
+                dirty_state,
                 get_institutions
             );
             move |value| match value {
@@ -113,6 +116,7 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
                         new_institution_state.set(Some(institution.clone()));
                         institution_name_state.set(String::new());
                         institution_description_state.set(String::new());
+                        dirty_state.set(true);
                     }
 
                     get_institutions.run();
@@ -162,14 +166,21 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state, get_institutions);
+            clone_states!(loading_state, dirty_state, get_institutions);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
                     loading_state.set(true);
                 }
-                UseCommandState::Resolved(_) => {
+                UseCommandState::Resolved(res) => {
                     loading_state.set(false);
+
+                    // TODO: handle future expected errors, e.g. duplicate institution name
+                    #[allow(clippy::redundant_pattern_matching)]
+                    if let Ok(_) = res {
+                        dirty_state.set(true);
+                    }
+
                     get_institutions.run();
                 }
             }
@@ -193,15 +204,27 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(institution_state, loading_state, get_institutions);
+            clone_states!(
+                institution_state,
+                loading_state,
+                dirty_state,
+                get_institutions
+            );
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
                     loading_state.set(true);
                 }
-                UseCommandState::Resolved(_) => {
+                UseCommandState::Resolved(res) => {
                     loading_state.set(false);
                     institution_state.set(None);
+
+                    // TODO: handle future expected errors, e.g. duplicate institution name
+                    #[allow(clippy::redundant_pattern_matching)]
+                    if let Ok(_) = res {
+                        dirty_state.set(true);
+                    }
+
                     get_institutions.run();
                 }
             }
@@ -300,7 +323,7 @@ pub fn EditInstitutions(props: &EditInstitutionsProps) -> Html {
 
     let leave_click = move |_| {
         subview.pop();
-        on_exit.emit(());
+        on_exit.emit(*dirty_state);
     };
 
     html! {

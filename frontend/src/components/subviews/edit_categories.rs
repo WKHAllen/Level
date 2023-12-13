@@ -10,9 +10,10 @@ use yew::prelude::*;
 /// Category configuration subview properties.
 #[derive(Clone, PartialEq, Properties)]
 pub struct EditCategoriesProps {
-    /// The callback called when the subview is exited.
+    /// The callback called when the subview is exited. The returned value
+    /// represents whether any changes were made to the categories.
     #[prop_or_default]
-    pub on_exit: Callback<()>,
+    pub on_exit: Callback<bool>,
 }
 
 /// The category editing subview.
@@ -28,6 +29,7 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
     let category_description_error_state = use_state(|| None::<String>);
     let new_category_state = use_state(|| None::<Category>);
     let loading_state = use_state(|| false);
+    let dirty_state = use_state(|| false);
 
     let subview = use_subview();
 
@@ -91,6 +93,7 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
                 category_description_state,
                 new_category_state,
                 loading_state,
+                dirty_state,
                 get_categories
             );
             move |value| match value {
@@ -106,6 +109,7 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
                         new_category_state.set(Some(category.clone()));
                         category_name_state.set(String::new());
                         category_description_state.set(String::new());
+                        dirty_state.set(true);
                     }
 
                     get_categories.run();
@@ -155,14 +159,21 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state, get_categories);
+            clone_states!(loading_state, dirty_state, get_categories);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
                     loading_state.set(true);
                 }
-                UseCommandState::Resolved(_) => {
+                UseCommandState::Resolved(res) => {
                     loading_state.set(false);
+
+                    // TODO: handle future expected errors, e.g. duplicate category name
+                    #[allow(clippy::redundant_pattern_matching)]
+                    if let Ok(_) = res {
+                        dirty_state.set(true);
+                    }
+
                     get_categories.run();
                 }
             }
@@ -186,15 +197,22 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(category_state, loading_state, get_categories);
+            clone_states!(category_state, loading_state, dirty_state, get_categories);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
                     loading_state.set(true);
                 }
-                UseCommandState::Resolved(_) => {
+                UseCommandState::Resolved(res) => {
                     loading_state.set(false);
                     category_state.set(None);
+
+                    // TODO: handle future expected errors, e.g. duplicate category name
+                    #[allow(clippy::redundant_pattern_matching)]
+                    if let Ok(_) = res {
+                        dirty_state.set(true);
+                    }
+
                     get_categories.run();
                 }
             }
@@ -293,7 +311,7 @@ pub fn EditCategories(props: &EditCategoriesProps) -> Html {
 
     let leave_click = move |_| {
         subview.pop();
-        on_exit.emit(());
+        on_exit.emit(*dirty_state);
     };
 
     html! {

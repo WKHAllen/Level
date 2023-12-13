@@ -319,10 +319,15 @@ pub fn Save() -> Html {
     let run_create_transaction = move |_| create_transaction.run();
 
     let update_subcategories = {
-        clone_states!(transaction_subcategory_state, get_subcategories);
+        clone_states!(
+            transaction_subcategory_state,
+            transaction_subcategory_error_state,
+            get_subcategories
+        );
         move |_| {
             get_subcategories.run();
             transaction_subcategory_state.set(None);
+            transaction_subcategory_error_state.set(None);
         }
     };
 
@@ -426,11 +431,26 @@ pub fn Save() -> Html {
                 .collect::<Html>();
 
             let configure_institutions = {
-                clone_states!(subview, get_institutions);
+                clone_states!(
+                    transaction_institution_state,
+                    transaction_institution_error_state,
+                    subview,
+                    get_institutions
+                );
                 move |_| {
                     let on_exit = {
-                        clone_states!(get_institutions);
-                        move |_| get_institutions.run()
+                        clone_states!(
+                            transaction_institution_state,
+                            transaction_institution_error_state,
+                            get_institutions
+                        );
+                        move |dirty| {
+                            if dirty {
+                                transaction_institution_state.set(None);
+                                transaction_institution_error_state.set(None);
+                                get_institutions.run();
+                            }
+                        }
                     };
                     subview.push(html! {
                         <EditInstitutions {on_exit} />
@@ -438,11 +458,26 @@ pub fn Save() -> Html {
                 }
             };
             let configure_categories = {
-                clone_states!(subview, get_categories);
+                clone_states!(
+                    transaction_category_state,
+                    transaction_category_error_state,
+                    subview,
+                    get_categories
+                );
                 move |_| {
                     let on_exit = {
-                        clone_states!(get_categories);
-                        move |_| get_categories.run()
+                        clone_states!(
+                            transaction_category_state,
+                            transaction_category_error_state,
+                            get_categories
+                        );
+                        move |dirty| {
+                            if dirty {
+                                transaction_category_state.set(None);
+                                transaction_category_error_state.set(None);
+                                get_categories.run();
+                            }
+                        }
                     };
                     subview.push(html! {
                         <EditCategories {on_exit} />
@@ -450,11 +485,38 @@ pub fn Save() -> Html {
                 }
             };
             let configure_subcategories = {
-                clone_states!(subview, get_subcategories);
+                clone_states!(
+                    transaction_category_state,
+                    transaction_category_error_state,
+                    transaction_subcategory_state,
+                    transaction_subcategory_error_state,
+                    subview,
+                    get_categories,
+                    get_subcategories
+                );
                 move |_| {
                     let on_exit = {
-                        clone_states!(get_subcategories);
-                        move |_| get_subcategories.run()
+                        clone_states!(
+                            transaction_category_state,
+                            transaction_category_error_state,
+                            transaction_subcategory_state,
+                            transaction_subcategory_error_state,
+                            get_categories,
+                            get_subcategories
+                        );
+                        move |(subcategory_dirty, category_dirty)| {
+                            if subcategory_dirty {
+                                transaction_subcategory_state.set(None);
+                                transaction_subcategory_error_state.set(None);
+                                get_subcategories.run();
+                            }
+
+                            if category_dirty {
+                                transaction_category_state.set(None);
+                                transaction_category_error_state.set(None);
+                                get_categories.run();
+                            }
+                        }
                     };
                     subview.push(html! {
                         <EditSubcategories {on_exit} />
@@ -462,11 +524,16 @@ pub fn Save() -> Html {
                 }
             };
             let configure_tags = {
-                clone_states!(subview, get_tags);
+                clone_states!(transaction_tags_state, subview, get_tags);
                 move |_| {
                     let on_exit = {
-                        clone_states!(get_tags);
-                        move |_| get_tags.run()
+                        clone_states!(transaction_tags_state, get_tags);
+                        move |dirty| {
+                            if dirty {
+                                transaction_tags_state.set(Vec::new());
+                                get_tags.run();
+                            }
+                        }
                     };
                     subview.push(html! {
                         <EditTags {on_exit} />

@@ -11,9 +11,12 @@ use yew::prelude::*;
 /// Subcategory configuration subview properties.
 #[derive(Clone, PartialEq, Properties)]
 pub struct EditSubcategoriesProps {
-    /// The callback called when the subview is exited.
+    /// The callback called when the subview is exited. The returned value
+    /// is a 2-tuple, with the first element representing whether any changes
+    /// were made to the subcategories, and the second element representing
+    /// whether any changes were made to the categories.
     #[prop_or_default]
-    pub on_exit: Callback<()>,
+    pub on_exit: Callback<(bool, bool)>,
 }
 
 /// The subcategory editing subview.
@@ -31,6 +34,8 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
     let subcategory_description_error_state = use_state(|| None::<String>);
     let new_subcategory_state = use_state(|| None::<Subcategory>);
     let loading_state = use_state(|| false);
+    let dirty_state = use_state(|| false);
+    let category_dirty_state = use_state(|| false);
 
     let subview = use_subview();
 
@@ -134,6 +139,7 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
                 subcategory_description_state,
                 new_subcategory_state,
                 loading_state,
+                dirty_state,
                 get_subcategories
             );
             move |value| match value {
@@ -149,6 +155,7 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
                         new_subcategory_state.set(Some(subcategory.clone()));
                         subcategory_name_state.set(String::new());
                         subcategory_description_state.set(String::new());
+                        dirty_state.set(true);
                     }
 
                     get_subcategories.run();
@@ -198,14 +205,21 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state, get_subcategories);
+            clone_states!(loading_state, dirty_state, get_subcategories);
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
                     loading_state.set(true);
                 }
-                UseCommandState::Resolved(_) => {
+                UseCommandState::Resolved(res) => {
                     loading_state.set(false);
+
+                    // TODO: handle future expected errors, e.g. duplicate subcategory name
+                    #[allow(clippy::redundant_pattern_matching)]
+                    if let Ok(_) = res {
+                        dirty_state.set(true);
+                    }
+
                     get_subcategories.run();
                 }
             }
@@ -229,15 +243,27 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(subcategory_state, loading_state, get_subcategories);
+            clone_states!(
+                subcategory_state,
+                loading_state,
+                dirty_state,
+                get_subcategories
+            );
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
                     loading_state.set(true);
                 }
-                UseCommandState::Resolved(_) => {
+                UseCommandState::Resolved(res) => {
                     loading_state.set(false);
                     subcategory_state.set(None);
+
+                    // TODO: handle future expected errors, e.g. duplicate subcategory name
+                    #[allow(clippy::redundant_pattern_matching)]
+                    if let Ok(_) = res {
+                        dirty_state.set(true);
+                    }
+
                     get_subcategories.run();
                 }
             }
@@ -334,22 +360,22 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
         }
     };
 
-    let leave_click = {
-        clone_states!(subview);
-        move |_| {
-            subview.pop();
-            on_exit.emit(());
-        }
-    };
-
     let configure_categories = {
-        clone_states!(category_state, subview, get_categories);
+        clone_states!(
+            category_state,
+            category_dirty_state,
+            subview,
+            get_categories
+        );
         move |_| {
             let on_exit = {
-                clone_states!(category_state, get_categories);
-                move |_| {
-                    get_categories.run();
-                    category_state.set(None);
+                clone_states!(category_state, category_dirty_state, get_categories);
+                move |dirty| {
+                    if dirty {
+                        get_categories.run();
+                        category_state.set(None);
+                        category_dirty_state.set(true);
+                    }
                 }
             };
             subview.push(html! {
@@ -363,6 +389,14 @@ pub fn EditSubcategories(props: &EditSubcategoriesProps) -> Html {
         move |_| {
             get_subcategories.run();
             subcategory_state.set(None);
+        }
+    };
+
+    let leave_click = {
+        clone_states!(subview);
+        move |_| {
+            subview.pop();
+            on_exit.emit((*dirty_state, *category_dirty_state));
         }
     };
 
