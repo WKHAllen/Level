@@ -318,10 +318,11 @@ pub fn Save() -> Html {
 
     let run_create_transaction = move |_| create_transaction.run();
 
-    let fetch_subcategories = {
-        clone_states!(get_subcategories);
+    let update_subcategories = {
+        clone_states!(transaction_subcategory_state, get_subcategories);
         move |_| {
             get_subcategories.run();
+            transaction_subcategory_state.set(None);
         }
     };
 
@@ -588,7 +589,7 @@ pub fn Save() -> Html {
                                     <div class="account-transactions-new-input">
                                         <SelectNullable
                                             state={transaction_category_state}
-                                            on_change={fetch_subcategories}
+                                            on_change={update_subcategories}
                                             options={category_names}
                                             label="Category"
                                             required={true}
