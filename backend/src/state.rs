@@ -4,6 +4,7 @@ use commands::BackendCommands;
 use common::*;
 use db::*;
 use log::{error, info};
+use std::collections::HashMap;
 use std::env;
 use std::future::Future;
 use std::pin::Pin;
@@ -263,10 +264,39 @@ impl BackendCommands for State {
         account: Account,
         num_transactions: usize,
         limit: usize,
-    ) -> CommandResult<Vec<AccountTransaction>> {
+    ) -> CommandResult<Vec<(AccountTransaction, Vec<AccountTransactionTag>)>> {
         self.with(|db| {
             Box::pin(async move {
-                AccountTransaction::batch(db, &account, num_transactions, limit).await
+                let transactions =
+                    AccountTransaction::batch(db, &account, num_transactions, limit).await?;
+                let transaction_tags = AccountTransactionTag::list_by_transaction_batch(
+                    db,
+                    &account,
+                    num_transactions,
+                    limit,
+                )
+                .await?;
+                let mut transaction_tags_map = transaction_tags.into_iter().fold(
+                    HashMap::new(),
+                    |mut map, transaction_tag| {
+                        map.entry(transaction_tag.account_transaction_id.clone())
+                            .and_modify(|transaction_tags: &mut Vec<AccountTransactionTag>| {
+                                transaction_tags.push(transaction_tag)
+                            })
+                            .or_default();
+                        map
+                    },
+                );
+                let batch = transactions
+                    .into_iter()
+                    .map(|transaction| {
+                        let this_transaction_tags = transaction_tags_map
+                            .remove(&transaction.id)
+                            .unwrap_or_default();
+                        (transaction, this_transaction_tags)
+                    })
+                    .collect();
+                Ok(batch)
             })
         })
         .await
@@ -284,7 +314,7 @@ impl BackendCommands for State {
         category: Category,
         subcategory: Option<Subcategory>,
         tags: Vec<Tag>,
-    ) -> CommandResult<AccountTransaction> {
+    ) -> CommandResult<(AccountTransaction, Vec<AccountTransactionTag>)> {
         self.with(|db| {
             Box::pin(async move {
                 let transaction = AccountTransaction::create(
@@ -301,11 +331,15 @@ impl BackendCommands for State {
                 )
                 .await?;
 
+                let mut transaction_tags = Vec::new();
+
                 for tag in tags.iter() {
-                    AccountTransactionTag::create(db, &transaction, tag).await?;
+                    let transaction_tag =
+                        AccountTransactionTag::create(db, &transaction, tag).await?;
+                    transaction_tags.push(transaction_tag);
                 }
 
-                Ok(transaction)
+                Ok((transaction, transaction_tags))
             })
         })
         .await
@@ -371,6 +405,10 @@ impl BackendCommands for State {
 
     async fn delete_category(&self, category: Category) -> CommandResult<()> {
         self.with(|db| category.delete(db)).await
+    }
+
+    async fn subcategories(&self) -> CommandResult<Vec<Subcategory>> {
+        self.with(|db| Subcategory::list(db)).await
     }
 
     async fn subcategories_within(&self, category: Category) -> CommandResult<Vec<Subcategory>> {

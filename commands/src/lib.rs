@@ -51,7 +51,7 @@ pub trait Commands {
         account: Account,
         num_transactions: usize,
         limit: usize,
-    ) -> CommandResult<Vec<AccountTransaction>>;
+    ) -> CommandResult<Vec<(AccountTransaction, Vec<AccountTransactionTag>)>>;
 
     /// Creates a new transaction.
     async fn create_transaction(
@@ -66,7 +66,7 @@ pub trait Commands {
         category: Category,
         subcategory: Option<Subcategory>,
         tags: Vec<Tag>,
-    ) -> CommandResult<AccountTransaction>;
+    ) -> CommandResult<(AccountTransaction, Vec<AccountTransactionTag>)>;
 
     /// Retrieves the institutions within the save file.
     async fn institutions(&self) -> CommandResult<Vec<Institution>>;
@@ -105,6 +105,9 @@ pub trait Commands {
 
     /// Deletes the category.
     async fn delete_category(&self, category: Category) -> CommandResult<()>;
+
+    /// Retrieves the categories within the save file.
+    async fn subcategories(&self) -> CommandResult<Vec<Subcategory>>;
 
     /// Retrieves the subcategories that fall under a category.
     async fn subcategories_within(&self, category: Category) -> CommandResult<Vec<Subcategory>>;

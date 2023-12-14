@@ -30,10 +30,20 @@ pub trait DBAccountTransactionTag: Sized {
     /// Lists all account transaction tags in the database.
     async fn list(db: &mut DBImpl) -> Result<Vec<Self>>;
 
-    /// Lists account transaction tags corresponding to a given account transaction.
+    /// Lists account transaction tags corresponding to a given account
+    /// transaction.
     async fn list_by_transaction(
         db: &mut DBImpl,
         account_transaction: &AccountTransaction,
+    ) -> Result<Vec<Self>>;
+
+    /// Lists account transaction tags corresponding to a list of account
+    /// transactions.
+    async fn list_by_transaction_batch(
+        db: &mut DBImpl,
+        account: &Account,
+        num_transactions: usize,
+        limit: usize,
     ) -> Result<Vec<Self>>;
 
     /// Lists account transaction tags corresponding to a given tag.
@@ -107,6 +117,26 @@ impl DBAccountTransactionTag for AccountTransactionTag {
         )
         .fetch_all(&mut *db)
         .await?)
+    }
+
+    async fn list_by_transaction_batch(
+        db: &mut DBImpl,
+        account: &Account,
+        num_transactions: usize,
+        limit: usize,
+    ) -> Result<Vec<Self>> {
+        let total_transactions = (num_transactions + limit) as u32;
+        let transaction_limit = limit as u32;
+
+        Ok(sqlx::query_as!(Self, r#"
+            SELECT account_transaction_tag.* FROM (
+                SELECT id FROM (
+                    SELECT * FROM account_transaction WHERE account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ?
+                ) ORDER BY transaction_date ASC, created_at ASC LIMIT ?
+            ) AS account_transaction_batch
+            JOIN account_transaction_tag
+                ON account_transaction_batch.id = account_transaction_tag.account_transaction_id;
+        "#, account.id, total_transactions, transaction_limit).fetch_all(&mut *db).await?)
     }
 
     async fn list_by_tag(db: &mut DBImpl, tag: &Tag) -> Result<Vec<Self>> {

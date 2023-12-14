@@ -7,6 +7,7 @@ use crate::validation::*;
 use crate::view::View;
 use commands::FrontendCommands;
 use common::*;
+use std::collections::HashMap;
 use yew::prelude::*;
 
 /// The number of transactions to request in one batch.
@@ -27,6 +28,7 @@ pub fn Save() -> Html {
     let institutions_state = use_state(Vec::new);
     let categories_state = use_state(Vec::new);
     let subcategories_state = use_state(Vec::new);
+    let available_subcategories_state = use_state(Vec::new);
     let tags_state = use_state(Vec::new);
 
     let transaction_name_state = use_state(String::new);
@@ -51,6 +53,23 @@ pub fn Save() -> Html {
     let view = use_view();
     let subview = use_subview();
     let alert = use_alert();
+
+    let institution_map = institutions_state
+        .iter()
+        .map(|institution: &Institution| (&institution.id, &institution.name))
+        .collect::<HashMap<_, _>>();
+    let category_map = categories_state
+        .iter()
+        .map(|category: &Category| (&category.id, &category.name))
+        .collect::<HashMap<_, _>>();
+    let subcategory_map = subcategories_state
+        .iter()
+        .map(|subcategory: &Subcategory| (&subcategory.id, &subcategory.name))
+        .collect::<HashMap<_, _>>();
+    let tag_map = tags_state
+        .iter()
+        .map(|tag: &Tag| (&tag.id, &tag.name))
+        .collect::<HashMap<_, _>>();
 
     let _get_save_info = use_command(UseCommand::new({
         clone_states!(save_info_state);
@@ -131,27 +150,36 @@ pub fn Save() -> Html {
         }
     }));
 
-    let get_subcategories = use_command(
+    let get_subcategories = use_command(UseCommand::new({
+        clone_states!(subcategories_state);
+        |backend| async move {
+            let subcategories = backend.subcategories().await?;
+            subcategories_state.set(subcategories);
+            Ok(())
+        }
+    }));
+
+    let get_available_subcategories = use_command(
         UseCommand::new({
             clone_states!(
                 transaction_category_state,
                 categories_state,
-                subcategories_state
+                available_subcategories_state
             );
             |backend| async move {
                 match *transaction_category_state {
                     Some(category_index) => match categories_state.get(category_index) {
                         Some(category) => {
-                            let subcategories =
+                            let available_subcategories =
                                 backend.subcategories_within(category.clone()).await?;
-                            subcategories_state.set(subcategories);
+                            available_subcategories_state.set(available_subcategories);
                         }
                         None => {
                             categories_state.set(Vec::new());
                         }
                     },
                     None => {
-                        subcategories_state.set(Vec::new());
+                        available_subcategories_state.set(Vec::new());
                     }
                 }
 
@@ -193,7 +221,7 @@ pub fn Save() -> Html {
                 transaction_tags_state,
                 institutions_state,
                 categories_state,
-                subcategories_state,
+                available_subcategories_state,
                 tags_state,
             );
             |backend| async move {
@@ -203,7 +231,7 @@ pub fn Save() -> Html {
                     .and_then(|index| categories_state.get(index).cloned());
                 let transaction_category2 = transaction_category.clone();
                 let transaction_subcategory = transaction_subcategory_state
-                    .and_then(|index| subcategories_state.get(index).cloned());
+                    .and_then(|index| available_subcategories_state.get(index).cloned());
                 let tags = transaction_tags_state
                     .iter()
                     .map(|index| {
@@ -294,7 +322,26 @@ pub fn Save() -> Html {
         })
         .run_on_init(false)
         .on_update({
-            clone_states!(loading_state, loaded_transactions_state);
+            clone_states!(
+                transaction_name_state,
+                transaction_name_error_state,
+                transaction_description_state,
+                transaction_description_error_state,
+                transaction_amount_state,
+                transaction_type_state,
+                transaction_type_error_state,
+                transaction_institution_state,
+                transaction_institution_error_state,
+                transaction_date_state,
+                transaction_date_error_state,
+                transaction_category_state,
+                transaction_category_error_state,
+                transaction_subcategory_state,
+                transaction_subcategory_error_state,
+                transaction_tags_state,
+                loading_state,
+                loaded_transactions_state
+            );
             move |value| match value {
                 UseCommandState::Init => {}
                 UseCommandState::Loading => {
@@ -304,12 +351,33 @@ pub fn Save() -> Html {
                     loading_state.set(false);
 
                     // TODO: handle future expected errors
-                    if let Ok(Some(transaction)) = res {
-                        // TODO: put the new transaction into the correct place in the loaded transactions vector
+                    if let Ok(Some((transaction, transaction_tags))) = res {
                         let mut loaded_transactions = (*loaded_transactions_state).clone();
-                        loaded_transactions.push(transaction.clone());
+                        let insert_index = loaded_transactions.partition_point(|(current, _)| {
+                            current.get_date() <= transaction.get_date()
+                        });
+                        loaded_transactions.insert(
+                            insert_index,
+                            (transaction.clone(), transaction_tags.clone()),
+                        );
                         loaded_transactions_state.set(loaded_transactions);
-                        // TODO: clear all new transaction input error states
+
+                        transaction_name_state.set(String::new());
+                        transaction_name_error_state.set(None);
+                        transaction_description_state.set(String::new());
+                        transaction_description_error_state.set(None);
+                        transaction_amount_state.set(NumberState::new(0.0).decimals(2));
+                        transaction_type_state.set(None);
+                        transaction_type_error_state.set(None);
+                        transaction_institution_state.set(None);
+                        transaction_institution_error_state.set(None);
+                        transaction_date_state.set(DatePickerState::new_today());
+                        transaction_date_error_state.set(None);
+                        transaction_category_state.set(None);
+                        transaction_category_error_state.set(None);
+                        transaction_subcategory_state.set(None);
+                        transaction_subcategory_error_state.set(None);
+                        transaction_tags_state.set(Vec::new());
                     }
                 }
             }
@@ -318,14 +386,14 @@ pub fn Save() -> Html {
 
     let run_create_transaction = move |_| create_transaction.run();
 
-    let update_subcategories = {
+    let update_available_subcategories = {
         clone_states!(
             transaction_subcategory_state,
             transaction_subcategory_error_state,
-            get_subcategories
+            get_available_subcategories
         );
         move |_| {
-            get_subcategories.run();
+            get_available_subcategories.run();
             transaction_subcategory_state.set(None);
             transaction_subcategory_error_state.set(None);
         }
@@ -339,7 +407,7 @@ pub fn Save() -> Html {
         .iter()
         .map(|category| category.name.clone())
         .collect::<Vec<_>>();
-    let subcategory_names = subcategories_state
+    let available_subcategory_names = available_subcategories_state
         .iter()
         .map(|subcategory| subcategory.name.clone())
         .collect::<Vec<_>>();
@@ -420,11 +488,63 @@ pub fn Save() -> Html {
 
             let account_transactions = loaded_transactions_state
                 .iter()
-                .map(|_transaction| {
+                .map(|(transaction, transaction_tags)| {
+                    let transaction_type = transaction.get_transaction_type().to_string();
+                    let transaction_institution = institution_map.get(&transaction.institution_id);
+                    let transaction_date = transaction.get_date().format("%Y-%m-%d").to_string();
+                    let transaction_category = category_map.get(&transaction.category_id);
+                    let transaction_subcategory = transaction
+                        .subcategory_id
+                        .as_ref()
+                        .and_then(|subcategory_id| subcategory_map.get(&subcategory_id));
+                    let transaction_tags_html = transaction_tags
+                        .iter()
+                        .map(|transaction_tag| {
+                            let tag_name = tag_map
+                                .get(&transaction_tag.tag_id)
+                                .map(|s| s.as_str())
+                                .unwrap_or("");
+
+                            html! {
+                                <span class="account-transaction-field-tag">{tag_name}</span>
+                            }
+                        })
+                        .collect::<Html>();
+
                     html! {
-                        <div class="account-transaction">
-                            // TODO: display transaction
-                            <span>{"Transaction"}</span>
+                        <div class="account-transactions-table-row account-transactions-row">
+                            <div class="account-transaction-field">
+                                <span>{&transaction.name}</span>
+                            </div>
+                            <div class="account-transaction-field">
+                                <span>{&transaction.description}</span>
+                            </div>
+                            <div class="account-transaction-field">
+                                <span>{&transaction.amount}</span>
+                            </div>
+                            <div class="account-transaction-field">
+                                <span>{&transaction_type}</span>
+                            </div>
+                            <div class="account-transaction-field">
+                                <span>{&transaction_institution}</span>
+                            </div>
+                            <div class="account-transaction-field">
+                                <span>{&transaction_date}</span>
+                            </div>
+                            <div class="account-transaction-field">
+                                <span>{&transaction_category}</span>
+                            </div>
+                            <div class="account-transaction-field">
+                                <span>{&transaction_subcategory}</span>
+                            </div>
+                            <div class="account-transaction-field">
+                                <div class="account-transaction-field-tags">
+                                    {transaction_tags_html}
+                                </div>
+                            </div>
+                            <div class="account-transaction-field">
+                                // TODO: edit/delete transaction actions
+                            </div>
                         </div>
                     }
                 })
@@ -492,7 +612,8 @@ pub fn Save() -> Html {
                     transaction_subcategory_error_state,
                     subview,
                     get_categories,
-                    get_subcategories
+                    get_subcategories,
+                    get_available_subcategories
                 );
                 move |_| {
                     let on_exit = {
@@ -502,13 +623,15 @@ pub fn Save() -> Html {
                             transaction_subcategory_state,
                             transaction_subcategory_error_state,
                             get_categories,
-                            get_subcategories
+                            get_subcategories,
+                            get_available_subcategories
                         );
                         move |(subcategory_dirty, category_dirty)| {
                             if subcategory_dirty {
                                 transaction_subcategory_state.set(None);
                                 transaction_subcategory_error_state.set(None);
                                 get_subcategories.run();
+                                get_available_subcategories.run();
                             }
 
                             if category_dirty {
@@ -580,7 +703,35 @@ pub fn Save() -> Html {
                             <div class="account-transactions">
                                 <div class="account-transactions-header">
                                     <div class="account-transactions-title">
-                                        <span>{"Transactions"}</span>
+                                        <div class="account-transactions-table-header account-transactions-row">
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Name"}</span>
+                                            </div>
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Description"}</span>
+                                            </div>
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Amount"}</span>
+                                            </div>
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Type"}</span>
+                                            </div>
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Institution"}</span>
+                                            </div>
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Date"}</span>
+                                            </div>
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Category"}</span>
+                                            </div>
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Subcategory"}</span>
+                                            </div>
+                                            <div class="account-transactions-table-header-label">
+                                                <span>{"Tags"}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="account-transactions-actions">
                                         // TODO: transaction actions
@@ -590,9 +741,11 @@ pub fn Save() -> Html {
                                     {account_transactions_loading}
                                 </div>
                                 <div class="account-transactions-list">
-                                    {account_transactions}
+                                    <div class="account-transactions-table">
+                                        {account_transactions}
+                                    </div>
                                 </div>
-                                <div class="account-transactions-new">
+                                <div class="account-transactions-new account-transactions-row">
                                     <div class="account-transactions-new-input">
                                         <Input
                                             state={transaction_name_state}
@@ -656,7 +809,7 @@ pub fn Save() -> Html {
                                     <div class="account-transactions-new-input">
                                         <SelectNullable
                                             state={transaction_category_state}
-                                            on_change={update_subcategories}
+                                            on_change={update_available_subcategories}
                                             options={category_names}
                                             label="Category"
                                             required={true}
@@ -670,7 +823,7 @@ pub fn Save() -> Html {
                                     <div class="account-transactions-new-input">
                                         <SelectNullable
                                             state={transaction_subcategory_state}
-                                            options={subcategory_names}
+                                            options={available_subcategory_names}
                                             label="Subcategory"
                                             required={false}
                                             compact={true}
