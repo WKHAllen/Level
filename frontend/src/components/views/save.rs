@@ -462,8 +462,10 @@ pub fn Save() -> Html {
                             }
                         };
 
+                        let this_selected = *selected_account_index_state == Some(index);
+
                         html! {
-                            <div class="account-select-button" {onclick}>
+                            <div class={classes!("save-accounts-select-account", this_selected.then_some("save-accounts-select-account-selected"))} {onclick}>
                                 <span>{&account.name}</span>
                             </div>
                         }
