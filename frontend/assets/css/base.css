@@ -2169,6 +2169,18 @@ body {
   width: var(--base-tooltip-popup-max-width);
   display: flex;
   justify-content: center;
+  z-index: -1;
+  transition: z-index 0s linear 0.15s;
+}
+
+.base-tooltip-open .base-tooltip-popup-container {
+  z-index: 1;
+  transition: z-index 0s linear 0s;
+}
+
+.base-tooltip-disabled .base-tooltip-popup-container {
+  z-index: -1;
+  transition: z-index 0s linear 0s;
 }
 
 .base-tooltip-popup {
@@ -2189,17 +2201,12 @@ body {
   box-shadow: var(--base-standard-box-shadow);
 }
 
-.base-tooltip:hover .base-tooltip-popup {
+.base-tooltip-open .base-tooltip-popup {
   visibility: visible;
   opacity: 1;
 }
 
-.base-tooltip:hover .base-tooltip-popup-container:hover .base-tooltip-popup {
-  visibility: hidden;
-  opacity: 0;
-}
-
-.base-tooltip.base-tooltip-disabled:hover .base-tooltip-popup {
+.base-tooltip-disabled .base-tooltip-popup {
   visibility: hidden;
   opacity: 0;
 }
