@@ -278,12 +278,11 @@ impl BackendCommands for State {
                 .await?;
                 let mut transaction_tags_map = transaction_tags.into_iter().fold(
                     HashMap::new(),
-                    |mut map, transaction_tag| {
-                        map.entry(transaction_tag.account_transaction_id.clone())
-                            .and_modify(|transaction_tags: &mut Vec<AccountTransactionTag>| {
-                                transaction_tags.push(transaction_tag)
-                            })
+                    |mut map: HashMap<String, Vec<AccountTransactionTag>>, transaction_tag| {
+                        let transaction_tags = map
+                            .entry(transaction_tag.account_transaction_id.clone())
                             .or_default();
+                        transaction_tags.push(transaction_tag);
                         map
                     },
                 );
