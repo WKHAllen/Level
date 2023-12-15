@@ -156,7 +156,7 @@ impl Save {
 
         Self::verify_does_not_exist(name)?;
 
-        let key = password_to_key(password);
+        let key = password_to_key(password).await;
         let now = Utc::now().naive_utc();
 
         let metadata = SaveMetadata {
@@ -179,7 +179,7 @@ impl Save {
 
         Self::verify_exists(name)?;
 
-        let key = password_to_key(password);
+        let key = password_to_key(password).await;
 
         let save_path = get_save_path(name);
         let mut save_file = File::open(&save_path).await?;
@@ -317,7 +317,7 @@ impl Save {
     /// Checks if the provided password can successfully decrypt a save,
     /// returning an error if it cannot.
     async fn verify_password(name: &str, password: &str) -> Result<()> {
-        let key = password_to_key(password);
+        let key = password_to_key(password).await;
 
         let save_path = get_save_path(name);
         let mut save_file = File::open(&save_path).await?;
@@ -361,7 +361,7 @@ impl Save {
     /// Changes a save's password by decrypting and re-encrypting the save
     /// data. This should not be used while the save is open.
     pub async fn change_password(name: &str, old_password: &str, new_password: &str) -> Result<()> {
-        let new_key = password_to_key(new_password);
+        let new_key = password_to_key(new_password).await;
 
         let mut save = Self::open(name, old_password).await?;
         save.key = new_key;
@@ -425,6 +425,8 @@ mod tests {
     use super::*;
     use crate::DBTag;
     use common::Tag;
+
+    const TEST_SAVE_NAMES: &[&str] = &["test", "My Test Save"];
 
     #[tokio::test]
     async fn test_save() {
@@ -494,7 +496,7 @@ mod tests {
         let saves = Save::list().await.unwrap();
         let saves = saves
             .into_iter()
-            .filter(|s| &s.name != "test") // ignore the "test" save
+            .filter(|s| !TEST_SAVE_NAMES.contains(&s.name.as_str())) // ignore the test saves
             .collect::<Vec<_>>();
         assert_eq!(saves.len(), 1);
         assert_eq!(&saves[0].name, new_name);
@@ -507,7 +509,7 @@ mod tests {
         let saves = Save::list().await.unwrap();
         let saves = saves
             .into_iter()
-            .filter(|s| &s.name != "test") // ignore the "test" save
+            .filter(|s| !TEST_SAVE_NAMES.contains(&s.name.as_str())) // ignore the test saves
             .collect::<Vec<_>>();
         assert_eq!(saves.len(), 2);
         let save1 = saves.iter().find(|s| s.name == new_name).unwrap();
@@ -520,14 +522,14 @@ mod tests {
         let saves = Save::list().await.unwrap();
         let saves = saves
             .into_iter()
-            .filter(|s| &s.name != "test") // ignore the "test" save
+            .filter(|s| !TEST_SAVE_NAMES.contains(&s.name.as_str())) // ignore the test saves
             .collect::<Vec<_>>();
         assert_eq!(saves.len(), 1);
         Save::delete(name2, password2).await.unwrap();
         let saves = Save::list().await.unwrap();
         let saves = saves
             .into_iter()
-            .filter(|s| &s.name != "test") // ignore the "test" save
+            .filter(|s| !TEST_SAVE_NAMES.contains(&s.name.as_str())) // ignore the test saves
             .collect::<Vec<_>>();
         assert!(saves.is_empty());
     }

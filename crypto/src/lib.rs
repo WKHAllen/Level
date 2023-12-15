@@ -16,6 +16,14 @@ pub const AES_KEY_SIZE: usize = 32;
 /// The number of bytes to use for an AES nonce.
 pub const AES_NONCE_SIZE: usize = 12;
 
+/// Fixed bcrypt hash cost.
+const FIXED_PASSWORD_COST: u32 = 12;
+
+/// Fixed bcrypt hash salt.
+const FIXED_PASSWORD_SALT: [u8; 16] = [
+    108, 101, 118, 101, 108, 101, 118, 101, 108, 101, 118, 101, 108, 101, 118, 101,
+];
+
 /// Encrypts data with AES.
 pub fn aes_encrypt(key: &[u8; AES_KEY_SIZE], plaintext: &[u8]) -> Result<Vec<u8>> {
     let cipher = Aes256Gcm::new_from_slice(key).unwrap();
@@ -95,12 +103,52 @@ pub async fn try_decrypt_file(src: &mut File, key: &[u8; AES_KEY_SIZE]) -> Resul
     Ok(())
 }
 
-/// Convert a password of arbitrary length to an AES key by performing a SHA-256 hash.
-pub fn password_to_key(password: &str) -> [u8; AES_KEY_SIZE] {
+/// This is the underlying synchronous implementation of [`password_to_key`].
+/// Never call this in an async context, as it relies very heavily on CPU
+/// operations.
+pub fn password_to_key_sync(password: &str) -> [u8; AES_KEY_SIZE] {
+    let bcrypt_hash = bcrypt::hash_with_salt(password, FIXED_PASSWORD_COST, FIXED_PASSWORD_SALT)
+        .unwrap()
+        .to_string();
     let mut hasher = Sha256::new();
-    hasher.update(password);
+    hasher.update(bcrypt_hash);
     let result = hasher.finalize();
     result.into()
+}
+
+/// Gets the AES-256 encryption/decryption key, given the password.
+///
+/// ## Algorithm
+///
+/// This function hashes the password with bcrypt, using a fixed cost and
+/// salt. This step is necessary to add a time cost. The fixed cost and salt
+/// are necessary to ensure the same hash is always generated, as a different
+/// hash means a different key used to encrypt/decrypt.
+///
+/// The bcrypt hash digest is then hashed again, this time with SHA-256. This
+/// is necessary to get a fixed-size output and additional randomness in the
+/// appearance of the encryption/decryption key.
+///
+/// The resulting SHA-256 hash is the key that can be used for encryption and
+/// decryption.
+///
+/// ## Backup codes
+///
+/// Because of how this algorithm works, the returned SHA-256 hash can
+/// function as a backup code. Because it will have been the hash that was
+/// originally used to encrypt the data, it can be saved as a backup and used
+/// to decrypt the data later in the event that the password is lost or
+/// forgotten.
+///
+/// ## Async
+///
+/// This algorithm relies very heavily on CPU operations. To get around this,
+/// the logic is wrapped in [`tokio::task::spawn_blocking`].
+pub async fn password_to_key(password: &str) -> [u8; AES_KEY_SIZE] {
+    let password = password.to_owned();
+    tokio::task::spawn_blocking(move || password_to_key_sync(&password))
+        .await
+        .unwrap()
 }
 
 /// Crypto tests.
@@ -110,11 +158,16 @@ mod tests {
     use rand::{random, thread_rng, Fill};
     use std::io;
     use std::path::Path;
+    use std::time::{Duration, Instant};
     use tokio::fs::{self, File, OpenOptions};
 
     const SAVES_DIR: &str = "saves";
 
     const SAVE_EXT: &str = "level";
+
+    const MIN_GET_KEY_DURATION: Duration = Duration::from_millis(100);
+
+    const MAX_GET_KEY_DURATION: Duration = Duration::from_millis(1000);
 
     fn rand_range(min: usize, max: usize) -> usize {
         (random::<usize>() % (max - min)) + min
@@ -144,7 +197,7 @@ mod tests {
     }
 
     async fn encrypt_decrypt_file(data: &[u8], password: &str) -> (Vec<u8>, Vec<u8>) {
-        let key = password_to_key(password);
+        let key = password_to_key(password).await;
 
         let plaintext_path = random_save_path();
         let ciphertext_path = random_save_path();
@@ -198,10 +251,10 @@ mod tests {
         (ciphertext, plaintext)
     }
 
-    #[test]
-    fn test_aes() {
+    #[tokio::test]
+    async fn test_aes() {
         let aes_message = "Hello, AES!";
-        let key = password_to_key("password123");
+        let key = password_to_key("password123").await;
         let aes_encrypted = aes_encrypt(&key, aes_message.as_bytes()).unwrap();
         let aes_decrypted = aes_decrypt(&key, &aes_encrypted).unwrap();
         let aes_decrypted_message = std::str::from_utf8(&aes_decrypted).unwrap();
@@ -263,12 +316,16 @@ mod tests {
         assert_ne!(plaintext, ciphertext);
     }
 
-    #[test]
-    fn test_password_to_key() {
-        let key1 = password_to_key("password123");
-        let key2 = password_to_key("password123");
-        let key3 = password_to_key("password124");
+    #[tokio::test]
+    async fn test_password_to_key() {
+        let start = Instant::now();
+        let key1 = password_to_key("password123").await;
+        let key2 = password_to_key("password123").await;
+        let key3 = password_to_key("password124").await;
+        let elapsed = start.elapsed();
         assert_eq!(key1, key2);
         assert_ne!(key1, key3);
+        assert!(elapsed >= MIN_GET_KEY_DURATION * 3);
+        assert!(elapsed <= MAX_GET_KEY_DURATION * 3);
     }
 }

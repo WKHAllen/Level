@@ -14,7 +14,7 @@ const TEST_SAVE_PASSWORD: &str = "password123";
 
 /// Creates and populates a test save file.
 async fn create_test_save() -> Result<()> {
-    if Save::exists("My Test Save") {
+    if Save::exists(TEST_SAVE_NAME) {
         return Ok(());
     }
 
