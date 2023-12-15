@@ -173,16 +173,16 @@ impl DBAccountTransaction for AccountTransaction {
         num_transactions: usize,
         limit: usize,
     ) -> Result<Vec<Self>> {
-        let total_transactions = (num_transactions + limit) as u32;
-        let transaction_limit = limit as u32;
+        let num_transactions = num_transactions as u32;
+        let limit = limit as u32;
 
         // This is stupid and annoying but unfortunately there's currently no
         // alternative
         Ok(sqlx::query_as!(Self, r#"
             SELECT id as 'id!', account_id as 'account_id!', name as 'name!', description, amount as 'amount!', transaction_type as 'transaction_type!', institution_id as 'institution_id!', transaction_date as 'transaction_date!', category_id as 'category_id!', subcategory_id, reconciled as 'reconciled!', created_at as 'created_at!', edited_at, reconciled_at FROM (
-                SELECT * FROM account_transaction WHERE account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ?
-            ) ORDER BY transaction_date ASC, created_at ASC LIMIT ?;
-        "#, account.id, total_transactions, transaction_limit).fetch_all(&mut *db).await?)
+                SELECT * FROM account_transaction WHERE account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ? OFFSET ?
+            ) ORDER BY transaction_date ASC, created_at ASC;
+        "#, account.id, limit, num_transactions).fetch_all(&mut *db).await?)
     }
 
     async fn get_account(&self, db: &mut DBImpl) -> Result<Account> {
@@ -536,6 +536,103 @@ mod tests {
             .unwrap();
         assert_eq!(transactions3.len(), 1);
         assert_eq!(transactions3[0], transaction2);
+
+        // Batch
+        let batch_transaction1 = AccountTransaction::create(
+            &mut db,
+            &mut account1,
+            "Batch transaction #1",
+            "",
+            0.0,
+            TransactionType::Credit,
+            &institution1,
+            NaiveDate::from_ymd_opt(2020, 5, 1).unwrap(),
+            &category1,
+            None,
+        )
+        .await
+        .unwrap();
+        let batch_transaction2 = AccountTransaction::create(
+            &mut db,
+            &mut account1,
+            "Batch transaction #2",
+            "",
+            0.0,
+            TransactionType::Credit,
+            &institution1,
+            NaiveDate::from_ymd_opt(2020, 5, 2).unwrap(),
+            &category1,
+            None,
+        )
+        .await
+        .unwrap();
+        let batch_transaction3 = AccountTransaction::create(
+            &mut db,
+            &mut account1,
+            "Batch transaction #3",
+            "",
+            0.0,
+            TransactionType::Credit,
+            &institution1,
+            NaiveDate::from_ymd_opt(2020, 5, 3).unwrap(),
+            &category1,
+            None,
+        )
+        .await
+        .unwrap();
+        let batch1 = AccountTransaction::batch(&mut db, &account1, 0, 100)
+            .await
+            .unwrap();
+        assert_eq!(batch1.len(), 4);
+        assert_eq!(
+            batch1.iter().collect::<Vec<_>>(),
+            vec![
+                &batch_transaction1,
+                &batch_transaction2,
+                &batch_transaction3,
+                &transaction1
+            ]
+        );
+        let batch2 = AccountTransaction::batch(&mut db, &account1, 1, 100)
+            .await
+            .unwrap();
+        assert_eq!(batch2.len(), 3);
+        assert_eq!(
+            batch2.iter().collect::<Vec<_>>(),
+            vec![
+                &batch_transaction1,
+                &batch_transaction2,
+                &batch_transaction3
+            ]
+        );
+        let batch3 = AccountTransaction::batch(&mut db, &account1, 2, 100)
+            .await
+            .unwrap();
+        assert_eq!(batch3.len(), 2);
+        assert_eq!(
+            batch3.iter().collect::<Vec<_>>(),
+            vec![&batch_transaction1, &batch_transaction2]
+        );
+        let batch4 = AccountTransaction::batch(&mut db, &account1, 3, 100)
+            .await
+            .unwrap();
+        assert_eq!(batch4.len(), 1);
+        assert_eq!(batch4.iter().collect::<Vec<_>>(), vec![&batch_transaction1]);
+        let batch5 = AccountTransaction::batch(&mut db, &account1, 4, 100)
+            .await
+            .unwrap();
+        assert_eq!(batch5.len(), 0);
+        let batch6 = AccountTransaction::batch(&mut db, &account1, 1, 2)
+            .await
+            .unwrap();
+        assert_eq!(batch6.len(), 2);
+        assert_eq!(
+            batch6.iter().collect::<Vec<_>>(),
+            vec![&batch_transaction2, &batch_transaction3]
+        );
+        batch_transaction1.delete(&mut db).await.unwrap();
+        batch_transaction2.delete(&mut db).await.unwrap();
+        batch_transaction3.delete(&mut db).await.unwrap();
 
         // Get account
         let account3 = transaction1.get_account(&mut db).await.unwrap();

@@ -125,18 +125,19 @@ impl DBAccountTransactionTag for AccountTransactionTag {
         num_transactions: usize,
         limit: usize,
     ) -> Result<Vec<Self>> {
-        let total_transactions = (num_transactions + limit) as u32;
-        let transaction_limit = limit as u32;
+        let num_transactions = num_transactions as u32;
+        let limit = limit as u32;
 
         Ok(sqlx::query_as!(Self, r#"
             SELECT account_transaction_tag.* FROM (
-                SELECT id FROM (
-                    SELECT * FROM account_transaction WHERE account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ?
-                ) ORDER BY transaction_date ASC, created_at ASC LIMIT ?
+                SELECT id, transaction_date, created_at FROM (
+                    SELECT * FROM account_transaction WHERE account_id = ? ORDER BY transaction_date DESC, created_at DESC LIMIT ? OFFSET ?
+                ) ORDER BY transaction_date ASC, created_at ASC
             ) AS account_transaction_batch
             JOIN account_transaction_tag
-                ON account_transaction_batch.id = account_transaction_tag.account_transaction_id;
-        "#, account.id, total_transactions, transaction_limit).fetch_all(&mut *db).await?)
+                ON account_transaction_batch.id = account_transaction_tag.account_transaction_id
+            ORDER BY account_transaction_batch.transaction_date ASC, account_transaction_batch.created_at ASC;
+        "#, account.id, limit, num_transactions).fetch_all(&mut *db).await?)
     }
 
     async fn list_by_tag(db: &mut DBImpl, tag: &Tag) -> Result<Vec<Self>> {
@@ -284,6 +285,30 @@ mod tests {
             .unwrap();
         assert_eq!(transaction_tags3.len(), 1);
         assert_eq!(transaction_tags3[0], transaction_tag2);
+
+        // List by transaction batch
+        let batch1 = AccountTransactionTag::list_by_transaction_batch(&mut db, &account, 0, 100)
+            .await
+            .unwrap();
+        assert_eq!(batch1.len(), 2);
+        assert_eq!(
+            batch1.iter().collect::<Vec<_>>(),
+            vec![&transaction_tag2, &transaction_tag1]
+        );
+        let batch2 = AccountTransactionTag::list_by_transaction_batch(&mut db, &account, 1, 100)
+            .await
+            .unwrap();
+        assert_eq!(batch2.len(), 1);
+        assert_eq!(batch2.iter().collect::<Vec<_>>(), vec![&transaction_tag2]);
+        let batch3 = AccountTransactionTag::list_by_transaction_batch(&mut db, &account, 2, 100)
+            .await
+            .unwrap();
+        assert_eq!(batch3.len(), 0);
+        let batch4 = AccountTransactionTag::list_by_transaction_batch(&mut db, &account, 0, 1)
+            .await
+            .unwrap();
+        assert_eq!(batch4.len(), 1);
+        assert_eq!(batch4.iter().collect::<Vec<_>>(), vec![&transaction_tag1]);
 
         // List by tag
         let transaction_tags4 = AccountTransactionTag::list_by_tag(&mut db, &tag1)
